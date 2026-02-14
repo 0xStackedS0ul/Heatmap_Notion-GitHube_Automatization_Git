@@ -23,18 +23,6 @@
             --h2-opacity: 0.6;
         }
 
-        /* Клас для примусової темної теми */
-        body.dark-mode {
-            --bg-color: #191919;
-            --text-color: rgba(255, 255, 255, 0.9);
-            --card-bg: #252525;
-            --card-border: #373737;
-            --card-shadow: none;
-            --stat-value-color: #40c463;
-            --cal-label-color: rgba(255, 255, 255, 0.6);
-            --h2-opacity: 0.8;
-        }
-
         body {
             font-family: ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, "Apple Color Emoji", Arial, sans-serif, "Segoe UI Emoji", "Segoe UI Symbol";
             margin: 0;
@@ -99,28 +87,6 @@
             text-align: center;
         }
 
-        /* Стилі для календаря в темній темі */
-        body.dark-mode .cal-heatmap-container .graph-label {
-            fill: var(--cal-label-color) !important;
-        }
-
-        /* Кнопка перемикання теми */
-        #theme-toggle {
-            position: absolute;
-            top: 10px;
-            right: 10px;
-            background: none;
-            border: none;
-            cursor: pointer;
-            font-size: 20px;
-            opacity: 0.5;
-            transition: opacity 0.2s;
-            z-index: 100;
-        }
-        #theme-toggle:hover {
-            opacity: 1;
-        }
-
         /* Адаптація під системну тему (автоматично) */
         @media (prefers-color-scheme: dark) {
             :root {
@@ -133,13 +99,14 @@
                 --cal-label-color: rgba(255, 255, 255, 0.6);
                 --h2-opacity: 0.8;
             }
-            /* Якщо система темна, але ми хочемо світлу (через клас), змінні перевизначаться класом body.light-mode, якщо треба */
+
+            .cal-heatmap-container .graph-label {
+                fill: var(--cal-label-color) !important;
+            }
         }
     </style>
 </head>
 <body>
-
-    <button id="theme-toggle" title="Перемкнути тему">◑</button>
 
     <div id="cal-heatmap"></div>
     <div class="legend-hint">
@@ -155,27 +122,6 @@
 
     <script>
         const cal = new CalHeatmap();
-
-        // --- ЛОГІКА ТЕМИ ---
-        const themeToggleBtn = document.getElementById('theme-toggle');
-        const body = document.body;
-
-        // Перевірка збереженої теми
-        const savedTheme = localStorage.getItem('habit-theme');
-        if (savedTheme === 'dark') {
-            body.classList.add('dark-mode');
-        } else if (savedTheme === 'light') {
-            body.classList.remove('dark-mode');
-        } else if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
-             // Якщо налаштувань немає, але система темна - додаємо клас (для консистентності)
-             body.classList.add('dark-mode');
-        }
-
-        themeToggleBtn.addEventListener('click', () => {
-            body.classList.toggle('dark-mode');
-            const isDark = body.classList.contains('dark-mode');
-            localStorage.setItem('habit-theme', isDark ? 'dark' : 'light');
-        });
 
         async function renderDashboard() {
             try {
