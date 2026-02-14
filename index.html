@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Habit Tracker</title>
+    <title>Habit Efficiency</title>
 
     <script src="https://d3js.org/d3.v7.min.js"></script>
     <script src="https://unpkg.com/cal-heatmap/dist/cal-heatmap.min.js"></script>
@@ -23,7 +23,6 @@
             align-items: center;
         }
 
-        /* Стилі для статистики */
         .stats-container {
             margin-top: 30px;
             width: 100%;
@@ -52,11 +51,14 @@
         .stat-value {
             font-size: 18px;
             font-weight: bold;
-            color: #216e39; /* Notion Green */
+            color: #216e39;
         }
 
         h2 {
-            font-size: 18px;
+            font-size: 16px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            opacity: 0.8;
             margin-top: 0;
             margin-bottom: 20px;
             align-self: flex-start;
@@ -64,7 +66,13 @@
             max-width: 800px;
         }
 
-        /* Темна тема */
+        .legend-hint {
+            font-size: 12px;
+            opacity: 0.6;
+            margin-top: 10px;
+            text-align: center;
+        }
+
         @media (prefers-color-scheme: dark) {
             body { color: #ffffff; }
             .stat-card {
@@ -78,12 +86,13 @@
 </head>
 <body>
 
-    <!-- Графік -->
     <div id="cal-heatmap"></div>
+    <div class="legend-hint">
+        Колір залежить від % виконання плану (100 = 1 виконана звичка)
+    </div>
 
-    <!-- Статистика -->
     <div style="width: 100%; max-width: 800px; margin-top: 30px;">
-        <h2>📊 Загальна статистика</h2>
+        <h2>📊 Total Repetitions (All Time)</h2>
         <div id="stats-list" class="stats-container">
             Loading stats...
         </div>
@@ -94,7 +103,6 @@
 
         async function renderDashboard() {
             try {
-                // 1. АНТИ-КЕШ: Додаємо ?t=timestamp, щоб браузер не брав старий файл
                 const timestamp = new Date().getTime();
                 const response = await fetch(`./data.json?t=${timestamp}`);
 
@@ -102,10 +110,17 @@
 
                 const fullData = await response.json();
 
-                // --- РЕНДЕР HEATMAP ---
-                const heatmapData = Object.keys(fullData.heatmap).map(key => ({
+                let heatmapSource = fullData;
+                let statsSource = {};
+
+                if (fullData.heatmap) {
+                    heatmapSource = fullData.heatmap;
+                    statsSource = fullData.stats || {};
+                }
+
+                const heatmapData = Object.keys(heatmapSource).map(key => ({
                     date: key,
-                    value: fullData.heatmap[key]
+                    value: heatmapSource[key]
                 }));
 
                 const now = new Date();
@@ -139,7 +154,8 @@
                         color: {
                             range: ['#ebedf0', '#9be9a8', '#40c463', '#30a14e', '#216e39'],
                             type: 'threshold',
-                            domain: [10, 30, 50, 100] // Підлаштуй під свою інтенсивність
+                            // 50% плану, 100% (1 звичка), 200% (2 звички), 300% (3 звички)
+                            domain: [50, 100, 200, 300]
                         },
                     },
                     theme: 'auto',
@@ -148,9 +164,10 @@
                         window.Tooltip,
                         {
                             text: function (date, value, dayjsDate) {
+                                // Округлюємо до цілого числа
+                                const score = value ? Math.round(value) : 0;
                                 return (
-                                    (value ? value : "0") +
-                                    " інтенсивність | " +
+                                    score + "% ефективності | " +
                                     dayjsDate.format("D MMMM")
                                 );
                             },
@@ -158,16 +175,15 @@
                     ],
                 ]);
 
-                // --- РЕНДЕР СТАТИСТИКИ (Problem 3) ---
+                // Статистика залишається "сирою" (скільки разів ти щось зробив)
                 const statsContainer = document.getElementById('stats-list');
                 statsContainer.innerHTML = '';
 
-                // Сортуємо: від найбільшої інтенсивності до найменшої
-                const sortedStats = Object.entries(fullData.stats)
+                const sortedStats = Object.entries(statsSource)
                     .sort(([,a], [,b]) => b - a);
 
                 if (sortedStats.length === 0) {
-                    statsContainer.innerHTML = '<p>Даних ще немає</p>';
+                    statsContainer.innerHTML = '<p>Поки немає виконаних звичок</p>';
                 } else {
                     sortedStats.forEach(([name, value]) => {
                         const card = document.createElement('div');
@@ -184,9 +200,8 @@
                 console.error("Error:", error);
                 document.body.innerHTML = `
                     <div style="text-align:center; padding: 20px;">
-                        <h3>⚠️ Помилка завантаження</h3>
-                        <p>Перевірте GitHub Actions або data.json</p>
-                        <small>${error.message}</small>
+                        <h3>⚠️ Помилка</h3>
+                        <p>${error.message}</p>
                     </div>`;
             }
         }

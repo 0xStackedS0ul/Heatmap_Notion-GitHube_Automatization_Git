@@ -4,12 +4,11 @@ from notion_client import Client
 from collections import defaultdict
 from datetime import datetime, date
 
-# Отримуємо змінні середовища
 NOTION_TOKEN = os.environ.get("NOTION_TOKEN")
 DATABASE_ID = os.environ.get("DATABASE_ID")
 
 if not NOTION_TOKEN or not DATABASE_ID:
-    raise ValueError("Потрібно встановити NOTION_TOKEN та DATABASE_ID в Secrets")
+    raise ValueError("Secrets NOTION_TOKEN and DATABASE_ID are required")
 
 notion = Client(auth=NOTION_TOKEN)
 
@@ -19,11 +18,10 @@ def get_today_str():
 
 
 def fetch_all_database_pages():
-    """Витягує всі сторінки"""
     results = []
     has_more = True
     start_cursor = None
-    print("⏳ Завантаження історії з Notion...")
+    print("⏳ Завантаження даних з Notion...")
 
     while has_more:
         response = notion.databases.query(
@@ -38,28 +36,22 @@ def fetch_all_database_pages():
 
 
 def process_history_and_update(pages):
-    """
-    1. Генерує дані для Heatmap (дати).
-    2. Генерує статистику по звичках (назва -> сума).
-    3. Оновлює Notion: ставить Enabled=True для виконаних завдань.
-    """
-    heatmap_counts = defaultdict(int)
-    habit_stats = defaultdict(int)
+    # Heatmap тепер зберігає "Бали ефективності" (сума відсотків)
+    heatmap_scores = defaultdict(float)
+    # Stats зберігає реальні суми повторень (для списку внизу)
+    habit_raw_stats = defaultdict(int)
 
-    print("🔄 Обробка даних та оновлення статусів...")
+    print("🔄 Розрахунок інтенсивності (нормалізація)...")
 
     for page in pages:
         props = page["properties"]
         page_id = page["id"]
 
-        # --- 1. Отримуємо дані ---
-
-        # Назва звички
+        # --- 1. Отримання даних ---
         habit_name = "Unknown"
         if "Name_Hebits" in props and props["Name_Hebits"]["title"]:
             habit_name = props["Name_Hebits"]["title"][0]["plain_text"]
 
-        # Дата
         date_val = None
         if "Date" in props and props["Date"]["date"]:
             date_val = props["Date"]["date"]["start"]
@@ -67,78 +59,81 @@ def process_history_and_update(pages):
             date_val = page["created_time"]
         day = date_val.split("T")[0]
 
-        # Інтенсивність
+        # Поточне значення
         intensity = 0
         if "Number_of_intensity" in props and props["Number_of_intensity"]["number"]:
             intensity = props["Number_of_intensity"]["number"]
 
-        # Статус Enabled
+        # Максимальне значення (Ціль)
+        max_intensity = 0
+        if "Max_Number_of_intensity" in props and props["Max_Number_of_intensity"]["number"]:
+            max_intensity = props["Max_Number_of_intensity"]["number"]
+
         is_enabled = False
         if "Enabled" in props and props["Enabled"]["checkbox"]:
             is_enabled = True
 
-        # Чи це шаблон?
         is_template = False
         if "Template_Checkbox" in props and props["Template_Checkbox"]["checkbox"]:
             is_template = True
 
-        # --- 2. Логіка агрегації (тільки якщо не шаблон) ---
-        if not is_template:
-            # Heatmap (сума інтенсивності по днях)
-            heatmap_counts[day] += intensity
+        # --- 2. Логіка розрахунку ---
+        if not is_template and intensity > 0:
 
-            # Stats (сума інтенсивності по звичках)
-            if intensity > 0:
-                habit_stats[habit_name] += intensity
+            # А. Розрахунок балів для графіку (Heatmap)
+            # Якщо є Максимум -> рахуємо відсоток (напр. 25/50 = 50 балів)
+            if max_intensity > 0:
+                score = (intensity / max_intensity) * 100
+            else:
+                # Якщо Максимуму немає, але звичка зроблена -> даємо фіксовані 100 балів
+                score = 100.0
 
-            # --- 3. Логіка оновлення Notion (Problem 2) ---
-            # Якщо є інтенсивність (зроблено), але не стоїть галочка Enabled -> ставимо її
-            if intensity > 0 and not is_enabled:
+            # Округлимо до 1 знаку
+            heatmap_scores[day] += round(score, 1)
+
+            # Б. Розрахунок статистики (сумуємо реальні повтори)
+            habit_raw_stats[habit_name] += intensity
+
+            print(f"   ➕ {habit_name}: {intensity}/{max_intensity} -> {score:.1f}% ({day})")
+
+            # --- 3. Оновлення статусу (Enabled) ---
+            if not is_enabled:
                 try:
-                    print(f"   👉 Маркуємо як виконане: {habit_name} ({day})")
                     notion.pages.update(
                         page_id=page_id,
                         properties={"Enabled": {"checkbox": True}}
                     )
+                    print(f"   ✅ Відмічено виконаним: {habit_name}")
                 except Exception as e:
                     print(f"   ❌ Помилка оновлення {habit_name}: {e}")
 
-    # Формуємо фінальний об'єкт для JSON
     return {
-        "heatmap": dict(heatmap_counts),
-        "stats": dict(habit_stats)
+        "heatmap": dict(heatmap_scores),
+        "stats": dict(habit_raw_stats)
     }
 
 
 def create_daily_habits(all_pages):
-    """Створює нові звички на сьогодні з шаблонів"""
     today = get_today_str()
     print(f"📅 Перевірка шаблонів на {today}...")
 
     templates = []
     created_today_names = set()
 
-    # Пошук шаблонів та вже створених записів
     for page in all_pages:
         props = page["properties"]
-
-        # Це шаблон?
         if "Template_Checkbox" in props and props["Template_Checkbox"]["checkbox"]:
             templates.append(page)
 
-        # Це запис за сьогодні?
-        page_date = None
-        if "Date" in props and props["Date"]["date"]:
-            page_date = props["Date"]["date"]["start"]
+        p_date = props["Date"]["date"]["start"] if (props.get("Date") and props["Date"]["date"]) else None
 
-        habit_name = ""
+        h_name = ""
         if "Name_Hebits" in props and props["Name_Hebits"]["title"]:
-            habit_name = props["Name_Hebits"]["title"][0]["plain_text"]
+            h_name = props["Name_Hebits"]["title"][0]["plain_text"]
 
-        if page_date == today and habit_name:
-            created_today_names.add(habit_name)
+        if p_date == today and h_name:
+            created_today_names.add(h_name)
 
-    # Створення нових
     for template in templates:
         props = template["properties"]
         name_list = props["Name_Hebits"]["title"]
@@ -148,44 +143,38 @@ def create_daily_habits(all_pages):
         if habit_name in created_today_names:
             continue
 
-        max_intensity = None
+        max_val = None
         if "Max_Number_of_intensity" in props and props["Max_Number_of_intensity"]["number"]:
-            max_intensity = props["Max_Number_of_intensity"]["number"]
+            max_val = props["Max_Number_of_intensity"]["number"]
 
-        new_page_props = {
+        new_props = {
             "Name_Hebits": {"title": [{"text": {"content": habit_name}}]},
             "Date": {"date": {"start": today}},
             "Enabled": {"checkbox": False},
             "Template_Checkbox": {"checkbox": False},
-            "Number_of_intensity": {"number": None}  # Пусто, щоб користувач ввів
+            "Number_of_intensity": {"number": None}
         }
-
-        if max_intensity is not None:
-            new_page_props["Max_Number_of_intensity"] = {"number": max_intensity}
+        if max_val is not None:
+            new_props["Max_Number_of_intensity"] = {"number": max_val}
 
         try:
             notion.pages.create(
                 parent={"database_id": DATABASE_ID},
-                properties=new_page_props
+                properties=new_props
             )
-            print(f"✅ Створено нове завдання: {habit_name}")
+            print(f"🆕 Створено на сьогодні: {habit_name}")
         except Exception as e:
-            print(f"❌ Помилка створення {habit_name}: {e}")
+            print(f"❌ Error creating {habit_name}: {e}")
 
 
 def main():
-    # 1. Завантажуємо
     pages = fetch_all_database_pages()
-
-    # 2. Обробляємо (оновлюємо Notion + генеруємо статистику)
     full_data = process_history_and_update(pages)
 
-    # 3. Зберігаємо JSON (нову структуру)
     with open("data.json", "w", encoding="utf-8") as f:
         json.dump(full_data, f, indent=2, ensure_ascii=False)
-    print("💾 data.json успішно оновлено")
+    print("💾 data.json saved (Normalized Scores)")
 
-    # 4. Створюємо нові на завтра/сьогодні
     create_daily_habits(pages)
 
 
