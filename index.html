@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Habit Intensity Heatmap</title>
+
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    <script src="https://unpkg.com/cal-heatmap/dist/cal-heatmap.min.js"></script>
+    <link rel="stylesheet" href="https://unpkg.com/cal-heatmap/dist/cal-heatmap.css">
+
+    <script src="https://unpkg.com/@popperjs/core@2"></script>
+    <script src="https://unpkg.com/cal-heatmap/dist/plugins/Tooltip.min.js"></script>
+
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background-color: transparent;
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            color: #37352f;
+        }
+
+        #cal-heatmap {
+            margin: auto;
+        }
+
+        /* Темна тема */
+        @media (prefers-color-scheme: dark) {
+            body {
+                color: #ffffff;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <div id="cal-heatmap"></div>
+
+    <script>
+        const cal = new CalHeatmap();
+
+        async function renderHeatmap() {
+            try {
+                const response = await fetch('./data.json');
+                const rawData = await response.json();
+
+                const data = Object.keys(rawData).map(key => ({
+                    date: key,
+                    value: rawData[key]
+                }));
+
+                const now = new Date();
+
+                cal.paint({
+                    itemSelector: '#cal-heatmap',
+                    range: 12,
+                    domain: {
+                        type: 'month',
+                        gutter: 4,
+                        label: { text: 'MMM', position: 'top' },
+                    },
+                    subDomain: {
+                        type: 'day',
+                        radius: 2,
+                        width: 11,
+                        height: 11,
+                        gutter: 2
+                    },
+                    date: {
+                        start: new Date(now.getFullYear(), now.getMonth() - 11),
+                        highlight: [new Date()]
+                    },
+                    data: {
+                        source: data,
+                        x: 'date',
+                        y: 'value',
+                        defaultValue: 0
+                    },
+                    scale: {
+                        // Кольори від сірого до темно-зеленого
+                        color: {
+                            range: ['#ebedf0', '#9be9a8', '#40c463', '#30a14e', '#216e39'],
+                            type: 'threshold',
+                            // Налаштуй ці числа під свою інтенсивність!
+                            // Наприклад, якщо в день ти робиш 10 повторів, а максимум 50
+                            domain: [5, 10, 20, 40]
+                        },
+                    },
+                    theme: 'auto',
+                }, [
+                    [
+                        window.Tooltip,
+                        {
+                            text: function (date, value, dayjsDate) {
+                                return (
+                                    (value ? value : "0") +
+                                    " інтенсивність | " +
+                                    dayjsDate.format("D MMMM")
+                                );
+                            },
+                        },
+                    ],
+                ]);
+
+            } catch (error) {
+                console.error("Error:", error);
+                document.body.innerHTML = "<p>⚠️ Data load error</p>";
+            }
+        }
+
+        renderHeatmap();
+    </script>
+</body>
+</html>

@@ -1,0 +1,41 @@
+name: Update Notion Heatmap
+
+on:
+  schedule:
+    - cron: "0 3 * * *"   # Запуск щодня о 03:00 UTC
+  workflow_dispatch:      # Кнопка для ручного запуску
+
+# Надаємо права на запис у репозиторій
+permissions:
+  contents: write
+
+jobs:
+  update-heatmap:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: 'pip' # Кешування залежностей для швидкості
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Fetch Notion Data
+        env:
+          NOTION_TOKEN: ${{ secrets.NOTION_TOKEN }}
+          DATABASE_ID: ${{ secrets.DATABASE_ID }}
+        run: python scripts/fetch_notion.py
+
+      - name: Commit and Push changes
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add data.json
+          # Комітимо тільки якщо є зміни
+          git diff --quiet && git diff --staged --quiet || (git commit -m "🔥 Auto-update heatmap data" && git push)
