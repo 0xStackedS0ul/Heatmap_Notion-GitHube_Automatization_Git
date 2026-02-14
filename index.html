@@ -12,15 +12,39 @@
     <script src="https://unpkg.com/cal-heatmap/dist/plugins/Tooltip.min.js"></script>
 
     <style>
+        :root {
+            --bg-color: transparent;
+            --text-color: #37352f;
+            --card-bg: #fff;
+            --card-border: #e1e4e8;
+            --card-shadow: rgba(15, 15, 15, 0.05) 0px 0px 0px 1px, rgba(15, 15, 15, 0.1) 0px 2px 4px;
+            --stat-value-color: #216e39;
+            --cal-label-color: #666;
+            --h2-opacity: 0.6;
+        }
+
+        /* Клас для примусової темної теми */
+        body.dark-mode {
+            --bg-color: #191919;
+            --text-color: rgba(255, 255, 255, 0.9);
+            --card-bg: #252525;
+            --card-border: #373737;
+            --card-shadow: none;
+            --stat-value-color: #40c463;
+            --cal-label-color: rgba(255, 255, 255, 0.6);
+            --h2-opacity: 0.8;
+        }
+
         body {
             font-family: ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, "Apple Color Emoji", Arial, sans-serif, "Segoe UI Emoji", "Segoe UI Symbol";
             margin: 0;
             padding: 20px;
-            color: #37352f;
-            background-color: transparent; /* Для світлої теми залишаємо прозорим (адаптується під сторінку) */
+            color: var(--text-color);
+            background-color: var(--bg-color);
             display: flex;
             flex-direction: column;
             align-items: center;
+            transition: background-color 0.3s ease, color 0.3s ease;
         }
 
         .stats-container {
@@ -33,15 +57,15 @@
         }
 
         .stat-card {
-            border: 1px solid #e1e4e8;
+            border: 1px solid var(--card-border);
             border-radius: 6px;
             padding: 15px;
-            background: #fff;
-            box-shadow: rgba(15, 15, 15, 0.05) 0px 0px 0px 1px, rgba(15, 15, 15, 0.1) 0px 2px 4px;
+            background: var(--card-bg);
+            box-shadow: var(--card-shadow);
             display: flex;
             justify-content: space-between;
             align-items: center;
-            transition: background 0.2s ease;
+            transition: background 0.2s ease, border-color 0.2s ease;
         }
 
         .stat-name {
@@ -52,7 +76,7 @@
         .stat-value {
             font-size: 16px;
             font-weight: 600;
-            color: #216e39;
+            color: var(--stat-value-color);
         }
 
         h2 {
@@ -60,7 +84,7 @@
             font-weight: 600;
             text-transform: uppercase;
             letter-spacing: 0.5px;
-            opacity: 0.6;
+            opacity: var(--h2-opacity);
             margin-top: 0;
             margin-bottom: 20px;
             align-self: flex-start;
@@ -75,32 +99,47 @@
             text-align: center;
         }
 
-        /* Темна тема Notion */
+        /* Стилі для календаря в темній темі */
+        body.dark-mode .cal-heatmap-container .graph-label {
+            fill: var(--cal-label-color) !important;
+        }
+
+        /* Кнопка перемикання теми */
+        #theme-toggle {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-size: 20px;
+            opacity: 0.5;
+            transition: opacity 0.2s;
+            z-index: 100;
+        }
+        #theme-toggle:hover {
+            opacity: 1;
+        }
+
+        /* Адаптація під системну тему (автоматично) */
         @media (prefers-color-scheme: dark) {
-            body {
-                color: rgba(255, 255, 255, 0.9);
-                background-color: #191919; /* Точний колір Notion Dark Mode */
+            :root {
+                --bg-color: #191919;
+                --text-color: rgba(255, 255, 255, 0.9);
+                --card-bg: #252525;
+                --card-border: #373737;
+                --card-shadow: none;
+                --stat-value-color: #40c463;
+                --cal-label-color: rgba(255, 255, 255, 0.6);
+                --h2-opacity: 0.8;
             }
-
-            .stat-card {
-                background: #252525; /* Трохи світліше за фон (колір карток Notion) */
-                border: 1px solid #373737;
-                box-shadow: none;
-                color: rgba(255, 255, 255, 0.9);
-            }
-
-            .stat-value {
-                color: #40c463;
-            }
-
-            /* Адаптація самого календаря під темну тему */
-            .cal-heatmap-container .graph-label {
-                fill: rgba(255, 255, 255, 0.6) !important;
-            }
+            /* Якщо система темна, але ми хочемо світлу (через клас), змінні перевизначаться класом body.light-mode, якщо треба */
         }
     </style>
 </head>
 <body>
+
+    <button id="theme-toggle" title="Перемкнути тему">◑</button>
 
     <div id="cal-heatmap"></div>
     <div class="legend-hint">
@@ -116,6 +155,27 @@
 
     <script>
         const cal = new CalHeatmap();
+
+        // --- ЛОГІКА ТЕМИ ---
+        const themeToggleBtn = document.getElementById('theme-toggle');
+        const body = document.body;
+
+        // Перевірка збереженої теми
+        const savedTheme = localStorage.getItem('habit-theme');
+        if (savedTheme === 'dark') {
+            body.classList.add('dark-mode');
+        } else if (savedTheme === 'light') {
+            body.classList.remove('dark-mode');
+        } else if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+             // Якщо налаштувань немає, але система темна - додаємо клас (для консистентності)
+             body.classList.add('dark-mode');
+        }
+
+        themeToggleBtn.addEventListener('click', () => {
+            body.classList.toggle('dark-mode');
+            const isDark = body.classList.contains('dark-mode');
+            localStorage.setItem('habit-theme', isDark ? 'dark' : 'light');
+        });
 
         async function renderDashboard() {
             try {
