@@ -51,7 +51,7 @@
         .stat-value {
             font-size: 18px;
             font-weight: bold;
-            color: #216e39;
+            color: #216e39; /* Notion Green */
         }
 
         h2 {
@@ -118,16 +118,34 @@
                     statsSource = fullData.stats || {};
                 }
 
+                // 1. Конвертуємо дати в timestamp для надійності
                 const heatmapData = Object.keys(heatmapSource).map(key => ({
-                    date: key,
+                    date: new Date(key).getTime(),
                     value: heatmapSource[key]
                 }));
 
-                const now = new Date();
+                // 2. Логіка визначення діапазону календаря
+                // Знаходимо найпізнішу дату в даних або беремо сьогоднішню
+                let latestDate = new Date();
+
+                if (heatmapData.length > 0) {
+                    // Сортуємо, щоб знайти останню дату
+                    const sortedDates = heatmapData.sort((a, b) => b.date - a.date);
+                    const maxDataDate = new Date(sortedDates[0].date);
+
+                    // Якщо дані "з майбутнього" (як у тебе 2026), використовуємо їх як орієнтир
+                    if (maxDataDate > latestDate) {
+                        latestDate = maxDataDate;
+                    }
+                }
+
+                // Встановлюємо старт на ПОЧАТОК РОКУ (1 січня)
+                const startYear = latestDate.getFullYear();
+                const startDate = new Date(startYear, 0, 1); // 0 = Січень, 1 = Перше число
 
                 cal.paint({
                     itemSelector: '#cal-heatmap',
-                    range: 12,
+                    range: 12, // Показувати 12 місяців (весь рік)
                     domain: {
                         type: 'month',
                         gutter: 4,
@@ -141,8 +159,8 @@
                         gutter: 2
                     },
                     date: {
-                        start: new Date(now.getFullYear(), now.getMonth() - 11),
-                        highlight: [new Date()]
+                        start: startDate,
+                        highlight: [new Date()] // Підсвітити реальне "сьогодні"
                     },
                     data: {
                         source: heatmapData,
@@ -164,18 +182,17 @@
                         window.Tooltip,
                         {
                             text: function (date, value, dayjsDate) {
-                                // Округлюємо до цілого числа
                                 const score = value ? Math.round(value) : 0;
                                 return (
                                     score + "% ефективності | " +
-                                    dayjsDate.format("D MMMM")
+                                    dayjsDate.format("D MMMM YYYY")
                                 );
                             },
                         },
                     ],
                 ]);
 
-                // Статистика залишається "сирою" (скільки разів ти щось зробив)
+                // Статистика
                 const statsContainer = document.getElementById('stats-list');
                 statsContainer.innerHTML = '';
 
