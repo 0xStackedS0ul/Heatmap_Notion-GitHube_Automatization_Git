@@ -11,10 +11,9 @@
     <script src="https://unpkg.com/@popperjs/core@2"></script>
     <script src="https://unpkg.com/cal-heatmap/dist/plugins/Tooltip.min.js"></script>
 
-    <!-- Шрифт Inter для сучасності -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 
     <style>
         :root {
@@ -22,19 +21,19 @@
             --text-color: #37352f;
             --card-bg: #fff;
             --card-border: #e1e4e8;
-            --accent-color: #0891b2; /* Cyan */
-            --btn-hover: #f0f0f0;
+            --accent-color: #0891b2;
+            --active-tab-bg: #f3f4f6;
+            --streak-fire: #f59e0b; /* Orange for streak */
         }
 
-        /* HYDRO DARK THEME (Notion #191919) */
         @media (prefers-color-scheme: dark) {
             :root {
                 --bg-color: #191919;
-                --text-color: #E0F7FA; /* Light Cyan Text */
+                --text-color: #E0F7FA;
                 --card-bg: #202020;
                 --card-border: #2d2d2d;
                 --accent-color: #22d3ee;
-                --btn-hover: #333;
+                --active-tab-bg: #2d2d2d;
             }
         }
 
@@ -47,7 +46,7 @@
             display: flex;
             flex-direction: column;
             align-items: center;
-            overflow-x: hidden; /* Запобігаємо скролу при зумі */
+            overflow-x: hidden;
         }
 
         /* --- CONTROLS --- */
@@ -58,85 +57,90 @@
             display: flex;
             gap: 5px;
             z-index: 1000;
-            background: var(--bg-color); /* Щоб перекривало контент при скролі */
-            border-radius: 6px;
-            padding: 2px;
         }
 
         .zoom-btn {
-            background: transparent;
+            background: var(--card-bg);
             border: 1px solid var(--card-border);
             color: var(--text-color);
             width: 28px;
             height: 28px;
-            border-radius: 4px;
+            border-radius: 6px;
             cursor: pointer;
             display: flex;
             align-items: center;
             justify-content: center;
             font-size: 16px;
-            opacity: 0.6;
+            opacity: 0.7;
             transition: all 0.2s;
         }
+        .zoom-btn:hover { opacity: 1; border-color: var(--accent-color); }
 
-        .zoom-btn:hover {
-            opacity: 1;
-            background: var(--btn-hover);
-            border-color: var(--accent-color);
-        }
-
-        /* --- WRAPPER FOR SCALING --- */
-        #zoom-wrapper {
+        /* --- TABS NAVIGATION (GitHub Style) --- */
+        .tabs-container {
             display: flex;
-            flex-direction: column;
-            align-items: center;
-            width: 100%;
-            transition: transform 0.2s ease;
-            transform-origin: top center;
-        }
-
-        /* --- HEADER --- */
-        .header-container {
+            gap: 20px;
+            border-bottom: 1px solid var(--card-border);
             width: 100%;
             max-width: 800px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 25px;
-            border-bottom: 1px solid var(--card-border);
-            padding-bottom: 10px;
-            margin-top: 10px; /* Місце для кнопок, якщо екран вузький */
+            margin-bottom: 20px;
+            padding-left: 5px;
         }
 
-        h2 {
-            font-size: 12px;
-            font-weight: 700;
-            text-transform: uppercase;
-            letter-spacing: 1.5px;
-            color: var(--accent-color);
-            margin: 0;
+        .tab-btn {
+            background: none;
+            border: none;
+            padding: 10px 12px;
+            font-family: 'Inter', sans-serif;
+            font-size: 13px;
+            font-weight: 500;
+            color: var(--text-color);
+            cursor: pointer;
+            border-bottom: 2px solid transparent;
+            opacity: 0.6;
+            transition: all 0.2s;
             display: flex;
             align-items: center;
-            gap: 8px;
+            gap: 6px;
+        }
+
+        .tab-btn:hover {
+            opacity: 1;
+            background-color: var(--active-tab-bg);
+            border-radius: 6px 6px 0 0;
+        }
+
+        .tab-btn.active {
+            opacity: 1;
+            border-bottom: 2px solid var(--accent-color);
+            font-weight: 600;
+        }
+
+        /* --- SECTIONS --- */
+        .view-section {
+            width: 100%;
+            max-width: 800px;
+            display: none; /* Hidden by default */
+            animation: fadeIn 0.3s ease;
+        }
+        .view-section.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(5px); }
+            to { opacity: 1; transform: translateY(0); }
         }
 
         /* --- HEATMAP STYLES --- */
-        #cal-heatmap {
-            margin: auto;
-        }
-
-        .cal-heatmap-container .graph-rect {
-            rx: 3px !important;
-            ry: 3px !important;
-        }
-
+        #cal-heatmap { margin: auto; }
+        .cal-heatmap-container .graph-rect { rx: 3px !important; ry: 3px !important; }
         .cal-heatmap-container .graph-label {
             font-family: 'Inter', sans-serif;
             font-size: 10px;
             fill: var(--text-color) !important;
             opacity: 0.5;
         }
-
         .legend-hint {
             font-size: 11px;
             opacity: 0.5;
@@ -145,89 +149,135 @@
             font-weight: 400;
         }
 
-        /* --- STAT CARDS (Hydro Tanks) --- */
+        /* --- STAT CARDS (Hydro Tanks V2) --- */
         .stats-grid {
-            margin-top: 30px;
-            width: 100%;
-            max-width: 800px;
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-            gap: 12px;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 15px;
         }
 
         .stat-card {
             background: var(--card-bg);
             border: 1px solid var(--card-border);
-            border-radius: 8px;
-            padding: 16px;
+            border-radius: 10px;
+            padding: 18px;
             display: flex;
             flex-direction: column;
-            gap: 5px;
-            transition: transform 0.2s ease, box-shadow 0.2s ease;
+            gap: 10px;
             position: relative;
-            overflow: hidden;
+            transition: transform 0.2s;
         }
 
-        .stat-card::after {
-            content: '';
-            position: absolute;
-            bottom: 0;
-            left: 0;
-            width: 100%;
-            height: 2px;
-            background: linear-gradient(90deg, transparent, var(--accent-color), transparent);
-            opacity: 0.5;
+        .stat-card:hover {
+            transform: translateY(-2px);
+            border-color: var(--accent-color);
+        }
+
+        .stat-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
         }
 
         .stat-name {
-            font-size: 12px;
-            font-weight: 500;
-            opacity: 0.7;
+            font-size: 13px;
+            font-weight: 600;
             text-transform: uppercase;
             letter-spacing: 0.5px;
+            opacity: 0.8;
+        }
+
+        .stat-total-row {
+            display: flex;
+            align-items: baseline;
+            gap: 5px;
+            margin-top: 5px;
         }
 
         .stat-value {
-            font-size: 20px;
+            font-size: 28px;
             font-weight: 700;
-            color: var(--accent-color);
-            display: flex;
-            align-items: baseline;
-            gap: 4px;
+            color: var(--text-color);
+            line-height: 1;
         }
 
-        .stat-unit {
+        .stat-label {
             font-size: 12px;
-            font-weight: 400;
             opacity: 0.5;
+        }
+
+        /* Панелька страйків */
+        .streak-container {
+            display: flex;
+            gap: 10px;
+            margin-top: 10px;
+            padding-top: 10px;
+            border-top: 1px solid var(--card-border);
+        }
+
+        .streak-badge {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            font-size: 12px;
+            font-weight: 500;
+            background: var(--active-tab-bg);
+            padding: 4px 8px;
+            border-radius: 6px;
+        }
+
+        .streak-icon { font-size: 14px; }
+        .streak-active { color: var(--streak-fire); } /* Orange flame */
+        .streak-best { color: var(--accent-color); opacity: 0.8; }
+
+        #zoom-wrapper {
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            transform-origin: top center;
         }
 
     </style>
 </head>
 <body>
 
-    <!-- Zoom Controls -->
     <div class="controls-bar">
-        <button class="zoom-btn" onclick="updateZoom(-0.1)" title="Зменшити">-</button>
-        <button class="zoom-btn" onclick="updateZoom(0.1)" title="Збільшити">+</button>
+        <button class="zoom-btn" onclick="updateZoom(-0.1)" title="Zoom Out">-</button>
+        <button class="zoom-btn" onclick="updateZoom(0.1)" title="Zoom In">+</button>
     </div>
 
-    <!-- Scalable Content Wrapper -->
     <div id="zoom-wrapper">
-        <div class="header-container">
-            <h2>🌊 Hydro Tactics System</h2>
-            <div style="font-size: 12px; opacity: 0.6">Frequency > Force</div>
+
+        <div class="header-container" style="width: 100%; max-width: 800px; margin-bottom: 20px; display: flex; justify-content: space-between; align-items: center;">
+            <div style="font-weight: 700; font-size: 14px; color: var(--accent-color); letter-spacing: 1px;">🌊 HYDRO TACTICS</div>
         </div>
 
-        <div id="cal-heatmap"></div>
-
-        <div class="legend-hint">
-            Mist (Start) &nbsp; → &nbsp; Flow (100%) &nbsp; → &nbsp; Tsunami (Max Cap)
+        <!-- TABS -->
+        <div class="tabs-container">
+            <button class="tab-btn active" onclick="switchTab('flow')">
+                <span>🌊</span> Flow Map
+            </button>
+            <button class="tab-btn" onclick="switchTab('tanks')">
+                <span>📊</span> Hydro Tanks
+            </button>
         </div>
 
-        <div class="stats-grid" id="stats-list">
-            Loading flow data...
+        <!-- SECTION 1: FLOW MAP -->
+        <div id="view-flow" class="view-section active">
+            <div id="cal-heatmap"></div>
+            <div class="legend-hint">
+                Mist (Start) &nbsp; → &nbsp; Flow (100%) &nbsp; → &nbsp; Tsunami (Max Cap)
+            </div>
         </div>
+
+        <!-- SECTION 2: HYDRO TANKS (Stats) -->
+        <div id="view-tanks" class="view-section">
+            <div class="stats-grid" id="stats-list">
+                Loading tanks...
+            </div>
+        </div>
+
     </div>
 
     <script>
@@ -238,25 +288,34 @@
         const zoomWrapper = document.getElementById('zoom-wrapper');
 
         function applyZoom() {
-            // Обмеження зуму від 0.5x до 2.0x
             if (currentZoom < 0.5) currentZoom = 0.5;
             if (currentZoom > 2.0) currentZoom = 2.0;
-
             zoomWrapper.style.transform = `scale(${currentZoom})`;
-            // Зберігаємо вибір користувача
             localStorage.setItem('hydro-zoom', currentZoom);
         }
 
         function updateZoom(change) {
             currentZoom += change;
-            // Округляємо, щоб уникнути чисел типу 1.000000001
             currentZoom = Math.round(currentZoom * 10) / 10;
             applyZoom();
         }
-
-        // Застосувати збережений зум при старті
         applyZoom();
 
+        // --- TABS LOGIC ---
+        function switchTab(tabName) {
+            // Hide all sections
+            document.querySelectorAll('.view-section').forEach(el => el.classList.remove('active'));
+            document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
+
+            // Show selected
+            document.getElementById(`view-${tabName}`).classList.add('active');
+
+            // Highlight button
+            // Finding the button by onclick attribute is lazy but works here, or index based
+            const btns = document.querySelectorAll('.tab-btn');
+            if (tabName === 'flow') btns[0].classList.add('active');
+            else btns[1].classList.add('active');
+        }
 
         async function renderDashboard() {
             try {
@@ -270,6 +329,7 @@
                 let heatmapSource = fullData.heatmap || fullData;
                 let statsSource = fullData.stats || {};
 
+                // --- RENDER HEATMAP ---
                 const heatmapData = Object.keys(heatmapSource).map(key => ({
                     date: new Date(key).getTime(),
                     value: heatmapSource[key]
@@ -299,16 +359,8 @@
                         height: 12,
                         gutter: 3
                     },
-                    date: {
-                        start: startDate,
-                        highlight: [new Date()]
-                    },
-                    data: {
-                        source: heatmapData,
-                        x: 'date',
-                        y: 'value',
-                        defaultValue: 0
-                    },
+                    date: { start: startDate, highlight: [new Date()] },
+                    data: { source: heatmapData, x: 'date', y: 'value', defaultValue: 0 },
                     scale: {
                         color: {
                             range: ['#252525', '#164e63', '#0e7490', '#06b6d4', '#cffafe'],
@@ -318,43 +370,65 @@
                     },
                     theme: 'dark',
                 }, [
-                    [
-                        window.Tooltip,
-                        {
-                            text: function (date, value, dayjsDate) {
-                                const score = value ? Math.round(value) : 0;
-                                let status = "Dry";
-                                if (score > 0) status = "Mist";
-                                if (score >= 50) status = "Stream";
-                                if (score >= 100) status = "River";
-                                if (score >= 200) status = "Tsunami";
-
-                                return (
-                                    `${status}: ${score}% | ${dayjsDate.format("D MMM")}`
-                                );
-                            },
+                    [ window.Tooltip, {
+                        text: function (date, value, dayjsDate) {
+                            const score = value ? Math.round(value) : 0;
+                            let status = "Dry";
+                            if (score > 0) status = "Mist";
+                            if (score >= 50) status = "Stream";
+                            if (score >= 100) status = "River";
+                            if (score >= 200) status = "Tsunami";
+                            return `${status}: ${score}% | ${dayjsDate.format("D MMM")}`;
                         },
-                    ],
+                    }],
                 ]);
 
+                // --- RENDER STATS (NEW DESIGN) ---
                 const statsContainer = document.getElementById('stats-list');
                 statsContainer.innerHTML = '';
 
-                const sortedStats = Object.entries(statsSource)
-                    .sort(([,a], [,b]) => b - a);
+                // Handle both old format (value only) and new format (object with total/streak)
+                // We convert everything to array for sorting
+                const entries = Object.entries(statsSource).map(([name, data]) => {
+                    if (typeof data === 'object') {
+                        return { name, ...data };
+                    } else {
+                        return { name, total: data, current_streak: 0, best_streak: 0 };
+                    }
+                });
 
-                if (sortedStats.length === 0) {
-                    statsContainer.innerHTML = '<p style="opacity:0.5; font-size:12px">System dry. Initiate flow.</p>';
+                // Sort by Total Volume
+                entries.sort((a, b) => b.total - a.total);
+
+                if (entries.length === 0) {
+                    statsContainer.innerHTML = '<p style="opacity:0.5; font-size:12px">System dry.</p>';
                 } else {
-                    sortedStats.forEach(([name, value]) => {
+                    entries.forEach(stat => {
                         const card = document.createElement('div');
                         card.className = 'stat-card';
 
+                        // Icons for streaks
+                        const fireIcon = stat.current_streak > 0 ? '🔥' : '🧊';
+                        const streakClass = stat.current_streak > 0 ? 'streak-active' : '';
+
                         card.innerHTML = `
-                            <span class="stat-name">${name}</span>
-                            <span class="stat-value">
-                                ${value} <span class="stat-unit">units</span>
-                            </span>
+                            <div class="stat-header">
+                                <span class="stat-name">${stat.name}</span>
+                            </div>
+                            <div class="stat-total-row">
+                                <span class="stat-value">${stat.total}</span>
+                                <span class="stat-label">total units</span>
+                            </div>
+                            <div class="streak-container">
+                                <div class="streak-badge ${streakClass}" title="Поточна серія">
+                                    <span class="streak-icon">${fireIcon}</span>
+                                    <span>${stat.current_streak} days</span>
+                                </div>
+                                <div class="streak-badge streak-best" title="Рекорд">
+                                    <span class="streak-icon">🏆</span>
+                                    <span>${stat.best_streak} best</span>
+                                </div>
+                            </div>
                         `;
                         statsContainer.appendChild(card);
                     });

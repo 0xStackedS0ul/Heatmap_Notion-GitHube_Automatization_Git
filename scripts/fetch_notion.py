@@ -13,12 +13,67 @@ if not NOTION_TOKEN or not DATABASE_ID:
 notion = Client(auth=NOTION_TOKEN)
 
 
+def get_today_date_obj():
+    # Час по Києву (UTC+2 / UTC+3)
+    return (datetime.utcnow() + timedelta(hours=2)).date()
+
+
 def get_today_str():
-    # Fix: GitHub Actions працює в UTC. Додаємо 2 години (або 3 влітку),
-    # щоб "сьогодні" відповідало реальному дню в Україні, якщо скрипт запускається вночі.
-    # Це гарантує, що о 01:00 ночі скрипт вже буде знати, що настав новий день.
-    ukraine_time = datetime.utcnow() + timedelta(hours=2)
-    return ukraine_time.strftime("%Y-%m-%d")
+    return get_today_date_obj().strftime("%Y-%m-%d")
+
+
+def calculate_streaks(dates_list):
+    """
+    Рахує поточний та найкращий стрік на основі списку дат (рядків YYYY-MM-DD).
+    """
+    if not dates_list:
+        return 0, 0
+
+    # Сортуємо унікальні дати
+    sorted_dates = sorted(list(set([
+        datetime.strptime(d, "%Y-%m-%d").date() for d in dates_list
+    ])))
+
+    if not sorted_dates:
+        return 0, 0
+
+    today = get_today_date_obj()
+    current_streak = 0
+    best_streak = 0
+    temp_streak = 0
+
+    # 1. Рахуємо Best Streak (проходимо по всій історії)
+    for i in range(len(sorted_dates)):
+        if i == 0:
+            temp_streak = 1
+        else:
+            delta = (sorted_dates[i] - sorted_dates[i - 1]).days
+            if delta == 1:
+                temp_streak += 1
+            else:
+                best_streak = max(best_streak, temp_streak)
+                temp_streak = 1
+    best_streak = max(best_streak, temp_streak)
+
+    # 2. Рахуємо Current Streak (від кінця до початку)
+    # Перевіряємо, чи останній запис був сьогодні або вчора
+    last_date = sorted_dates[-1]
+    diff_from_today = (today - last_date).days
+
+    if diff_from_today > 1:
+        # Якщо останній запис був позавчора або раніше - стрік перервано
+        current_streak = 0
+    else:
+        # Стрік живий, рахуємо назад
+        current_streak = 1
+        for i in range(len(sorted_dates) - 2, -1, -1):
+            delta = (sorted_dates[i + 1] - sorted_dates[i]).days
+            if delta == 1:
+                current_streak += 1
+            else:
+                break
+
+    return current_streak, best_streak
 
 
 def fetch_all_database_pages():
@@ -41,14 +96,19 @@ def fetch_all_database_pages():
 
 def process_history_and_update(pages):
     heatmap_scores = defaultdict(float)
-    habit_raw_stats = defaultdict(int)
 
-    print("🔄 Розрахунок інтенсивності...")
+    # Словник для збереження дат по кожній звичці: { "Pushups": ["2023-01-01", ...] }
+    habit_dates = defaultdict(list)
+    # Словник для загальної суми: { "Pushups": 500 }
+    habit_totals = defaultdict(int)
+
+    print("🔄 Розрахунок статистики та стріків...")
 
     for page in pages:
         props = page["properties"]
         page_id = page["id"]
 
+        # --- Отримання даних ---
         habit_name = "Unknown"
         if "Name_Hebits" in props and props["Name_Hebits"]["title"]:
             habit_name = props["Name_Hebits"]["title"][0]["plain_text"]
@@ -76,49 +136,61 @@ def process_history_and_update(pages):
         if "Template_Checkbox" in props and props["Template_Checkbox"]["checkbox"]:
             is_template = True
 
+        # --- Логіка ---
         if not is_template and intensity > 0:
 
+            # Heatmap Score
             if max_intensity > 0:
                 score = (intensity / max_intensity) * 100
             else:
                 score = 100.0
 
             heatmap_scores[day] += round(score, 1)
-            habit_raw_stats[habit_name] += intensity
 
-            print(f"   ➕ {habit_name}: {intensity}/{max_intensity} -> {score:.1f}% ({day})")
+            # Збираємо дані для статистики
+            habit_totals[habit_name] += intensity
+            habit_dates[habit_name].append(day)
 
+            # Оновлення статусу в Notion
             if not is_enabled:
                 try:
                     notion.pages.update(
                         page_id=page_id,
                         properties={"Enabled": {"checkbox": True}}
                     )
-                    print(f"   ✅ Відмічено виконаним: {habit_name}")
+                    print(f"   ✅ Відмічено: {habit_name}")
                 except Exception as e:
-                    print(f"   ❌ Помилка оновлення {habit_name}: {e}")
+                    print(f"   ❌ Помилка Notion {habit_name}: {e}")
+
+    # --- Формування фінальної статистики з стріками ---
+    final_stats = {}
+    for name, total in habit_totals.items():
+        curr_streak, best_streak = calculate_streaks(habit_dates[name])
+        final_stats[name] = {
+            "total": total,
+            "current_streak": curr_streak,
+            "best_streak": best_streak
+        }
+        print(f"   📊 {name}: Total={total}, Streak={curr_streak}🔥")
 
     return {
         "heatmap": dict(heatmap_scores),
-        "stats": dict(habit_raw_stats)
+        "stats": final_stats
     }
 
 
 def create_daily_habits(all_pages):
-    today = get_today_str()
-    print(f"📅 Перевірка на дату: {today} (UA Time)")
+    today_str = get_today_str()
+    print(f"📅 Перевірка шаблонів на: {today_str}")
 
     templates = []
     created_today_names = set()
 
-    # 1. Шукаємо шаблони та вже існуючі записи за СЬОГОДНІ
     for page in all_pages:
         props = page["properties"]
-
         if "Template_Checkbox" in props and props["Template_Checkbox"]["checkbox"]:
             templates.append(page)
 
-        # Перевіряємо дату існуючого запису
         p_date = None
         if "Date" in props and props["Date"]["date"]:
             p_date = props["Date"]["date"]["start"]
@@ -127,20 +199,16 @@ def create_daily_habits(all_pages):
         if "Name_Hebits" in props and props["Name_Hebits"]["title"]:
             h_name = props["Name_Hebits"]["title"][0]["plain_text"]
 
-        # Якщо запис з такою назвою вже є за сьогодні - запам'ятовуємо
-        if p_date == today and h_name:
+        if p_date == today_str and h_name:
             created_today_names.add(h_name)
 
-    # 2. Створюємо відсутні
     for template in templates:
         props = template["properties"]
         name_list = props["Name_Hebits"]["title"]
         if not name_list: continue
         habit_name = name_list[0]["plain_text"]
 
-        # Якщо вже є -> пропускаємо
         if habit_name in created_today_names:
-            print(f"   ⏭️ {habit_name} вже існує на сьогодні")
             continue
 
         max_val = None
@@ -149,10 +217,9 @@ def create_daily_habits(all_pages):
 
         new_props = {
             "Name_Hebits": {"title": [{"text": {"content": habit_name}}]},
-            "Date": {"date": {"start": today}},
+            "Date": {"date": {"start": today_str}},
             "Enabled": {"checkbox": False},
             "Template_Checkbox": {"checkbox": False},
-            # ЗМІНА: Ставимо 0 замість пустоти
             "Number_of_intensity": {"number": 0}
         }
         if max_val is not None:
@@ -163,9 +230,9 @@ def create_daily_habits(all_pages):
                 parent={"database_id": DATABASE_ID},
                 properties=new_props
             )
-            print(f"🆕 Створено на сьогодні: {habit_name}")
+            print(f"🆕 Створено: {habit_name}")
         except Exception as e:
-            print(f"❌ Error creating {habit_name}: {e}")
+            print(f"❌ Error {habit_name}: {e}")
 
 
 def main():
@@ -174,7 +241,7 @@ def main():
 
     with open("data.json", "w", encoding="utf-8") as f:
         json.dump(full_data, f, indent=2, ensure_ascii=False)
-    print("💾 data.json saved")
+    print("💾 data.json оновлено (+Streaks)")
 
     create_daily_habits(pages)
 
