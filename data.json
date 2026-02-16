@@ -1,18 +1,13 @@
 {
   "heatmap": {
-    "2026-02-14": 170.0,
-    "2026-02-15": 20.0
+    "2026-02-14": 70.0,
+    "2026-02-15": 60.0
   },
   "stats": {
     "Віджимання": {
-      "total": 8,
+      "total": 10,
       "current_streak": 2,
       "best_streak": 2
-    },
-    "test": {
-      "total": 1,
-      "current_streak": 1,
-      "best_streak": 1
     }
   }
 }
