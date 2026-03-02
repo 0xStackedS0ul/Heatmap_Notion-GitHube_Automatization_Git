@@ -16,18 +16,19 @@
     "2026-02-25": 80.0,
     "2026-02-26": 60.0,
     "2026-02-27": 80.0,
-    "2026-02-28": 40.0
+    "2026-02-28": 40.0,
+    "2026-03-01": 140.0
   },
   "stats": {
     "Віджимання": {
-      "total": 55,
-      "current_streak": 17,
-      "best_streak": 17
+      "total": 60,
+      "current_streak": 18,
+      "best_streak": 18
     },
     "Читання книжки": {
-      "total": 16,
-      "current_streak": 11,
-      "best_streak": 11
+      "total": 18,
+      "current_streak": 12,
+      "best_streak": 12
     }
   }
 }
