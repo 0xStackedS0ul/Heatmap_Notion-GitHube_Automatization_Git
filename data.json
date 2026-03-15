@@ -34,17 +34,17 @@
   "stats": {
     "Віджимання": {
       "total": 88,
-      "current_streak": 30,
+      "current_streak": 0,
       "best_streak": 30
     },
     "Читання книжки": {
       "total": 30,
-      "current_streak": 24,
+      "current_streak": 0,
       "best_streak": 24
     },
     "Прибирання": {
       "total": 11,
-      "current_streak": 5,
+      "current_streak": 0,
       "best_streak": 6
     }
   }
