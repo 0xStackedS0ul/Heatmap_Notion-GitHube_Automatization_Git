@@ -30,23 +30,24 @@
     "2026-03-11": 80.0,
     "2026-03-12": 100.0,
     "2026-03-13": 80.0,
-    "2026-03-14": 60.0
+    "2026-03-14": 60.0,
+    "2026-03-15": 100.0
   },
   "stats": {
     "Віджимання": {
-      "total": 89,
-      "current_streak": 0,
-      "best_streak": 31
+      "total": 92,
+      "current_streak": 32,
+      "best_streak": 32
     },
     "Читання книжки": {
-      "total": 31,
-      "current_streak": 0,
-      "best_streak": 25
+      "total": 32,
+      "current_streak": 26,
+      "best_streak": 26
     },
     "Прибирання": {
-      "total": 12,
-      "current_streak": 0,
-      "best_streak": 6
+      "total": 13,
+      "current_streak": 7,
+      "best_streak": 7
     }
   }
 }
