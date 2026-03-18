@@ -23,8 +23,15 @@
             --card-border: #e1e4e8;
             --accent-color: #0891b2;
             --active-tab-bg: #f3f4f6;
-            --streak-fire: #f59e0b; /* Orange for streak */
-            --max-width: 1100px; /* Збільшена ширина для центрування */
+            --streak-fire: #f59e0b;
+            --peak-color: #ef4444; /* Red for peak days */
+            --max-width: 1100px;
+
+            /* Vector Colors */
+            --tag-mind: #8b5cf6;
+            --tag-body: #10b981;
+            --tag-phil: #f59e0b;
+            --tag-soc: #3b82f6;
         }
 
         @media (prefers-color-scheme: dark) {
@@ -68,191 +75,107 @@
             height: 28px;
             border-radius: 6px;
             cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 16px;
-            opacity: 0.7;
-            transition: all 0.2s;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 16px; opacity: 0.7; transition: all 0.2s;
         }
         .zoom-btn:hover { opacity: 1; border-color: var(--accent-color); }
 
-        /* --- TABS NAVIGATION (GitHub Style) --- */
+        /* --- TABS NAVIGATION --- */
         .tabs-container {
-            display: flex;
-            gap: 20px;
+            display: flex; gap: 20px;
             border-bottom: 1px solid var(--card-border);
-            width: 100%;
-            max-width: var(--max-width);
-            margin-bottom: 20px;
-            padding-left: 5px;
-            /* Центрування самих табів відносно сторінки */
-            margin-left: auto;
-            margin-right: auto;
+            width: 100%; max-width: var(--max-width);
+            margin-bottom: 20px; padding-left: 5px;
+            margin-left: auto; margin-right: auto;
         }
 
         .tab-btn {
-            background: none;
-            border: none;
-            padding: 10px 12px;
-            font-family: 'Inter', sans-serif;
-            font-size: 13px;
-            font-weight: 500;
-            color: var(--text-color);
-            cursor: pointer;
-            border-bottom: 2px solid transparent;
-            opacity: 0.6;
-            transition: all 0.2s;
-            display: flex;
-            align-items: center;
-            gap: 6px;
+            background: none; border: none; padding: 10px 12px;
+            font-family: 'Inter', sans-serif; font-size: 13px; font-weight: 500;
+            color: var(--text-color); cursor: pointer;
+            border-bottom: 2px solid transparent; opacity: 0.6; transition: all 0.2s;
+            display: flex; align-items: center; gap: 6px;
         }
-
-        .tab-btn:hover {
-            opacity: 1;
-            background-color: var(--active-tab-bg);
-            border-radius: 6px 6px 0 0;
-        }
-
-        .tab-btn.active {
-            opacity: 1;
-            border-bottom: 2px solid var(--accent-color);
-            font-weight: 600;
-        }
+        .tab-btn:hover { opacity: 1; background-color: var(--active-tab-bg); border-radius: 6px 6px 0 0; }
+        .tab-btn.active { opacity: 1; border-bottom: 2px solid var(--accent-color); font-weight: 600; }
 
         /* --- SECTIONS --- */
         .view-section {
-            width: 100%;
-            max-width: var(--max-width);
-            display: none; /* Hidden by default */
-            animation: fadeIn 0.3s ease;
+            width: 100%; max-width: var(--max-width);
+            display: none; animation: fadeIn 0.3s ease;
         }
+        #view-flow.active { display: flex; flex-direction: column; align-items: center; }
+        #view-tanks.active { display: block; }
 
-        /* Спеціальний стиль для Flow Map щоб гарантувати центрування */
-        #view-flow.active {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-        }
-
-        #view-tanks.active {
-            display: block;
-        }
-
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(5px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
 
         /* --- HEATMAP STYLES --- */
-        #cal-heatmap {
-            margin: auto;
-        }
+        #cal-heatmap { margin: auto; }
         .cal-heatmap-container .graph-rect { rx: 3px !important; ry: 3px !important; }
         .cal-heatmap-container .graph-label {
-            font-family: 'Inter', sans-serif;
-            font-size: 10px;
-            fill: var(--text-color) !important;
-            opacity: 0.5;
+            font-family: 'Inter', sans-serif; font-size: 10px;
+            fill: var(--text-color) !important; opacity: 0.5;
         }
-        .legend-hint {
-            font-size: 11px;
-            opacity: 0.5;
-            margin-top: 12px;
-            text-align: center;
-            font-weight: 400;
-        }
+        .legend-hint { font-size: 11px; opacity: 0.5; margin-top: 12px; text-align: center; font-weight: 400; }
 
-        /* --- STAT CARDS (Hydro Tanks V2) --- */
+        /* --- STAT CARDS V3 (With Vectors & Peaks) --- */
         .stats-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-            gap: 15px;
-            max-width: var(--max-width);
-            margin: 0 auto;
+            display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+            gap: 15px; max-width: var(--max-width); margin: 0 auto;
         }
 
         .stat-card {
-            background: var(--card-bg);
-            border: 1px solid var(--card-border);
-            border-radius: 10px;
-            padding: 18px;
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
-            position: relative;
-            transition: transform 0.2s;
+            background: var(--card-bg); border: 1px solid var(--card-border);
+            border-radius: 10px; padding: 16px;
+            display: flex; flex-direction: column; gap: 12px;
+            position: relative; transition: transform 0.2s;
+        }
+        .stat-card:hover { transform: translateY(-2px); border-color: var(--accent-color); }
+
+        /* Tags container */
+        .tags-row { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: -5px; }
+
+        .tag {
+            font-size: 10px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px;
+            padding: 3px 6px; border-radius: 4px; background: var(--active-tab-bg);
+            border: 1px solid var(--card-border); opacity: 0.8;
         }
 
-        .stat-card:hover {
-            transform: translateY(-2px);
-            border-color: var(--accent-color);
-        }
+        .tag-arch { color: var(--accent-color); border-color: var(--accent-color); background: transparent;}
 
-        .stat-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
+        /* Peak Indicator */
+        .peak-indicator {
+            font-size: 11px; font-weight: 600; padding: 3px 8px; border-radius: 4px;
+            display: flex; align-items: center; gap: 4px;
+            background: var(--active-tab-bg); border: 1px solid var(--card-border);
         }
-
-        .stat-name {
-            font-size: 13px;
-            font-weight: 600;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-            opacity: 0.8;
+        .peak-ready {
+            background: rgba(239, 68, 68, 0.1); border-color: var(--peak-color); color: var(--peak-color);
+            animation: pulse 2s infinite;
         }
+        @keyframes pulse { 0% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.4); } 70% { box-shadow: 0 0 0 4px rgba(239, 68, 68, 0); } 100% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0); } }
 
-        .stat-total-row {
-            display: flex;
-            align-items: baseline;
-            gap: 5px;
-            margin-top: 5px;
-        }
+        .stat-header { display: flex; justify-content: space-between; align-items: center; }
+        .stat-name { font-size: 14px; font-weight: 600; opacity: 0.9; }
 
-        .stat-value {
-            font-size: 28px;
-            font-weight: 700;
-            color: var(--text-color);
-            line-height: 1;
-        }
+        .stat-total-row { display: flex; align-items: baseline; gap: 5px; }
+        .stat-value { font-size: 26px; font-weight: 700; color: var(--text-color); line-height: 1; }
+        .stat-label { font-size: 11px; opacity: 0.5; text-transform: uppercase; letter-spacing: 0.5px;}
 
-        .stat-label {
-            font-size: 12px;
-            opacity: 0.5;
-        }
-
-        /* Панелька страйків */
         .streak-container {
-            display: flex;
-            gap: 10px;
-            margin-top: 10px;
-            padding-top: 10px;
+            display: flex; gap: 8px; margin-top: auto; padding-top: 12px;
             border-top: 1px solid var(--card-border);
         }
 
         .streak-badge {
-            display: flex;
-            align-items: center;
-            gap: 5px;
-            font-size: 12px;
-            font-weight: 500;
-            background: var(--active-tab-bg);
-            padding: 4px 8px;
-            border-radius: 6px;
+            display: flex; align-items: center; gap: 4px;
+            font-size: 12px; font-weight: 500; background: var(--active-tab-bg);
+            padding: 4px 8px; border-radius: 6px; flex: 1; justify-content: center;
         }
-
-        .streak-icon { font-size: 14px; }
-        .streak-active { color: var(--streak-fire); } /* Orange flame */
+        .streak-active { color: var(--streak-fire); }
         .streak-best { color: var(--accent-color); opacity: 0.8; }
 
-        #zoom-wrapper {
-            width: 100%;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            transform-origin: top center;
-        }
+        #zoom-wrapper { width: 100%; display: flex; flex-direction: column; align-items: center; transform-origin: top center; }
 
     </style>
 </head>
@@ -264,8 +187,6 @@
     </div>
 
     <div id="zoom-wrapper">
-
-        <!-- Header also centered and wider -->
         <div class="header-container" style="width: 100%; max-width: var(--max-width); margin-bottom: 20px; display: flex; justify-content: space-between; align-items: center;">
             <div style="font-weight: 700; font-size: 14px; color: var(--accent-color); letter-spacing: 1px;">🌊 HYDRO TACTICS</div>
         </div>
@@ -283,9 +204,7 @@
         <!-- SECTION 1: FLOW MAP -->
         <div id="view-flow" class="view-section active">
             <div id="cal-heatmap"></div>
-            <div class="legend-hint">
-                Mist (Start) &nbsp; → &nbsp; Flow (100%) &nbsp; → &nbsp; Tsunami (Max Cap)
-            </div>
+            <div class="legend-hint">Mist (Start) &nbsp; → &nbsp; Flow (100%) &nbsp; → &nbsp; Tsunami (Max Cap)</div>
         </div>
 
         <!-- SECTION 2: HYDRO TANKS (Stats) -->
@@ -294,7 +213,6 @@
                 Loading tanks...
             </div>
         </div>
-
     </div>
 
     <script>
@@ -310,45 +228,33 @@
             zoomWrapper.style.transform = `scale(${currentZoom})`;
             localStorage.setItem('hydro-zoom', currentZoom);
         }
-
         function updateZoom(change) {
-            currentZoom += change;
-            currentZoom = Math.round(currentZoom * 10) / 10;
-            applyZoom();
+            currentZoom += change; currentZoom = Math.round(currentZoom * 10) / 10; applyZoom();
         }
         applyZoom();
 
         // --- TABS LOGIC ---
         function switchTab(tabName) {
-            // Hide all sections
             document.querySelectorAll('.view-section').forEach(el => el.classList.remove('active'));
             document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
-
-            // Show selected
             document.getElementById(`view-${tabName}`).classList.add('active');
-
-            // Highlight button
             const btns = document.querySelectorAll('.tab-btn');
-            if (tabName === 'flow') btns[0].classList.add('active');
-            else btns[1].classList.add('active');
+            if (tabName === 'flow') btns[0].classList.add('active'); else btns[1].classList.add('active');
         }
 
         async function renderDashboard() {
             try {
                 const timestamp = new Date().getTime();
                 const response = await fetch(`./data.json?t=${timestamp}`);
-
                 if (!response.ok) throw new Error("File not found");
 
                 const fullData = await response.json();
-
                 let heatmapSource = fullData.heatmap || fullData;
                 let statsSource = fullData.stats || {};
 
                 // --- RENDER HEATMAP ---
                 const heatmapData = Object.keys(heatmapSource).map(key => ({
-                    date: new Date(key).getTime(),
-                    value: heatmapSource[key]
+                    date: new Date(key).getTime(), value: heatmapSource[key]
                 }));
 
                 let latestDate = new Date();
@@ -361,27 +267,15 @@
                 const startDate = new Date(startYear, 0, 1);
 
                 cal.paint({
-                    itemSelector: '#cal-heatmap',
-                    range: 12,
-                    domain: {
-                        type: 'month',
-                        gutter: 6,
-                        label: { text: 'MMM', position: 'top' },
-                    },
-                    subDomain: {
-                        type: 'day',
-                        radius: 3,
-                        width: 12,
-                        height: 12,
-                        gutter: 3
-                    },
+                    itemSelector: '#cal-heatmap', range: 12,
+                    domain: { type: 'month', gutter: 6, label: { text: 'MMM', position: 'top' } },
+                    subDomain: { type: 'day', radius: 3, width: 12, height: 12, gutter: 3 },
                     date: { start: startDate, highlight: [new Date()] },
                     data: { source: heatmapData, x: 'date', y: 'value', defaultValue: 0 },
                     scale: {
                         color: {
                             range: ['#252525', '#164e63', '#0e7490', '#06b6d4', '#cffafe'],
-                            type: 'threshold',
-                            domain: [1, 50, 100, 200]
+                            type: 'threshold', domain: [1, 50, 100, 200]
                         },
                     },
                     theme: 'dark',
@@ -399,21 +293,13 @@
                     }],
                 ]);
 
-                // --- RENDER STATS (NEW DESIGN) ---
+                // --- RENDER STATS WITH NEW ARCHITECTURE ---
                 const statsContainer = document.getElementById('stats-list');
                 statsContainer.innerHTML = '';
 
-                // Handle both old format (value only) and new format (object with total/streak)
-                // We convert everything to array for sorting
                 const entries = Object.entries(statsSource).map(([name, data]) => {
-                    if (typeof data === 'object') {
-                        return { name, ...data };
-                    } else {
-                        return { name, total: data, current_streak: 0, best_streak: 0 };
-                    }
+                    return typeof data === 'object' ? { name, ...data } : { name, total: data, current_streak: 0, best_streak: 0 };
                 });
-
-                // Sort by Total Volume
                 entries.sort((a, b) => b.total - a.total);
 
                 if (entries.length === 0) {
@@ -423,13 +309,35 @@
                         const card = document.createElement('div');
                         card.className = 'stat-card';
 
-                        // Icons for streaks
                         const fireIcon = stat.current_streak > 0 ? '🔥' : '🧊';
                         const streakClass = stat.current_streak > 0 ? 'streak-active' : '';
 
+                        // Tags Logic
+                        let tagsHTML = `<div class="tags-row">`;
+                        if (stat.architecture) {
+                            const icon = stat.architecture === 'Навчання' ? '📖' : '🔁';
+                            tagsHTML += `<span class="tag tag-arch">${icon} ${stat.architecture}</span>`;
+                        }
+                        if (stat.vector) {
+                            tagsHTML += `<span class="tag">✦ ${stat.vector}</span>`;
+                        }
+                        tagsHTML += `</div>`;
+
+                        // Peak Indicator Logic (Only for "Навчання")
+                        let peakHTML = '';
+                        if (stat.architecture === 'Навчання' && stat.days_to_peak !== undefined && stat.days_to_peak !== null) {
+                            if (stat.days_to_peak <= 0) {
+                                peakHTML = `<div class="peak-indicator peak-ready">⚡ PEAK DAY!</div>`;
+                            } else {
+                                peakHTML = `<div class="peak-indicator">⏳ Пік через ${stat.days_to_peak} дн.</div>`;
+                            }
+                        }
+
                         card.innerHTML = `
+                            ${tagsHTML}
                             <div class="stat-header">
                                 <span class="stat-name">${stat.name}</span>
+                                ${peakHTML}
                             </div>
                             <div class="stat-total-row">
                                 <span class="stat-value">${stat.total}</span>
@@ -442,7 +350,7 @@
                                 </div>
                                 <div class="streak-badge streak-best" title="Рекорд">
                                     <span class="streak-icon">🏆</span>
-                                    <span>${stat.best_streak} best</span>
+                                    <span>${stat.best_streak} max</span>
                                 </div>
                             </div>
                         `;
