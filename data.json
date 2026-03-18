@@ -32,28 +32,29 @@
     "2026-03-13": 80.0,
     "2026-03-14": 60.0,
     "2026-03-15": 100.0,
-    "2026-03-16": 100.0
+    "2026-03-16": 100.0,
+    "2026-03-17": 100.0
   },
   "stats": {
     "Віджимання": {
-      "total": 94,
-      "current_streak": 33,
-      "best_streak": 33
+      "total": 96,
+      "current_streak": 34,
+      "best_streak": 34
     },
     "Читання книжки": {
-      "total": 33,
-      "current_streak": 27,
-      "best_streak": 27
+      "total": 34,
+      "current_streak": 28,
+      "best_streak": 28
     },
     "Прибирання": {
-      "total": 14,
-      "current_streak": 8,
-      "best_streak": 8
+      "total": 15,
+      "current_streak": 9,
+      "best_streak": 9
     },
     "Вивчення та запис тем": {
-      "total": 1,
-      "current_streak": 1,
-      "best_streak": 1
+      "total": 2,
+      "current_streak": 2,
+      "best_streak": 2
     }
   }
 }
