@@ -39,22 +39,34 @@
     "Віджимання": {
       "total": 96,
       "current_streak": 34,
-      "best_streak": 34
+      "best_streak": 34,
+      "vector": "Тіло",
+      "architecture": "Звичка",
+      "days_to_peak": 0
     },
     "Читання книжки": {
       "total": 34,
       "current_streak": 28,
-      "best_streak": 28
+      "best_streak": 28,
+      "vector": "Розум",
+      "architecture": "Звичка",
+      "days_to_peak": 0
     },
     "Прибирання": {
       "total": 15,
       "current_streak": 9,
-      "best_streak": 9
+      "best_streak": 9,
+      "vector": "Соціалізація",
+      "architecture": "Звичка",
+      "days_to_peak": 0
     },
     "Вивчення та запис тем": {
       "total": 2,
       "current_streak": 2,
-      "best_streak": 2
+      "best_streak": 2,
+      "vector": "Розум",
+      "architecture": "Звичка",
+      "days_to_peak": 0
     }
   }
 }
