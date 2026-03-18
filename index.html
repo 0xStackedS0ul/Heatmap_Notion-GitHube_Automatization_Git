@@ -3,48 +3,30 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Hydro Tactics</title>
+    <title>Hydro Tactics - Neural Wire</title>
 
+    <!-- Тільки D3.js -->
     <script src="https://d3js.org/d3.v7.min.js"></script>
-    <script src="https://unpkg.com/cal-heatmap/dist/cal-heatmap.min.js"></script>
-    <link rel="stylesheet" href="https://unpkg.com/cal-heatmap/dist/cal-heatmap.css">
-    <script src="https://unpkg.com/@popperjs/core@2"></script>
-    <script src="https://unpkg.com/cal-heatmap/dist/plugins/Tooltip.min.js"></script>
 
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
 
     <style>
         :root {
-            --bg-color: transparent;
-            --text-color: #37352f;
-            --card-bg: #fff;
-            --card-border: #e1e4e8;
-            --accent-color: #0891b2;
-            --active-tab-bg: #f3f4f6;
-            --streak-fire: #f59e0b;
-            --peak-color: #ef4444; /* Red for peak days */
-            --max-width: 1100px;
-
-            /* Vector Colors */
-            --tag-mind: #8b5cf6;
-            --tag-body: #10b981;
-            --tag-phil: #f59e0b;
-            --tag-soc: #3b82f6;
+            /* PURE BLACK & WHITE AESTHETIC */
+            --bg-color: #000000;
+            --text-color: #ffffff;
+            --card-bg: #0a0a0a;
+            --card-border: #222222;
+            --accent-color: #ffffff;
+            --active-tab-bg: #111111;
+            --max-width: 1200px;
+            --board-bg: #000000;
+            --pulse-speed: 2s;
         }
 
-        @media (prefers-color-scheme: dark) {
-            :root {
-                --bg-color: #191919;
-                --text-color: #E0F7FA;
-                --card-bg: #202020;
-                --card-border: #2d2d2d;
-                --accent-color: #22d3ee;
-                --active-tab-bg: #2d2d2d;
-            }
-        }
-
+        /* Примусово ігноруємо світлу тему ОС, система завжди темна/чорна */
         body {
             font-family: 'Inter', sans-serif;
             margin: 0;
@@ -59,121 +41,117 @@
 
         /* --- CONTROLS --- */
         .controls-bar {
-            position: fixed;
-            top: 10px;
-            right: 10px;
-            display: flex;
-            gap: 5px;
-            z-index: 1000;
+            position: fixed; top: 10px; right: 10px;
+            display: flex; gap: 5px; z-index: 1000;
         }
-
         .zoom-btn {
-            background: var(--card-bg);
-            border: 1px solid var(--card-border);
-            color: var(--text-color);
-            width: 28px;
-            height: 28px;
-            border-radius: 6px;
-            cursor: pointer;
-            display: flex; align-items: center; justify-content: center;
-            font-size: 16px; opacity: 0.7; transition: all 0.2s;
+            background: var(--card-bg); border: 1px solid var(--card-border);
+            color: var(--text-color); width: 28px; height: 28px; border-radius: 6px;
+            cursor: pointer; display: flex; align-items: center; justify-content: center;
+            font-size: 16px; opacity: 0.5; transition: all 0.2s;
         }
         .zoom-btn:hover { opacity: 1; border-color: var(--accent-color); }
 
         /* --- TABS NAVIGATION --- */
         .tabs-container {
-            display: flex; gap: 20px;
-            border-bottom: 1px solid var(--card-border);
-            width: 100%; max-width: var(--max-width);
-            margin-bottom: 20px; padding-left: 5px;
+            display: flex; gap: 20px; border-bottom: 1px solid var(--card-border);
+            width: 100%; max-width: var(--max-width); margin-bottom: 20px; padding-left: 5px;
             margin-left: auto; margin-right: auto;
         }
-
         .tab-btn {
             background: none; border: none; padding: 10px 12px;
-            font-family: 'Inter', sans-serif; font-size: 13px; font-weight: 500;
-            color: var(--text-color); cursor: pointer;
-            border-bottom: 2px solid transparent; opacity: 0.6; transition: all 0.2s;
-            display: flex; align-items: center; gap: 6px;
+            font-family: 'JetBrains Mono', monospace; font-size: 12px; font-weight: 700;
+            color: var(--text-color); cursor: pointer; text-transform: uppercase;
+            border-bottom: 2px solid transparent; opacity: 0.4; transition: all 0.2s;
+            display: flex; align-items: center; gap: 8px; letter-spacing: 1px;
         }
         .tab-btn:hover { opacity: 1; background-color: var(--active-tab-bg); border-radius: 6px 6px 0 0; }
-        .tab-btn.active { opacity: 1; border-bottom: 2px solid var(--accent-color); font-weight: 600; }
+        .tab-btn.active { opacity: 1; border-bottom: 2px solid var(--accent-color); color: var(--accent-color); }
 
         /* --- SECTIONS --- */
         .view-section {
             width: 100%; max-width: var(--max-width);
-            display: none; animation: fadeIn 0.3s ease;
+            display: none; animation: fadeIn 0.4s ease;
         }
         #view-flow.active { display: flex; flex-direction: column; align-items: center; }
         #view-tanks.active { display: block; }
-
         @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
 
-        /* --- HEATMAP STYLES --- */
-        #cal-heatmap { margin: auto; }
-        .cal-heatmap-container .graph-rect { rx: 3px !important; ry: 3px !important; }
-        .cal-heatmap-container .graph-label {
-            font-family: 'Inter', sans-serif; font-size: 10px;
-            fill: var(--text-color) !important; opacity: 0.5;
+        /* --- WIRE NETWORK (D3) --- */
+        #d3-tree-container {
+            width: 100%;
+            height: 70vh;
+            min-height: 500px;
+            background-color: var(--board-bg);
+            border: 1px solid #111;
+            border-radius: 12px;
+            position: relative;
+            cursor: grab;
+            overflow: hidden;
         }
-        .legend-hint { font-size: 11px; opacity: 0.5; margin-top: 12px; text-align: center; font-weight: 400; }
+        #d3-tree-container:active { cursor: grabbing; }
 
-        /* --- STAT CARDS V3 (With Vectors & Peaks) --- */
-        .stats-grid {
-            display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-            gap: 15px; max-width: var(--max-width); margin: 0 auto;
+        .hint-overlay {
+            position: absolute; bottom: 20px; width: 100%;
+            text-align: center; font-family: 'Inter', sans-serif; font-size: 12px;
+            color: #555; pointer-events: none; letter-spacing: 0.5px;
+            font-style: italic;
         }
 
-        .stat-card {
-            background: var(--card-bg); border: 1px solid var(--card-border);
-            border-radius: 10px; padding: 16px;
-            display: flex; flex-direction: column; gap: 12px;
-            position: relative; transition: transform 0.2s;
+        /* Status indicator */
+        #pulse-status {
+            font-family: 'JetBrains Mono', monospace; font-size: 10px; color: #888;
+            margin-bottom: 15px; display: flex; align-items: center; gap: 8px;
+            background: #0a0a0a; padding: 4px 12px; border-radius: 4px; border: 1px solid #222;
+            letter-spacing: 1px;
         }
-        .stat-card:hover { transform: translateY(-2px); border-color: var(--accent-color); }
+        .ping-dot {
+            width: 6px; height: 6px; background-color: #fff; border-radius: 50%; display: inline-block;
+            animation: ping var(--pulse-speed) infinite alternate ease-in-out;
+            box-shadow: 0 0 5px #fff;
+        }
+        @keyframes ping { 0% { transform: scale(0.8); opacity: 0.3; } 100% { transform: scale(1.5); opacity: 1; } }
 
-        /* Tags container */
+        /* D3 Elements Styling */
+        .node-group { cursor: grab; }
+        .node-group:active { cursor: grabbing; }
+
+        .node-blob { stroke-linejoin: round; stroke-linecap: round; }
+
+        .node-text { fill: #ccc; font-family: 'JetBrains Mono', monospace; font-size: 10px; font-weight: 400; text-anchor: middle; pointer-events: none; }
+        .node-badge { font-size: 9px; font-weight: 700; pointer-events: none; text-anchor: middle; fill: #666; }
+
+        .link-base { fill: none; stroke: #222; stroke-width: 1px; }
+        .link-pulse { fill: none; stroke: #fff; stroke-width: 1.5px; stroke-dasharray: 2 12; stroke-linecap: round; }
+
+        @keyframes flow-animation {
+            to { stroke-dashoffset: -28; }
+        }
+
+        /* --- HYDRO TANKS (Stats in B&W) --- */
+        .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 15px; max-width: var(--max-width); margin: 0 auto; }
+        .stat-card { background: var(--card-bg); border: 1px solid var(--card-border); border-radius: 8px; padding: 18px; display: flex; flex-direction: column; gap: 12px; transition: border-color 0.2s; }
+        .stat-card:hover { border-color: #555; }
+
         .tags-row { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: -5px; }
+        .tag { font-size: 9px; font-weight: 600; text-transform: uppercase; letter-spacing: 1px; padding: 4px 8px; border-radius: 20px; background: transparent; border: 1px solid #444; color: #aaa; }
+        .tag-arch { border-color: #fff; color: #fff; }
 
-        .tag {
-            font-size: 10px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px;
-            padding: 3px 6px; border-radius: 4px; background: var(--active-tab-bg);
-            border: 1px solid var(--card-border); opacity: 0.8;
-        }
-
-        .tag-arch { color: var(--accent-color); border-color: var(--accent-color); background: transparent;}
-
-        /* Peak Indicator */
-        .peak-indicator {
-            font-size: 11px; font-weight: 600; padding: 3px 8px; border-radius: 4px;
-            display: flex; align-items: center; gap: 4px;
-            background: var(--active-tab-bg); border: 1px solid var(--card-border);
-        }
-        .peak-ready {
-            background: rgba(239, 68, 68, 0.1); border-color: var(--peak-color); color: var(--peak-color);
-            animation: pulse 2s infinite;
-        }
-        @keyframes pulse { 0% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.4); } 70% { box-shadow: 0 0 0 4px rgba(239, 68, 68, 0); } 100% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0); } }
+        .peak-indicator { font-size: 10px; font-weight: 700; padding: 3px 8px; border-radius: 4px; display: flex; align-items: center; gap: 6px; background: transparent; border: 1px solid #555; color: #888; text-transform: uppercase;}
+        .peak-ready { background: #fff; color: #000; border-color: #fff; animation: pulse-white 2s infinite; }
+        @keyframes pulse-white { 0% { box-shadow: 0 0 0 0 rgba(255,255,255, 0.4); } 70% { box-shadow: 0 0 0 6px rgba(255,255,255, 0); } 100% { box-shadow: 0 0 0 0 rgba(255,255,255, 0); } }
 
         .stat-header { display: flex; justify-content: space-between; align-items: center; }
-        .stat-name { font-size: 14px; font-weight: 600; opacity: 0.9; }
+        .stat-name { font-size: 14px; font-weight: 500; opacity: 0.9; }
 
         .stat-total-row { display: flex; align-items: baseline; gap: 5px; }
-        .stat-value { font-size: 26px; font-weight: 700; color: var(--text-color); line-height: 1; }
-        .stat-label { font-size: 11px; opacity: 0.5; text-transform: uppercase; letter-spacing: 0.5px;}
+        .stat-value { font-size: 28px; font-weight: 700; color: #fff; line-height: 1; font-family: 'JetBrains Mono', monospace;}
+        .stat-label { font-size: 10px; opacity: 0.4; text-transform: uppercase; letter-spacing: 1px;}
 
-        .streak-container {
-            display: flex; gap: 8px; margin-top: auto; padding-top: 12px;
-            border-top: 1px solid var(--card-border);
-        }
-
-        .streak-badge {
-            display: flex; align-items: center; gap: 4px;
-            font-size: 12px; font-weight: 500; background: var(--active-tab-bg);
-            padding: 4px 8px; border-radius: 6px; flex: 1; justify-content: center;
-        }
-        .streak-active { color: var(--streak-fire); }
-        .streak-best { color: var(--accent-color); opacity: 0.8; }
+        .streak-container { display: flex; gap: 8px; margin-top: auto; padding-top: 15px; border-top: 1px dashed #222; }
+        .streak-badge { display: flex; align-items: center; gap: 6px; font-size: 11px; font-weight: 500; background: transparent; border: 1px solid #222; padding: 6px 10px; border-radius: 4px; flex: 1; justify-content: center; color: #777;}
+        .streak-active { color: #fff; border-color: #555; }
+        .streak-best { color: #aaa; }
 
         #zoom-wrapper { width: 100%; display: flex; flex-direction: column; align-items: center; transform-origin: top center; }
 
@@ -187,37 +165,42 @@
     </div>
 
     <div id="zoom-wrapper">
-        <div class="header-container" style="width: 100%; max-width: var(--max-width); margin-bottom: 20px; display: flex; justify-content: space-between; align-items: center;">
-            <div style="font-weight: 700; font-size: 14px; color: var(--accent-color); letter-spacing: 1px;">🌊 HYDRO TACTICS</div>
+        <div class="header-container" style="width: 100%; max-width: var(--max-width); margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center;">
+            <div style="font-weight: 700; font-size: 14px; color: #fff; letter-spacing: 2px; font-family: 'JetBrains Mono', monospace;">
+                [ HYDRO.CORE ]
+            </div>
         </div>
 
         <!-- TABS -->
         <div class="tabs-container">
             <button class="tab-btn active" onclick="switchTab('flow')">
-                <span>🌊</span> Flow Map
+                <span style="font-size: 16px;">∿</span> System Wire
             </button>
             <button class="tab-btn" onclick="switchTab('tanks')">
-                <span>📊</span> Hydro Tanks
+                <span style="font-size: 14px;">■</span> Memory Tanks
             </button>
         </div>
 
-        <!-- SECTION 1: FLOW MAP -->
+        <!-- SECTION 1: PULSE WIRE (D3) -->
         <div id="view-flow" class="view-section active">
-            <div id="cal-heatmap"></div>
-            <div class="legend-hint">Mist (Start) &nbsp; → &nbsp; Flow (100%) &nbsp; → &nbsp; Tsunami (Max Cap)</div>
+            <div id="pulse-status">
+                <span class="ping-dot"></span> FREQUENCY: <span id="delay-val">0.0Hz</span> | GLOBAL CHAIN: <span id="streak-val">0</span>
+            </div>
+
+            <div id="d3-tree-container">
+                <div class="hint-overlay">Just start, you'll figure out along the way. [ 0 &rarr; 66 DAYS ]</div>
+            </div>
         </div>
 
         <!-- SECTION 2: HYDRO TANKS (Stats) -->
         <div id="view-tanks" class="view-section">
             <div class="stats-grid" id="stats-list">
-                Loading tanks...
+                Loading memory...
             </div>
         </div>
     </div>
 
     <script>
-        const cal = new CalHeatmap();
-
         // --- ZOOM LOGIC ---
         let currentZoom = parseFloat(localStorage.getItem('hydro-zoom')) || 1.0;
         const zoomWrapper = document.getElementById('zoom-wrapper');
@@ -242,6 +225,267 @@
             if (tabName === 'flow') btns[0].classList.add('active'); else btns[1].classList.add('active');
         }
 
+        function truncate(str, n) {
+            return str.length > n ? str.substr(0, n - 1) + '...' : str;
+        }
+
+        // --- HASH & GENERATORS FOR ORGANIC SHAPES ---
+        function simpleHash(str) {
+            let hash = 0;
+            for (let i = 0; i < str.length; i++) {
+                hash = ((hash << 5) - hash) + str.charCodeAt(i);
+                hash |= 0;
+            }
+            return Math.abs(hash);
+        }
+
+        // Органічний безформний "блоб", який дихає на місці без обертання
+        function generateBlobPath(radius, streak, id, type, time) {
+            if (type === 'root') streak = 66;
+
+            // Змінено з 50 на 66 днів
+            const t = Math.min(Math.max(streak, 0), 66) / 66;
+            const easeT = d3.easeCubicOut(t);
+
+            const numPoints = 12;
+            const points = [];
+            const seed = simpleHash(String(id));
+
+            for (let i = 0; i < numPoints; i++) {
+                const angle = (i / numPoints) * Math.PI * 2;
+
+                const timeScale = 0.0015;
+                const wobbleSpeed = 1 + (1 - easeT) * 2;
+
+                // Фіксуємо фазу для кожної точки `i`, щоб вона дихала на місці, а не оберталась
+                const phase1 = seed + i * 2.1;
+                const phase2 = seed + i * 5.7;
+
+                const wave1 = Math.sin(time * timeScale * wobbleSpeed + phase1);
+                const wave2 = Math.cos(time * timeScale * wobbleSpeed * 0.73 + phase2);
+                const rand = (wave1 + wave2) * 0.5; // Від -1 до 1
+
+                // На нулі стріку спотворення становить до 60% радіусу. На 66 стріку спотворення = 0.
+                const distortion = (1 - easeT) * 0.6 * radius;
+                const r = radius + rand * distortion;
+
+                points.push([r * Math.cos(angle), r * Math.sin(angle)]);
+            }
+
+            return d3.line().curve(d3.curveCatmullRomClosed.alpha(0.5))(points);
+        }
+
+        // "Брудний" органічний дріт (замість ідеальної дуги)
+        function generateWirePath(d, time) {
+            const dx = d.target.x - d.source.x;
+            const dy = d.target.y - d.source.y;
+            const dist = Math.sqrt(dx * dx + dy * dy);
+
+            if (dist < 5) return `M${d.source.x},${d.source.y}L${d.target.x},${d.target.y}`;
+
+            const nx = -dy / dist;
+            const ny = dx / dist;
+
+            const points = [[d.source.x, d.source.y]];
+            const segments = 4;
+
+            const streak = d.target.streak || 0;
+            // Змінено з 50 на 66 днів
+            const t = Math.min(Math.max(streak, 0), 66) / 66;
+            const easeT = d3.easeCubicOut(t);
+
+            const chaosAmplitude = (1 - easeT) * Math.min(dist * 0.4, 40);
+            const seed = simpleHash(d.source.id + "_" + d.target.id);
+
+            for(let i = 1; i < segments; i++) {
+                const f = i / segments;
+                const bx = d.source.x + f * dx;
+                const by = d.source.y + f * dy;
+
+                const staticOffset = Math.sin(seed + i * 15.3) * chaosAmplitude;
+                const timeOffset = Math.sin(time * 0.001 + i * 2 + seed) * (chaosAmplitude * 0.3);
+
+                const totalOffset = staticOffset + timeOffset;
+
+                points.push([bx + nx * totalOffset, by + ny * totalOffset]);
+            }
+            points.push([d.target.x, d.target.y]);
+
+            return d3.line().curve(d3.curveCatmullRom.alpha(0.5))(points);
+        }
+
+        // --- RENDER D3 NETWORK (Wire Aesthetic) ---
+        function renderSystemTree(statsSource) {
+            const container = document.getElementById("d3-tree-container");
+            const width = container.clientWidth;
+            const height = container.clientHeight;
+
+            d3.select("#d3-tree-container svg").remove();
+
+            const nodesData = [];
+            const linksData = [];
+            const rootId = "CORE";
+
+            nodesData.push({ id: rootId, name: "START", type: "root", radius: 10, streak: 0 });
+
+            Object.entries(statsSource).forEach(([name, stat]) => {
+                const vecId = "vec_" + (stat.vector || "None");
+                const archId = "arch_" + vecId + "_" + (stat.architecture || "None");
+
+                if (!nodesData.find(n => n.id === vecId)) {
+                    nodesData.push({ id: vecId, name: stat.vector || "Інше", type: "vector", radius: 7, streak: 0 });
+                    linksData.push({ source: rootId, target: vecId });
+                }
+                if (!nodesData.find(n => n.id === archId)) {
+                    nodesData.push({ id: archId, name: stat.architecture || "Дія", type: "arch", radius: 5, streak: 0 });
+                    linksData.push({ source: vecId, target: archId });
+                }
+
+                const leafId = "leaf_" + name;
+                nodesData.push({ id: leafId, name: name, type: "leaf", stat: stat, radius: 8, streak: stat.current_streak || 0 });
+                linksData.push({ source: archId, target: leafId });
+            });
+
+            // Підрахунок стріку для яскравості батьківських вузлів
+            ['arch', 'vector', 'root'].forEach(type => {
+                nodesData.filter(n => n.type === type).forEach(node => {
+                    const childrenLinks = linksData.filter(l => l.source === node.id || l.source.id === node.id);
+                    const childrenIds = childrenLinks.map(l => typeof l.target === 'object' ? l.target.id : l.target);
+                    const children = nodesData.filter(n => childrenIds.includes(n.id));
+
+                    if(children.length > 0) {
+                        const sum = children.reduce((acc, c) => acc + c.streak, 0);
+                        node.streak = sum / children.length;
+                    }
+                });
+            });
+
+            const svg = d3.select("#d3-tree-container").append("svg")
+                .attr("width", "100%")
+                .attr("height", "100%");
+
+            // Просте біле світіння
+            const defs = svg.append("defs");
+            const filter = defs.append("filter").attr("id", "glow").attr("x", "-50%").attr("y", "-50%").attr("width", "200%").attr("height", "200%");
+            filter.append("feGaussianBlur").attr("stdDeviation", "4").attr("result", "coloredBlur");
+            const feMerge = filter.append("feMerge");
+            feMerge.append("feMergeNode").attr("in", "coloredBlur");
+            feMerge.append("feMergeNode").attr("in", "SourceGraphic");
+
+            const g = svg.append("g");
+
+            const zoom = d3.zoom().scaleExtent([0.2, 3]).on("zoom", (e) => g.attr("transform", e.transform));
+            svg.call(zoom);
+            svg.call(zoom.transform, d3.zoomIdentity.translate(width / 2, height / 2).scale(0.9));
+
+            const simulation = d3.forceSimulation(nodesData)
+                .force("link", d3.forceLink(linksData).id(d => d.id).distance(d => {
+                    if (d.source.type === "root") return 150;
+                    if (d.source.type === "vector") return 100;
+                    return 70;
+                }))
+                .force("charge", d3.forceManyBody().strength(-400))
+                .force("center", d3.forceCenter(0, 0))
+                .force("collide", d3.forceCollide().radius(d => d.type === 'leaf' ? 40 : d.radius + 20).iterations(2));
+
+            const links = g.append("g").selectAll("g")
+                .data(linksData)
+                .join("g");
+
+            const linkBase = links.append("path").attr("class", "link-base");
+
+            const linkPulse = links.append("path")
+                .attr("class", "link-pulse")
+                .style("opacity", d => (d.target.streak > 0) ? 1 : 0)
+                .style("filter", d => (d.target.streak >= 30) ? "url(#glow)" : "none")
+                .style("animation", d => {
+                    if (d.target.streak <= 0) return "none";
+                    let s = d.target.streak;
+                    let duration = Math.max(0.5, 3.0 - (s * 0.04));
+                    return `flow-animation ${duration}s linear infinite`;
+                });
+
+            const nodes = g.append("g").selectAll(".node-group")
+                .data(nodesData)
+                .join("g")
+                .attr("class", "node-group")
+                .call(d3.drag()
+                    .on("start", dragstarted)
+                    .on("drag", dragged)
+                    .on("end", dragended));
+
+            // Малюємо форми
+            nodes.append("path")
+                .attr("class", "node-blob")
+                .style("fill", d => {
+                    if (d.type === 'root') return "#fff";
+                    if (d.stat && d.stat.days_to_peak <= 0 && d.stat.architecture === "Навчання") return "#fff";
+                    return d.streak >= 66 ? "#fff" : "#000";
+                })
+                .style("stroke", d => {
+                    if (d.type === 'root') return "#fff";
+                    if (d.stat && d.stat.days_to_peak <= 0 && d.stat.architecture === "Навчання") return "#fff";
+
+                    const t = Math.min(d.streak, 66) / 66;
+                    const v = Math.round(68 + t * (255 - 68));
+                    return `rgb(${v}, ${v}, ${v})`;
+                })
+                .style("stroke-width", d => {
+                    const t = Math.min(d.streak, 66) / 66;
+                    return 0.8 + (t * 0.7); // Від 0.8px до 1.5px
+                })
+                .style("filter", d => {
+                    if (d.type === 'root') return "url(#glow)";
+                    if (d.stat && d.stat.days_to_peak <= 0 && d.stat.architecture === "Навчання") return "url(#glow)";
+                    return d.streak >= 30 ? "url(#glow)" : "none";
+                });
+
+            // Текст вузлів
+            nodes.append("text")
+                .attr("class", "node-text")
+                .text(d => truncate(d.name, 20))
+                .attr("dy", d => d.radius + 14)
+                .style("fill", d => (d.streak > 0 || d.type === 'root') ? "#fff" : "#666");
+
+            // Інфо про стрік
+            nodes.filter(d => d.type === 'leaf' && d.streak > 0).append("text")
+                .text(d => {
+                    let info = `✦ ${d.streak}`;
+                    if (d.stat.architecture === 'Навчання') info += ` | [${d.stat.days_to_peak}]`;
+                    return info;
+                })
+                .attr("class", "node-badge")
+                .attr("dy", d => d.radius + 26)
+                .style("fill", d => (d.stat && d.stat.days_to_peak <= 0 && d.stat.architecture === "Навчання") ? "#fff" : "#aaa");
+
+            simulation.on("tick", () => {
+                // Фізика просто крутиться у фоні
+            });
+
+            // Глобальний ігровий цикл (60 FPS) для постійних анімацій
+            if (window.hydroSystemTimer) window.hydroSystemTimer.stop();
+            window.hydroSystemTimer = d3.timer((elapsed) => {
+
+                // Перемальовуємо дроти
+                linkBase.attr("d", d => generateWirePath(d, elapsed));
+                linkPulse.attr("d", d => generateWirePath(d, elapsed));
+
+                // Переміщуємо вузли на фізичні координати та перемальовуємо форму
+                nodes.attr("transform", d => `translate(${d.x},${d.y})`);
+                nodes.select(".node-blob").attr("d", d => generateBlobPath(d.radius, d.streak, d.id, d.type, elapsed));
+            });
+
+            function dragstarted(event, d) {
+                if (!event.active) simulation.alphaTarget(0.3).restart();
+                d.fx = d.x; d.fy = d.y;
+            }
+            function dragged(event, d) { d.fx = event.x; d.fy = event.y; }
+            function dragended(event, d) {
+                if (!event.active) simulation.alphaTarget(0);
+                d.fx = null; d.fy = null;
+            }
+        }
+
         async function renderDashboard() {
             try {
                 const timestamp = new Date().getTime();
@@ -252,48 +496,40 @@
                 let heatmapSource = fullData.heatmap || fullData;
                 let statsSource = fullData.stats || {};
 
-                // --- RENDER HEATMAP ---
-                const heatmapData = Object.keys(heatmapSource).map(key => ({
-                    date: new Date(key).getTime(), value: heatmapSource[key]
-                }));
+                // --- ГЛОБАЛЬНИЙ СТРІК ---
+                let globalStreak = 0;
+                let checkDate = new Date();
+                checkDate.setHours(0,0,0,0);
 
-                let latestDate = new Date();
-                if (heatmapData.length > 0) {
-                    const sortedDates = heatmapData.sort((a, b) => b.date - a.date);
-                    const maxDataDate = new Date(sortedDates[0].date);
-                    if (maxDataDate > latestDate) latestDate = maxDataDate;
+                const dateScores = {};
+                Object.keys(heatmapSource).forEach(d => {
+                    const dt = new Date(d);
+                    dt.setHours(0,0,0,0);
+                    dateScores[dt.getTime()] = heatmapSource[d];
+                });
+
+                if (dateScores[checkDate.getTime()] > 0) globalStreak++;
+                checkDate.setDate(checkDate.getDate() - 1);
+                while(dateScores[checkDate.getTime()] > 0) {
+                    globalStreak++;
+                    checkDate.setDate(checkDate.getDate() - 1);
                 }
-                const startYear = latestDate.getFullYear();
-                const startDate = new Date(startYear, 0, 1);
 
-                cal.paint({
-                    itemSelector: '#cal-heatmap', range: 12,
-                    domain: { type: 'month', gutter: 6, label: { text: 'MMM', position: 'top' } },
-                    subDomain: { type: 'day', radius: 3, width: 12, height: 12, gutter: 3 },
-                    date: { start: startDate, highlight: [new Date()] },
-                    data: { source: heatmapData, x: 'date', y: 'value', defaultValue: 0 },
-                    scale: {
-                        color: {
-                            range: ['#252525', '#164e63', '#0e7490', '#06b6d4', '#cffafe'],
-                            type: 'threshold', domain: [1, 50, 100, 200]
-                        },
-                    },
-                    theme: 'dark',
-                }, [
-                    [ window.Tooltip, {
-                        text: function (date, value, dayjsDate) {
-                            const score = value ? Math.round(value) : 0;
-                            let status = "Dry";
-                            if (score > 0) status = "Mist";
-                            if (score >= 50) status = "Stream";
-                            if (score >= 100) status = "River";
-                            if (score >= 200) status = "Tsunami";
-                            return `${status}: ${score}% | ${dayjsDate.format("D MMM")}`;
-                        },
-                    }],
-                ]);
+                let pulseDuration = Math.max(0.4, 3.0 - (globalStreak * 0.15));
+                let hz = (1 / pulseDuration).toFixed(1);
 
-                // --- RENDER STATS WITH NEW ARCHITECTURE ---
+                document.documentElement.style.setProperty('--pulse-speed', `${pulseDuration}s`);
+                document.getElementById('delay-val').innerText = `${hz}Hz`;
+                document.getElementById('streak-val').innerText = globalStreak;
+
+                // --- МАЛЮЄМО СИСТЕМУ ---
+                if (Object.keys(statsSource).length > 0) {
+                    renderSystemTree(statsSource);
+                } else {
+                    document.getElementById("d3-tree-container").innerHTML = '<p style="color:#555; text-align:center; padding-top: 50px; font-family: monospace;">[ SIGNAL LOST ] Start to initiate link.</p>';
+                }
+
+                // --- HYDRO TANKS (Stats) ---
                 const statsContainer = document.getElementById('stats-list');
                 statsContainer.innerHTML = '';
 
@@ -303,54 +539,48 @@
                 entries.sort((a, b) => b.total - a.total);
 
                 if (entries.length === 0) {
-                    statsContainer.innerHTML = '<p style="opacity:0.5; font-size:12px">System dry.</p>';
+                    statsContainer.innerHTML = '<p style="color:#555; font-family: monospace;">[ MEMORY EMPTY ]</p>';
                 } else {
                     entries.forEach(stat => {
                         const card = document.createElement('div');
                         card.className = 'stat-card';
 
-                        const fireIcon = stat.current_streak > 0 ? '🔥' : '🧊';
+                        const isPeak = stat.architecture === 'Навчання' && stat.days_to_peak <= 0;
+                        const fireIcon = stat.current_streak > 0 ? '✦' : '✧';
                         const streakClass = stat.current_streak > 0 ? 'streak-active' : '';
 
-                        // Tags Logic
                         let tagsHTML = `<div class="tags-row">`;
-                        if (stat.architecture) {
-                            const icon = stat.architecture === 'Навчання' ? '📖' : '🔁';
-                            tagsHTML += `<span class="tag tag-arch">${icon} ${stat.architecture}</span>`;
-                        }
-                        if (stat.vector) {
-                            tagsHTML += `<span class="tag">✦ ${stat.vector}</span>`;
-                        }
+                        if (stat.architecture) tagsHTML += `<span class="tag tag-arch">${stat.architecture}</span>`;
+                        if (stat.vector) tagsHTML += `<span class="tag">${stat.vector}</span>`;
                         tagsHTML += `</div>`;
 
-                        // Peak Indicator Logic (Only for "Навчання")
                         let peakHTML = '';
                         if (stat.architecture === 'Навчання' && stat.days_to_peak !== undefined && stat.days_to_peak !== null) {
-                            if (stat.days_to_peak <= 0) {
-                                peakHTML = `<div class="peak-indicator peak-ready">⚡ PEAK DAY!</div>`;
+                            if (isPeak) {
+                                peakHTML = `<div class="peak-indicator peak-ready">[ PEAK ]</div>`;
                             } else {
-                                peakHTML = `<div class="peak-indicator">⏳ Пік через ${stat.days_to_peak} дн.</div>`;
+                                peakHTML = `<div class="peak-indicator">[ T-${stat.days_to_peak} ]</div>`;
                             }
                         }
 
                         card.innerHTML = `
                             ${tagsHTML}
                             <div class="stat-header">
-                                <span class="stat-name">${stat.name}</span>
+                                <span class="stat-name" style="${isPeak ? 'color: #fff;' : ''}">${stat.name}</span>
                                 ${peakHTML}
                             </div>
                             <div class="stat-total-row">
                                 <span class="stat-value">${stat.total}</span>
-                                <span class="stat-label">total units</span>
+                                <span class="stat-label">циклів</span>
                             </div>
                             <div class="streak-container">
                                 <div class="streak-badge ${streakClass}" title="Поточна серія">
-                                    <span class="streak-icon">${fireIcon}</span>
-                                    <span>${stat.current_streak} days</span>
+                                    <span>${fireIcon}</span>
+                                    <span>${stat.current_streak}</span>
                                 </div>
                                 <div class="streak-badge streak-best" title="Рекорд">
-                                    <span class="streak-icon">🏆</span>
-                                    <span>${stat.best_streak} max</span>
+                                    <span>MAX</span>
+                                    <span>${stat.best_streak}</span>
                                 </div>
                             </div>
                         `;
@@ -360,7 +590,7 @@
 
             } catch (error) {
                 console.error("Error:", error);
-                document.body.innerHTML = `<p style="color:red; text-align:center">${error.message}</p>`;
+                document.body.innerHTML = `<p style="color:white; text-align:center; font-family: monospace;">[ FATAL ] ${error.message}</p>`;
             }
         }
 
