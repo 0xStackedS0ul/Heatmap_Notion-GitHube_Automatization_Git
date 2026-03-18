@@ -14,6 +14,7 @@ notion = Client(auth=NOTION_TOKEN)
 
 
 def get_today_date_obj():
+    # Час по Києву
     return (datetime.utcnow() + timedelta(hours=2)).date()
 
 
@@ -25,12 +26,18 @@ def get_yesterday_str():
     return (get_today_date_obj() - timedelta(days=1)).strftime("%Y-%m-%d")
 
 
-def get_prop(props, name, prop_type, nested_key=None):
-    """Безпечне отримання властивостей з Notion"""
-    if name in props and props[name] and props[name].get(prop_type):
-        if nested_key:
-            return props[name][prop_type].get(nested_key)
+def get_prop(props, name, prop_type):
+    """Безпечне отримання властивостей з Notion без ризику помилок з індексами"""
+    if name in props and props[name] and prop_type in props[name]:
         return props[name][prop_type]
+    return None
+
+
+def get_title(props, name):
+    """Спеціальна надійна функція для вилучення тексту з поля Title"""
+    title_list = get_prop(props, name, "title")
+    if title_list and isinstance(title_list, list) and len(title_list) > 0:
+        return title_list[0].get("plain_text", "Unknown")
     return None
 
 
@@ -84,7 +91,6 @@ def process_history_and_update(pages):
     habit_dates = defaultdict(list)
     habit_totals = defaultdict(int)
 
-    # Словник для збереження метаданих для UI (категорії, інтервали на сьогодні)
     habit_meta = {}
     today_str = get_today_str()
 
@@ -94,11 +100,13 @@ def process_history_and_update(pages):
         props = page["properties"]
         page_id = page["id"]
 
-        habit_name = get_prop(props, "Name_Hebits", "title", 0)
-        if type(habit_name) is dict: habit_name = habit_name.get("plain_text", "Unknown")
-        if not habit_name: continue
+        # Використовуємо нову безпечну функцію
+        habit_name = get_title(props, "Name_Hebits")
+        if not habit_name:
+            continue
 
-        date_val = get_prop(props, "Date", "date", "start") or page["created_time"].split("T")[0]
+        date_prop = get_prop(props, "Date", "date")
+        date_val = date_prop["start"] if date_prop else page["created_time"].split("T")[0]
         day = date_val.split("T")[0]
 
         intensity = get_prop(props, "Number_of_intensity", "number") or 0
@@ -106,11 +114,14 @@ def process_history_and_update(pages):
         is_enabled = get_prop(props, "Enabled", "checkbox") or False
         is_template = get_prop(props, "Template_Checkbox", "checkbox") or False
 
-        vector = get_prop(props, "Vector category", "select", "name")
-        architecture = get_prop(props, "Action Architecture", "select", "name")
+        vector_prop = get_prop(props, "Vector category", "select")
+        vector = vector_prop["name"] if vector_prop else None
+
+        arch_prop = get_prop(props, "Action Architecture", "select")
+        architecture = arch_prop["name"] if arch_prop else None
+
         interval = get_prop(props, "Maximum interval", "number")
 
-        # Зберігаємо метадані останнього дня (або шаблону) для відображення на сайті
         if habit_name not in habit_meta or day == today_str or is_template:
             habit_meta[habit_name] = {
                 "vector": vector,
@@ -154,31 +165,33 @@ def create_daily_habits(all_pages):
 
     templates, yesterday_pages, created_today_names = [], {}, set()
 
-    # Аналізуємо існуючі записи
     for page in all_pages:
         props = page["properties"]
         is_template = get_prop(props, "Template_Checkbox", "checkbox")
-        p_date = get_prop(props, "Date", "date", "start")
-        h_name = get_prop(props, "Name_Hebits", "title", 0)
-        if type(h_name) is dict: h_name = h_name.get("plain_text", "")
+
+        date_prop = get_prop(props, "Date", "date")
+        p_date = date_prop["start"] if date_prop else None
+
+        h_name = get_title(props, "Name_Hebits")
 
         if is_template: templates.append(page)
         if p_date == today_str and h_name: created_today_names.add(h_name)
         if p_date == yesterday_str and h_name: yesterday_pages[h_name] = page
 
-    # Створюємо нові
     for template in templates:
         t_props = template["properties"]
-        h_name = get_prop(t_props, "Name_Hebits", "title", 0)
-        if type(h_name) is dict: h_name = h_name.get("plain_text", "")
+        h_name = get_title(t_props, "Name_Hebits")
         if not h_name or h_name in created_today_names: continue
 
-        arch = get_prop(t_props, "Action Architecture", "select", "name")
-        vector = get_prop(t_props, "Vector category", "select", "name")
+        arch_prop = get_prop(t_props, "Action Architecture", "select")
+        arch = arch_prop["name"] if arch_prop else None
+
+        vector_prop = get_prop(t_props, "Vector category", "select")
+        vector = vector_prop["name"] if vector_prop else None
+
         base_max = get_prop(t_props, "Max_Number_of_intensity", "number")
         base_interval = get_prop(t_props, "Maximum interval", "number")
 
-        # --- ЛОГІКА ПЕРІОДИЗАЦІЇ (НАВЧАННЯ) ---
         new_interval = base_interval
 
         if arch == "Навчання" and base_interval is not None:
@@ -190,16 +203,13 @@ def create_daily_habits(all_pages):
 
                 if y_interval is None: y_interval = base_interval
 
-                # Якщо вчора було зроблено ПІК (або більше максимуму) -> СКИДАЄМО інтервал
                 if y_num >= y_max:
                     new_interval = base_interval
                     print(f"   ⚡ {h_name}: Пік досягнуто вчора! Скидання інтервалу до {base_interval}.")
                 else:
-                    # Якщо ні -> ВІДНІМАЄМО 1 (мінімум 0)
                     new_interval = max(0, y_interval - 1)
                     print(f"   ⏳ {h_name}: Мінімальна дія. Інтервал зменшено до {new_interval}.")
 
-        # Формуємо властивості для нової сторінки
         new_props = {
             "Name_Hebits": {"title": [{"text": {"content": h_name}}]},
             "Date": {"date": {"start": today_str}},
@@ -211,7 +221,6 @@ def create_daily_habits(all_pages):
         if base_max is not None: new_props["Max_Number_of_intensity"] = {"number": base_max}
         if new_interval is not None: new_props["Maximum interval"] = {"number": new_interval}
 
-        # Додаємо Select-категорії, якщо вони існують
         if arch: new_props["Action Architecture"] = {"select": {"name": arch}}
         if vector: new_props["Vector category"] = {"select": {"name": vector}}
 
