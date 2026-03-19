@@ -550,7 +550,13 @@
                         const streakClass = stat.current_streak > 0 ? 'streak-active' : '';
 
                         let tagsHTML = `<div class="tags-row">`;
-                        if (stat.architecture) tagsHTML += `<span class="tag tag-arch">${stat.architecture}</span>`;
+                        if (stat.architecture) {
+                            let icon = '🔁';
+                            if (stat.architecture === 'Навчання') icon = '📖';
+                            else if (stat.architecture === 'Поведінка') icon = '🌀';
+
+                            tagsHTML += `<span class="tag tag-arch">${icon} ${stat.architecture}</span>`;
+                        }
                         if (stat.vector) tagsHTML += `<span class="tag">${stat.vector}</span>`;
                         tagsHTML += `</div>`;
 
