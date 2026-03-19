@@ -43,7 +43,7 @@
       "best_streak": 35,
       "vector": "Тіло",
       "architecture": "Звичка",
-      "days_to_peak": null
+      "days_to_peak": 0
     },
     "Читання книжки": {
       "total": 35,
@@ -51,7 +51,7 @@
       "best_streak": 29,
       "vector": "Розум",
       "architecture": "Звичка",
-      "days_to_peak": null
+      "days_to_peak": 0
     },
     "Прибирання": {
       "total": 16,
@@ -59,7 +59,7 @@
       "best_streak": 10,
       "vector": "Соціалізація",
       "architecture": "Звичка",
-      "days_to_peak": null
+      "days_to_peak": 0
     },
     "Вивчення та запис тем": {
       "total": 3,
@@ -67,7 +67,7 @@
       "best_streak": 3,
       "vector": "Розум",
       "architecture": "Звичка",
-      "days_to_peak": null
+      "days_to_peak": 0
     }
   }
 }
