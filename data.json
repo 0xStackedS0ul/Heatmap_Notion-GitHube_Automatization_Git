@@ -35,53 +35,54 @@
     "2026-03-16": 100.0,
     "2026-03-17": 100.0,
     "2026-03-18": 100.0,
-    "2026-03-19": 180.0
+    "2026-03-19": 186.60000000000002,
+    "2026-03-20": 146.6
   },
   "stats": {
     "Віджимання": {
-      "total": 101,
-      "current_streak": 36,
-      "best_streak": 36,
+      "total": 103,
+      "current_streak": 37,
+      "best_streak": 37,
       "vector": "Тіло",
       "architecture": "Звичка",
       "days_to_peak": null
     },
     "Читання книжки": {
-      "total": 37,
-      "current_streak": 30,
-      "best_streak": 30,
+      "total": 38,
+      "current_streak": 31,
+      "best_streak": 31,
       "vector": "Розум",
       "architecture": "Звичка",
       "days_to_peak": null
     },
     "Прибирання": {
-      "total": 17,
-      "current_streak": 11,
-      "best_streak": 11,
+      "total": 18,
+      "current_streak": 12,
+      "best_streak": 12,
       "vector": "Соціалізація",
       "architecture": "Звичка",
       "days_to_peak": null
     },
     "Вивчення та запис тем": {
-      "total": 4,
-      "current_streak": 4,
-      "best_streak": 4,
+      "total": 5,
+      "current_streak": 5,
+      "best_streak": 5,
       "vector": "Розум",
       "architecture": "Звичка",
       "days_to_peak": null
     },
     "Дії в денний час": {
-      "total": 1,
-      "current_streak": 1,
-      "best_streak": 1,
+      "total": 4,
+      "current_streak": 2,
+      "best_streak": 2,
       "vector": "Філософія",
       "architecture": "Поведінка",
       "days_to_peak": null
     },
     "Виконання завдань з університету": {
-      "total": 1,
-      "current_streak": 1,
-      "best_streak": 1,
+      "total": 2,
+      "current_streak": 2,
+      "best_streak": 2,
       "vector": "Розум",
       "architecture": "Навчання",
       "days_to_peak": null
