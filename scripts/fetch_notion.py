@@ -202,6 +202,7 @@ def create_daily_habits(all_pages):
 
         new_interval = base_interval
 
+        # ЛОГІКА ПЕРІОДИЗАЦІЇ
         if arch == "Навчання" and base_interval is not None:
             if h_name in yesterday_pages:
                 y_props = yesterday_pages[h_name]["properties"]
@@ -212,9 +213,17 @@ def create_daily_habits(all_pages):
                 if y_interval is None: y_interval = base_interval
 
                 if y_num >= y_max:
+                    # Якщо зроблено максимум -> скидаємо до N
                     new_interval = base_interval
+                    print(f"   ⚡ {h_name}: Пік досягнуто вчора! Скидання інтервалу до {base_interval}.")
+                elif y_interval <= 0:
+                    # Якщо інтервал ДІЙШОВ ДО НУЛЯ -> автоматично запускаємо новий цикл
+                    new_interval = base_interval
+                    print(f"   🔄 {h_name}: Цикл завершився. Автоматичний перезапуск до {base_interval}.")
                 else:
+                    # В інших випадках мінусуємо 1 день
                     new_interval = max(0, y_interval - 1)
+                    print(f"   ⏳ {h_name}: Інтервал зменшено до {new_interval}.")
 
         new_props = {
             "Name_Hebits": {"title": [{"text": {"content": h_name}}]},
@@ -250,7 +259,7 @@ def main():
 
     with open("data.json", "w", encoding="utf-8") as f:
         json.dump(full_data, f, indent=2, ensure_ascii=False)
-    print("💾 data.json оновлено (+Staking & Automation)")
+    print("💾 data.json оновлено (+Periodization Auto-Reset)")
 
     create_daily_habits(pages)
 
