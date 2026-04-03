@@ -328,6 +328,7 @@
 
             nodesData.push({ id: rootId, name: "Infinity Way", type: "root", radius: 10, streak: 0 });
 
+            // 1. Спочатку створюємо всі вузли
             Object.entries(statsSource).forEach(([name, stat]) => {
                 const vecId = "vec_" + (stat.vector || "None");
                 const archId = "arch_" + vecId + "_" + (stat.architecture || "None");
@@ -343,7 +344,33 @@
 
                 const leafId = "leaf_" + name;
                 nodesData.push({ id: leafId, name: name, type: "leaf", stat: stat, radius: 8, streak: stat.current_streak || 0 });
-                linksData.push({ source: archId, target: leafId });
+            });
+
+            // 2. Тепер прописуємо зв'язки (Habit Stacking Logic)
+            Object.entries(statsSource).forEach(([name, stat]) => {
+                const leafId = "leaf_" + name;
+                let isLinkedToParent = false;
+
+                // Якщо є кастомні батьківські зв'язки
+                if (stat.parent_nodes && stat.parent_nodes.trim() !== "") {
+                    const parents = stat.parent_nodes.split(',').map(s => s.trim());
+
+                    parents.forEach(pName => {
+                        const parentLeafId = "leaf_" + pName;
+                        // Перевіряємо, чи існує такий батько в системі
+                        if (nodesData.find(n => n.id === parentLeafId)) {
+                            linksData.push({ source: parentLeafId, target: leafId });
+                            isLinkedToParent = true;
+                        }
+                    });
+                }
+
+                // Якщо батьків немає (або ім'я з помилкою) - прив'язуємо стандартно до Архітектури
+                if (!isLinkedToParent) {
+                    const vecId = "vec_" + (stat.vector || "None");
+                    const archId = "arch_" + vecId + "_" + (stat.architecture || "None");
+                    linksData.push({ source: archId, target: leafId });
+                }
             });
 
             // Підрахунок стріку для яскравості батьківських вузлів
@@ -378,10 +405,12 @@
             svg.call(zoom);
             svg.call(zoom.transform, d3.zoomIdentity.translate(width / 2, height / 2).scale(0.9));
 
+            // Фізика. Додав умову: якщо звичка кріпиться до звички, зв'язок коротший (щільна група)
             const simulation = d3.forceSimulation(nodesData)
                 .force("link", d3.forceLink(linksData).id(d => d.id).distance(d => {
                     if (d.source.type === "root") return 150;
                     if (d.source.type === "vector") return 100;
+                    if (d.source.type === "leaf" && d.target.type === "leaf") return 45; // Habit Stack (дуже близько)
                     return 70;
                 }))
                 .force("charge", d3.forceManyBody().strength(-400))
