@@ -129,6 +129,16 @@
         }
 
         /* --- HYDRO TANKS (Stats in B&W) --- */
+        .tanks-header { display: flex; justify-content: flex-end; width: 100%; max-width: var(--max-width); margin: 0 auto 15px auto; }
+        .copy-btn {
+            background: transparent; border: 1px solid #444; color: #aaa;
+            font-family: 'JetBrains Mono', monospace; font-size: 10px; font-weight: 700;
+            padding: 6px 12px; border-radius: 4px; cursor: pointer;
+            transition: all 0.2s; letter-spacing: 1px; text-transform: uppercase;
+        }
+        .copy-btn:hover { color: #fff; border-color: #fff; background: rgba(255,255,255,0.05); }
+        .copy-btn.copied { background: #fff; color: #000; border-color: #fff; }
+
         .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 15px; max-width: var(--max-width); margin: 0 auto; }
         .stat-card { background: var(--card-bg); border: 1px solid var(--card-border); border-radius: 8px; padding: 18px; display: flex; flex-direction: column; gap: 12px; transition: border-color 0.2s; }
         .stat-card:hover { border-color: #555; }
@@ -194,6 +204,9 @@
 
         <!-- SECTION 2: HYDRO TANKS (Stats) -->
         <div id="view-tanks" class="view-section">
+            <div class="tanks-header">
+                <button id="copy-btn" class="copy-btn" onclick="copyMemoryData()">[ COPY TO CLIPBOARD ]</button>
+            </div>
             <div class="stats-grid" id="stats-list">
                 Loading memory...
             </div>
@@ -229,6 +242,34 @@
             return str.length > n ? str.substr(0, n - 1) + '...' : str;
         }
 
+        // --- CLIPBOARD LOGIC ---
+        window.memoryDumpText = "";
+        function copyMemoryData() {
+            if (!window.memoryDumpText) return;
+
+            // Використовуємо textarea як надійний fallback для Notion iframe
+            const textArea = document.createElement("textarea");
+            textArea.value = window.memoryDumpText;
+            textArea.style.position = "fixed";
+            textArea.style.left = "-9999px";
+            document.body.appendChild(textArea);
+            textArea.select();
+
+            try {
+                document.execCommand('copy');
+                const btn = document.getElementById('copy-btn');
+                btn.innerText = "[ DATA COPIED ]";
+                btn.classList.add('copied');
+                setTimeout(() => {
+                    btn.innerText = "[ COPY TO CLIPBOARD ]";
+                    btn.classList.remove('copied');
+                }, 2000);
+            } catch (err) {
+                console.error('Copy failed', err);
+            }
+            document.body.removeChild(textArea);
+        }
+
         // --- HASH & GENERATORS FOR ORGANIC SHAPES ---
         function simpleHash(str) {
             let hash = 0;
@@ -239,11 +280,9 @@
             return Math.abs(hash);
         }
 
-        // Органічний безформний "блоб", який дихає на місці без обертання
         function generateBlobPath(radius, streak, id, type, time) {
             if (type === 'root') streak = 66;
 
-            // Змінено з 50 на 66 днів
             const t = Math.min(Math.max(streak, 0), 66) / 66;
             const easeT = d3.easeCubicOut(t);
 
@@ -257,15 +296,13 @@
                 const timeScale = 0.0015;
                 const wobbleSpeed = 1 + (1 - easeT) * 2;
 
-                // Фіксуємо фазу для кожної точки `i`, щоб вона дихала на місці, а не оберталась
                 const phase1 = seed + i * 2.1;
                 const phase2 = seed + i * 5.7;
 
                 const wave1 = Math.sin(time * timeScale * wobbleSpeed + phase1);
                 const wave2 = Math.cos(time * timeScale * wobbleSpeed * 0.73 + phase2);
-                const rand = (wave1 + wave2) * 0.5; // Від -1 до 1
+                const rand = (wave1 + wave2) * 0.5;
 
-                // На нулі стріку спотворення становить до 60% радіусу. На 66 стріку спотворення = 0.
                 const distortion = (1 - easeT) * 0.6 * radius;
                 const r = radius + rand * distortion;
 
@@ -275,7 +312,6 @@
             return d3.line().curve(d3.curveCatmullRomClosed.alpha(0.5))(points);
         }
 
-        // "Брудний" органічний дріт (замість ідеальної дуги)
         function generateWirePath(d, time) {
             const dx = d.target.x - d.source.x;
             const dy = d.target.y - d.source.y;
@@ -290,7 +326,6 @@
             const segments = 4;
 
             const streak = d.target.streak || 0;
-            // Змінено з 50 на 66 днів
             const t = Math.min(Math.max(streak, 0), 66) / 66;
             const easeT = d3.easeCubicOut(t);
 
@@ -328,7 +363,6 @@
 
             nodesData.push({ id: rootId, name: "Infinity Way", type: "root", radius: 10, streak: 0 });
 
-            // 1. Спочатку створюємо всі вузли
             Object.entries(statsSource).forEach(([name, stat]) => {
                 const vecId = "vec_" + (stat.vector || "None");
                 const archId = "arch_" + vecId + "_" + (stat.architecture || "None");
@@ -346,18 +380,15 @@
                 nodesData.push({ id: leafId, name: name, type: "leaf", stat: stat, radius: 8, streak: stat.current_streak || 0 });
             });
 
-            // 2. Тепер прописуємо зв'язки (Habit Stacking Logic)
             Object.entries(statsSource).forEach(([name, stat]) => {
                 const leafId = "leaf_" + name;
                 let isLinkedToParent = false;
 
-                // Якщо є кастомні батьківські зв'язки
                 if (stat.parent_nodes && stat.parent_nodes.trim() !== "") {
                     const parents = stat.parent_nodes.split(',').map(s => s.trim());
 
                     parents.forEach(pName => {
                         const parentLeafId = "leaf_" + pName;
-                        // Перевіряємо, чи існує такий батько в системі
                         if (nodesData.find(n => n.id === parentLeafId)) {
                             linksData.push({ source: parentLeafId, target: leafId });
                             isLinkedToParent = true;
@@ -365,7 +396,6 @@
                     });
                 }
 
-                // Якщо батьків немає (або ім'я з помилкою) - прив'язуємо стандартно до Архітектури
                 if (!isLinkedToParent) {
                     const vecId = "vec_" + (stat.vector || "None");
                     const archId = "arch_" + vecId + "_" + (stat.architecture || "None");
@@ -373,7 +403,6 @@
                 }
             });
 
-            // Підрахунок стріку для яскравості батьківських вузлів
             ['arch', 'vector', 'root'].forEach(type => {
                 nodesData.filter(n => n.type === type).forEach(node => {
                     const childrenLinks = linksData.filter(l => l.source === node.id || l.source.id === node.id);
@@ -391,7 +420,6 @@
                 .attr("width", "100%")
                 .attr("height", "100%");
 
-            // Просте біле світіння
             const defs = svg.append("defs");
             const filter = defs.append("filter").attr("id", "glow").attr("x", "-50%").attr("y", "-50%").attr("width", "200%").attr("height", "200%");
             filter.append("feGaussianBlur").attr("stdDeviation", "4").attr("result", "coloredBlur");
@@ -405,12 +433,11 @@
             svg.call(zoom);
             svg.call(zoom.transform, d3.zoomIdentity.translate(width / 2, height / 2).scale(0.9));
 
-            // Фізика. Додав умову: якщо звичка кріпиться до звички, зв'язок коротший (щільна група)
             const simulation = d3.forceSimulation(nodesData)
                 .force("link", d3.forceLink(linksData).id(d => d.id).distance(d => {
                     if (d.source.type === "root") return 150;
                     if (d.source.type === "vector") return 100;
-                    if (d.source.type === "leaf" && d.target.type === "leaf") return 45; // Habit Stack (дуже близько)
+                    if (d.source.type === "leaf" && d.target.type === "leaf") return 45;
                     return 70;
                 }))
                 .force("charge", d3.forceManyBody().strength(-400))
@@ -443,7 +470,6 @@
                     .on("drag", dragged)
                     .on("end", dragended));
 
-            // Малюємо форми
             nodes.append("path")
                 .attr("class", "node-blob")
                 .style("fill", d => {
@@ -461,7 +487,7 @@
                 })
                 .style("stroke-width", d => {
                     const t = Math.min(d.streak, 66) / 66;
-                    return 0.8 + (t * 0.7); // Від 0.8px до 1.5px
+                    return 0.8 + (t * 0.7);
                 })
                 .style("filter", d => {
                     if (d.type === 'root') return "url(#glow)";
@@ -469,14 +495,12 @@
                     return d.streak >= 30 ? "url(#glow)" : "none";
                 });
 
-            // Текст вузлів
             nodes.append("text")
                 .attr("class", "node-text")
                 .text(d => truncate(d.name, 20))
                 .attr("dy", d => d.radius + 14)
                 .style("fill", d => (d.streak > 0 || d.type === 'root') ? "#fff" : "#666");
 
-            // Інфо про стрік
             nodes.filter(d => d.type === 'leaf' && d.streak > 0).append("text")
                 .text(d => {
                     let info = `✦ ${d.streak}`;
@@ -487,19 +511,12 @@
                 .attr("dy", d => d.radius + 26)
                 .style("fill", d => (d.stat && d.stat.days_to_peak <= 0 && d.stat.architecture === "Навчання") ? "#fff" : "#aaa");
 
-            simulation.on("tick", () => {
-                // Фізика просто крутиться у фоні
-            });
+            simulation.on("tick", () => {});
 
-            // Глобальний ігровий цикл (60 FPS) для постійних анімацій
             if (window.hydroSystemTimer) window.hydroSystemTimer.stop();
             window.hydroSystemTimer = d3.timer((elapsed) => {
-
-                // Перемальовуємо дроти
                 linkBase.attr("d", d => generateWirePath(d, elapsed));
                 linkPulse.attr("d", d => generateWirePath(d, elapsed));
-
-                // Переміщуємо вузли на фізичні координати та перемальовуємо форму
                 nodes.attr("transform", d => `translate(${d.x},${d.y})`);
                 nodes.select(".node-blob").attr("d", d => generateBlobPath(d.radius, d.streak, d.id, d.type, elapsed));
             });
@@ -558,9 +575,11 @@
                     document.getElementById("d3-tree-container").innerHTML = '<p style="color:#555; text-align:center; padding-top: 50px; font-family: monospace;">[ SIGNAL LOST ] Start to initiate link.</p>';
                 }
 
-                // --- HYDRO TANKS (Stats) ---
+                // --- HYDRO TANKS (Stats & Text Dump Generation) ---
                 const statsContainer = document.getElementById('stats-list');
                 statsContainer.innerHTML = '';
+
+                let dumpText = `[ HYDRO.CORE MEMORY DUMP ]\nDate: ${new Date().toISOString().split('T')[0]}\n\n`;
 
                 const entries = Object.entries(statsSource).map(([name, data]) => {
                     return typeof data === 'object' ? { name, ...data } : { name, total: data, current_streak: 0, best_streak: 0 };
@@ -569,6 +588,7 @@
 
                 if (entries.length === 0) {
                     statsContainer.innerHTML = '<p style="color:#555; font-family: monospace;">[ MEMORY EMPTY ]</p>';
+                    dumpText += "[ MEMORY EMPTY ]\n";
                 } else {
                     entries.forEach(stat => {
                         const card = document.createElement('div');
@@ -620,8 +640,18 @@
                             </div>
                         `;
                         statsContainer.appendChild(card);
+
+                        // Text logic for Dump
+                        let tagsText = [stat.architecture, stat.vector].filter(Boolean).join(", ");
+                        let peakStatusText = "";
+                        if (stat.architecture === 'Навчання' && stat.days_to_peak !== undefined && stat.days_to_peak !== null) {
+                            peakStatusText = isPeak ? " [PEAK]" : ` [T-${stat.days_to_peak}]`;
+                        }
+                        dumpText += `${fireIcon} ${stat.current_streak}${peakStatusText} | ${stat.name} (${tagsText}) -> ${stat.total} циклів (MAX: ${stat.best_streak})\n`;
                     });
                 }
+
+                window.memoryDumpText = dumpText;
 
             } catch (error) {
                 console.error("Error:", error);
