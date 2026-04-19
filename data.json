@@ -81,40 +81,41 @@
     "2026-04-14": 206.60000000000002,
     "2026-04-15": 199.89999999999998,
     "2026-04-16": 260.0,
-    "2026-04-17": 226.60000000000002
+    "2026-04-17": 226.60000000000002,
+    "2026-04-18": 199.89999999999998
   },
   "stats": {
     "Віджимання": {
-      "total": 152,
-      "current_streak": 65,
-      "best_streak": 65,
+      "total": 153,
+      "current_streak": 66,
+      "best_streak": 66,
       "vector": "Тіло",
       "architecture": "Звичка",
       "days_to_peak": null,
       "parent_nodes": null
     },
     "Читання книжки": {
-      "total": 67,
-      "current_streak": 59,
-      "best_streak": 59,
+      "total": 68,
+      "current_streak": 60,
+      "best_streak": 60,
       "vector": "Розум",
       "architecture": "Звичка",
       "days_to_peak": null,
       "parent_nodes": null
     },
     "Прибирання": {
-      "total": 46,
-      "current_streak": 40,
-      "best_streak": 40,
+      "total": 47,
+      "current_streak": 41,
+      "best_streak": 41,
       "vector": "Соціалізація",
       "architecture": "Звичка",
       "days_to_peak": null,
       "parent_nodes": null
     },
     "Вивчення та запис тем": {
-      "total": 33,
-      "current_streak": 33,
-      "best_streak": 33,
+      "total": 34,
+      "current_streak": 34,
+      "best_streak": 34,
       "vector": "Розум",
       "architecture": "Звичка",
       "days_to_peak": null,
@@ -122,7 +123,7 @@
     },
     "Дії в денний час": {
       "total": 42,
-      "current_streak": 2,
+      "current_streak": 0,
       "best_streak": 27,
       "vector": "Філософія",
       "architecture": "Поведінка",
@@ -130,36 +131,36 @@
       "parent_nodes": null
     },
     "Виконання завдань з університету": {
-      "total": 32,
-      "current_streak": 30,
-      "best_streak": 30,
+      "total": 33,
+      "current_streak": 31,
+      "best_streak": 31,
       "vector": "Розум",
       "architecture": "Навчання",
       "days_to_peak": null,
       "parent_nodes": null
     },
     "Вмитися зранку": {
-      "total": 82,
-      "current_streak": 67,
-      "best_streak": 67,
+      "total": 83,
+      "current_streak": 68,
+      "best_streak": 68,
       "vector": "Тіло",
       "architecture": "Звичка",
       "days_to_peak": null,
       "parent_nodes": null
     },
     "Холодний душ": {
-      "total": 15,
-      "current_streak": 15,
-      "best_streak": 15,
+      "total": 16,
+      "current_streak": 16,
+      "best_streak": 16,
       "vector": "Тіло",
       "architecture": "Звичка",
       "days_to_peak": null,
       "parent_nodes": null
     },
     "Запис та повторення англійських слів": {
-      "total": 15,
-      "current_streak": 8,
-      "best_streak": 8,
+      "total": 16,
+      "current_streak": 9,
+      "best_streak": 9,
       "vector": "Розум",
       "architecture": "Звичка",
       "days_to_peak": null,
