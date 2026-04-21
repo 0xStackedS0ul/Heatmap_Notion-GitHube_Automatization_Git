@@ -85,13 +85,13 @@
     "2026-04-18": 199.89999999999998,
     "2026-04-19": 240.0,
     "2026-04-20": 206.59999999999997,
-    "2026-04-21": 33.3
+    "2026-04-21": 113.3
   },
   "stats": {
     "Віджимання": {
-      "total": 155,
-      "current_streak": 68,
-      "best_streak": 68,
+      "total": 156,
+      "current_streak": 69,
+      "best_streak": 69,
       "vector": "Тіло",
       "architecture": "Звичка",
       "days_to_peak": 0,
@@ -125,8 +125,8 @@
       "parent_nodes": null
     },
     "Дії в денний час": {
-      "total": 44,
-      "current_streak": 2,
+      "total": 45,
+      "current_streak": 3,
       "best_streak": 27,
       "vector": "Філософія",
       "architecture": "Поведінка",
@@ -152,21 +152,21 @@
       "parent_nodes": null
     },
     "Холодний душ": {
-      "total": 18,
-      "current_streak": 18,
-      "best_streak": 18,
+      "total": 19,
+      "current_streak": 19,
+      "best_streak": 19,
       "vector": "Тіло",
       "architecture": "Звичка",
       "days_to_peak": 0,
       "parent_nodes": null
     },
     "Запис та повторення англійських слів": {
-      "total": 18,
-      "current_streak": 11,
-      "best_streak": 11,
+      "total": 19,
+      "current_streak": 12,
+      "best_streak": 12,
       "vector": "Розум",
       "architecture": "Звичка",
-      "days_to_peak": null,
+      "days_to_peak": 0,
       "parent_nodes": null
     }
   }
