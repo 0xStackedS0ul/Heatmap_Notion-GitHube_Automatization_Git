@@ -96,6 +96,7 @@ def process_history_and_update(pages):
     habit_totals = defaultdict(int)
 
     habit_meta = {}
+    habit_earliest_date = {}  # Для розрахунку Інтегралу (Win Rate)
     today_str = get_today_str()
 
     print("🔄 Обробка статистики...")
@@ -134,6 +135,13 @@ def process_history_and_update(pages):
                 "parent_nodes": parent_nodes
             }
 
+        # Відслідковуємо найпершу дату для кожної дії
+        if not is_template:
+            if habit_name not in habit_earliest_date:
+                habit_earliest_date[habit_name] = day
+            else:
+                habit_earliest_date[habit_name] = min(habit_earliest_date[habit_name], day)
+
         if not is_template and intensity > 0:
             score = (intensity / max_intensity * 100) if max_intensity > 0 else 100.0
             heatmap_scores[day] += round(score, 1)
@@ -149,11 +157,23 @@ def process_history_and_update(pages):
     final_stats = {}
     for name, total in habit_totals.items():
         curr_streak, best_streak = calculate_streaks(habit_dates[name])
+
+        # --- РОЗРАХУНОК ІНТЕГРАЛУ (Win Rate %) ---
+        win_rate = 0.0
+        if name in habit_earliest_date:
+            first_day = datetime.strptime(habit_earliest_date[name], "%Y-%m-%d").date()
+            today_obj = get_today_date_obj()
+            total_days_tracked = (today_obj - first_day).days + 1
+            if total_days_tracked < 1: total_days_tracked = 1
+            successful_days = len(set(habit_dates[name]))
+            win_rate = round((successful_days / total_days_tracked) * 100, 1)
+
         meta = habit_meta.get(name, {})
         final_stats[name] = {
             "total": total,
             "current_streak": curr_streak,
             "best_streak": best_streak,
+            "win_rate": win_rate,
             "vector": meta.get("vector"),
             "architecture": meta.get("architecture"),
             "days_to_peak": meta.get("current_interval"),
@@ -202,7 +222,6 @@ def create_daily_habits(all_pages):
 
         new_interval = base_interval
 
-        # ЛОГІКА ПЕРІОДИЗАЦІЇ
         if arch == "Навчання" and base_interval is not None:
             if h_name in yesterday_pages:
                 y_props = yesterday_pages[h_name]["properties"]
@@ -213,17 +232,11 @@ def create_daily_habits(all_pages):
                 if y_interval is None: y_interval = base_interval
 
                 if y_num >= y_max:
-                    # Якщо зроблено максимум -> скидаємо до N
                     new_interval = base_interval
-                    print(f"   ⚡ {h_name}: Пік досягнуто вчора! Скидання інтервалу до {base_interval}.")
                 elif y_interval <= 0:
-                    # Якщо інтервал ДІЙШОВ ДО НУЛЯ -> автоматично запускаємо новий цикл
                     new_interval = base_interval
-                    print(f"   🔄 {h_name}: Цикл завершився. Автоматичний перезапуск до {base_interval}.")
                 else:
-                    # В інших випадках мінусуємо 1 день
                     new_interval = max(0, y_interval - 1)
-                    print(f"   ⏳ {h_name}: Інтервал зменшено до {new_interval}.")
 
         new_props = {
             "Name_Hebits": {"title": [{"text": {"content": h_name}}]},
@@ -231,7 +244,6 @@ def create_daily_habits(all_pages):
             "Template_Checkbox": {"checkbox": False}
         }
 
-        # --- АВТОМАТИЗАЦІЯ (AUTO COMPLETE) ---
         if auto_complete:
             val = auto_value if auto_value is not None else (base_max if base_max is not None else 1)
             new_props["Number_of_intensity"] = {"number": val}
@@ -259,7 +271,7 @@ def main():
 
     with open("data.json", "w", encoding="utf-8") as f:
         json.dump(full_data, f, indent=2, ensure_ascii=False)
-    print("💾 data.json оновлено (+Periodization Auto-Reset)")
+    print("💾 data.json оновлено (+Integral Win Rate)")
 
     create_daily_habits(pages)
 

@@ -14,7 +14,6 @@
 
     <style>
         :root {
-            /* NOTION DARK AESTHETIC */
             --bg-color: #191919;
             --text-color: #ffffff;
             --card-bg: #202020;
@@ -26,7 +25,6 @@
             --pulse-speed: 2s;
         }
 
-        /* Примусово ігноруємо світлу тему ОС, система завжди темна/чорна */
         body {
             font-family: 'Inter', sans-serif;
             margin: 0;
@@ -98,7 +96,6 @@
             font-style: italic;
         }
 
-        /* Status indicator */
         #pulse-status {
             font-family: 'JetBrains Mono', monospace; font-size: 10px; color: #888;
             margin-bottom: 15px; display: flex; align-items: center; gap: 8px;
@@ -112,7 +109,6 @@
         }
         @keyframes ping { 0% { transform: scale(0.8); opacity: 0.3; } 100% { transform: scale(1.5); opacity: 1; } }
 
-        /* D3 Elements Styling */
         .node-group { cursor: grab; }
         .node-group:active { cursor: grabbing; }
 
@@ -181,7 +177,6 @@
             </div>
         </div>
 
-        <!-- TABS -->
         <div class="tabs-container">
             <button class="tab-btn active" onclick="switchTab('flow')">
                 <span style="font-size: 16px;">∿</span> System Wire
@@ -191,18 +186,16 @@
             </button>
         </div>
 
-        <!-- SECTION 1: PULSE WIRE (D3) -->
         <div id="view-flow" class="view-section active">
             <div id="pulse-status">
                 <span class="ping-dot"></span> FREQUENCY: <span id="delay-val">0.0Hz</span> | GLOBAL CHAIN: <span id="streak-val">0</span>
             </div>
 
             <div id="d3-tree-container">
-                <div class="hint-overlay">Just start, you'll figure out along the way. [ 0 &rarr; 66 DAYS ]</div>
+                <div class="hint-overlay">Just start, you'll figure out along the way. [ 0 &rarr; 66 DAYS / >70% INT ]</div>
             </div>
         </div>
 
-        <!-- SECTION 2: HYDRO TANKS (Stats) -->
         <div id="view-tanks" class="view-section">
             <div class="tanks-header">
                 <button id="copy-btn" class="copy-btn" onclick="copyMemoryData()">[ COPY TO CLIPBOARD ]</button>
@@ -214,7 +207,6 @@
     </div>
 
     <script>
-        // --- ZOOM LOGIC ---
         let currentZoom = parseFloat(localStorage.getItem('hydro-zoom')) || 1.0;
         const zoomWrapper = document.getElementById('zoom-wrapper');
 
@@ -229,7 +221,6 @@
         }
         applyZoom();
 
-        // --- TABS LOGIC ---
         function switchTab(tabName) {
             document.querySelectorAll('.view-section').forEach(el => el.classList.remove('active'));
             document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
@@ -242,19 +233,15 @@
             return str.length > n ? str.substr(0, n - 1) + '...' : str;
         }
 
-        // --- CLIPBOARD LOGIC ---
         window.memoryDumpText = "";
         function copyMemoryData() {
             if (!window.memoryDumpText) return;
-
-            // Використовуємо textarea як надійний fallback для Notion iframe
             const textArea = document.createElement("textarea");
             textArea.value = window.memoryDumpText;
             textArea.style.position = "fixed";
             textArea.style.left = "-9999px";
             document.body.appendChild(textArea);
             textArea.select();
-
             try {
                 document.execCommand('copy');
                 const btn = document.getElementById('copy-btn');
@@ -270,7 +257,6 @@
             document.body.removeChild(textArea);
         }
 
-        // --- HASH & GENERATORS FOR ORGANIC SHAPES ---
         function simpleHash(str) {
             let hash = 0;
             for (let i = 0; i < str.length; i++) {
@@ -292,13 +278,10 @@
 
             for (let i = 0; i < numPoints; i++) {
                 const angle = (i / numPoints) * Math.PI * 2;
-
                 const timeScale = 0.0015;
                 const wobbleSpeed = 1 + (1 - easeT) * 2;
-
                 const phase1 = seed + i * 2.1;
                 const phase2 = seed + i * 5.7;
-
                 const wave1 = Math.sin(time * timeScale * wobbleSpeed + phase1);
                 const wave2 = Math.cos(time * timeScale * wobbleSpeed * 0.73 + phase2);
                 const rand = (wave1 + wave2) * 0.5;
@@ -308,7 +291,6 @@
 
                 points.push([r * Math.cos(angle), r * Math.sin(angle)]);
             }
-
             return d3.line().curve(d3.curveCatmullRomClosed.alpha(0.5))(points);
         }
 
@@ -339,17 +321,24 @@
 
                 const staticOffset = Math.sin(seed + i * 15.3) * chaosAmplitude;
                 const timeOffset = Math.sin(time * 0.001 + i * 2 + seed) * (chaosAmplitude * 0.3);
-
                 const totalOffset = staticOffset + timeOffset;
 
                 points.push([bx + nx * totalOffset, by + ny * totalOffset]);
             }
             points.push([d.target.x, d.target.y]);
-
             return d3.line().curve(d3.curveCatmullRom.alpha(0.5))(points);
         }
 
-        // --- RENDER D3 NETWORK (Wire Aesthetic) ---
+        function getEffectiveStreak(stat) {
+            if (stat.architecture === 'Інтеграл') {
+                // Якщо >= 70%, виглядає ідеально (як стрік 66 днів)
+                if (stat.win_rate >= 70) return 66;
+                // Інакше деградує пропорційно
+                return (stat.win_rate / 70) * 66;
+            }
+            return stat.current_streak || 0;
+        }
+
         function renderSystemTree(statsSource) {
             const container = document.getElementById("d3-tree-container");
             const width = container.clientWidth;
@@ -377,7 +366,8 @@
                 }
 
                 const leafId = "leaf_" + name;
-                nodesData.push({ id: leafId, name: name, type: "leaf", stat: stat, radius: 8, streak: stat.current_streak || 0 });
+                // Враховуємо "Ефективний стрік" для Інтегралів
+                nodesData.push({ id: leafId, name: name, type: "leaf", stat: stat, radius: 8, streak: getEffectiveStreak(stat) });
             });
 
             Object.entries(statsSource).forEach(([name, stat]) => {
@@ -386,7 +376,6 @@
 
                 if (stat.parent_nodes && stat.parent_nodes.trim() !== "") {
                     const parents = stat.parent_nodes.split(',').map(s => s.trim());
-
                     parents.forEach(pName => {
                         const parentLeafId = "leaf_" + pName;
                         if (nodesData.find(n => n.id === parentLeafId)) {
@@ -501,15 +490,25 @@
                 .attr("dy", d => d.radius + 14)
                 .style("fill", d => (d.streak > 0 || d.type === 'root') ? "#fff" : "#666");
 
-            nodes.filter(d => d.type === 'leaf' && d.streak > 0).append("text")
+            // Відображення Інтегралу (%) або Стріку (дні)
+            nodes.filter(d => d.type === 'leaf' && (d.streak > 0 || d.stat.architecture === 'Інтеграл')).append("text")
                 .text(d => {
-                    let info = `✦ ${d.streak}`;
+                    if (d.stat.architecture === 'Інтеграл') {
+                        return `∫ ${d.stat.win_rate}%`;
+                    }
+                    let info = `✦ ${d.stat.current_streak}`;
                     if (d.stat.architecture === 'Навчання') info += ` | [${d.stat.days_to_peak}]`;
                     return info;
                 })
                 .attr("class", "node-badge")
                 .attr("dy", d => d.radius + 26)
-                .style("fill", d => (d.stat && d.stat.days_to_peak <= 0 && d.stat.architecture === "Навчання") ? "#fff" : "#aaa");
+                .style("fill", d => {
+                    if (d.stat && d.stat.architecture === "Інтеграл") {
+                        return d.stat.win_rate >= 70 ? "#fff" : "#aaa";
+                    }
+                    if (d.stat && d.stat.days_to_peak <= 0 && d.stat.architecture === "Навчання") return "#fff";
+                    return "#aaa";
+                });
 
             simulation.on("tick", () => {});
 
@@ -542,7 +541,6 @@
                 let heatmapSource = fullData.heatmap || fullData;
                 let statsSource = fullData.stats || {};
 
-                // --- ГЛОБАЛЬНИЙ СТРІК ---
                 let globalStreak = 0;
                 let checkDate = new Date();
                 checkDate.setHours(0,0,0,0);
@@ -568,14 +566,12 @@
                 document.getElementById('delay-val').innerText = `${hz}Hz`;
                 document.getElementById('streak-val').innerText = globalStreak;
 
-                // --- МАЛЮЄМО СИСТЕМУ ---
                 if (Object.keys(statsSource).length > 0) {
                     renderSystemTree(statsSource);
                 } else {
                     document.getElementById("d3-tree-container").innerHTML = '<p style="color:#555; text-align:center; padding-top: 50px; font-family: monospace;">[ SIGNAL LOST ] Start to initiate link.</p>';
                 }
 
-                // --- HYDRO TANKS (Stats & Text Dump Generation) ---
                 const statsContainer = document.getElementById('stats-list');
                 statsContainer.innerHTML = '';
 
@@ -594,15 +590,20 @@
                         const card = document.createElement('div');
                         card.className = 'stat-card';
 
+                        const isIntegral = stat.architecture === 'Інтеграл';
+                        const isHealthyIntegral = isIntegral && stat.win_rate >= 70;
                         const isPeak = stat.architecture === 'Навчання' && stat.days_to_peak <= 0;
-                        const fireIcon = stat.current_streak > 0 ? '✦' : '✧';
-                        const streakClass = stat.current_streak > 0 ? 'streak-active' : '';
+
+                        const fireIcon = isIntegral ? '∫' : (stat.current_streak > 0 ? '✦' : '✧');
+                        const streakClass = isIntegral ? (isHealthyIntegral ? 'streak-active' : '') : (stat.current_streak > 0 ? 'streak-active' : '');
+                        const displayStreak = isIntegral ? `${stat.win_rate}%` : stat.current_streak;
 
                         let tagsHTML = `<div class="tags-row">`;
                         if (stat.architecture) {
                             let icon = '🔁';
                             if (stat.architecture === 'Навчання') icon = '📖';
                             else if (stat.architecture === 'Поведінка') icon = '🌀';
+                            else if (isIntegral) icon = '∫';
 
                             tagsHTML += `<span class="tag tag-arch">${icon} ${stat.architecture}</span>`;
                         }
@@ -618,10 +619,25 @@
                             }
                         }
 
+                        let streakBestHTML = '';
+                        if (isIntegral) {
+                            streakBestHTML = `
+                                <div class="streak-badge streak-best" title="Ціль">
+                                    <span>TARGET</span>
+                                    <span>>70%</span>
+                                </div>`;
+                        } else {
+                            streakBestHTML = `
+                                <div class="streak-badge streak-best" title="Рекорд">
+                                    <span>MAX</span>
+                                    <span>${stat.best_streak}</span>
+                                </div>`;
+                        }
+
                         card.innerHTML = `
                             ${tagsHTML}
                             <div class="stat-header">
-                                <span class="stat-name" style="${isPeak ? 'color: #fff;' : ''}">${stat.name}</span>
+                                <span class="stat-name" style="${isPeak || isHealthyIntegral ? 'color: #fff;' : ''}">${stat.name}</span>
                                 ${peakHTML}
                             </div>
                             <div class="stat-total-row">
@@ -631,23 +647,19 @@
                             <div class="streak-container">
                                 <div class="streak-badge ${streakClass}" title="Поточна серія">
                                     <span>${fireIcon}</span>
-                                    <span>${stat.current_streak}</span>
+                                    <span>${displayStreak}</span>
                                 </div>
-                                <div class="streak-badge streak-best" title="Рекорд">
-                                    <span>MAX</span>
-                                    <span>${stat.best_streak}</span>
-                                </div>
+                                ${streakBestHTML}
                             </div>
                         `;
                         statsContainer.appendChild(card);
 
-                        // Text logic for Dump
                         let tagsText = [stat.architecture, stat.vector].filter(Boolean).join(", ");
                         let peakStatusText = "";
                         if (stat.architecture === 'Навчання' && stat.days_to_peak !== undefined && stat.days_to_peak !== null) {
                             peakStatusText = isPeak ? " [PEAK]" : ` [T-${stat.days_to_peak}]`;
                         }
-                        dumpText += `${fireIcon} ${stat.current_streak}${peakStatusText} | ${stat.name} (${tagsText}) -> ${stat.total} циклів (MAX: ${stat.best_streak})\n`;
+                        dumpText += `${fireIcon} ${displayStreak}${peakStatusText} | ${stat.name} (${tagsText}) -> ${stat.total} циклів (MAX: ${stat.best_streak})\n`;
                     });
                 }
 
