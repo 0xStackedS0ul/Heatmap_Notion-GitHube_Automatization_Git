@@ -1,5 +1,6 @@
 {
   "heatmap": {
+    "2026-05-12": 306.6,
     "2026-05-11": 306.6,
     "2026-05-10": 306.6,
     "2026-05-09": 419.90000000000003,
@@ -108,103 +109,103 @@
     "2026-01-22": 33.3
   },
   "stats": {
-    "Сон до 11:00": {
-      "total": 5,
-      "current_streak": 3,
-      "best_streak": 3,
-      "win_rate": 62.5,
+    "Віджимання": {
+      "total": 186,
+      "current_streak": 90,
+      "best_streak": 90,
+      "win_rate": 98.9,
       "vector": "Тіло",
-      "architecture": "Інтеграл",
-      "days_to_peak": null,
-      "parent_nodes": null
-    },
-    "Запис та повторення англійських слів": {
-      "total": 42,
-      "current_streak": 32,
-      "best_streak": 32,
-      "win_rate": 97.0,
-      "vector": "Розум",
-      "architecture": "Звичка",
-      "days_to_peak": null,
-      "parent_nodes": null
-    },
-    "Вмитися зранку": {
-      "total": 106,
-      "current_streak": 91,
-      "best_streak": 91,
-      "win_rate": 95.5,
-      "vector": "Тіло",
-      "architecture": "Звичка",
-      "days_to_peak": null,
-      "parent_nodes": null
-    },
-    "Холодний душ": {
-      "total": 39,
-      "current_streak": 39,
-      "best_streak": 39,
-      "win_rate": 97.5,
-      "vector": "Тіло",
-      "architecture": "Звичка",
-      "days_to_peak": null,
-      "parent_nodes": null
-    },
-    "Дії в денний час": {
-      "total": 69,
-      "current_streak": 15,
-      "best_streak": 27,
-      "win_rate": 90.9,
-      "vector": "Філософія",
-      "architecture": "Поведінка",
-      "days_to_peak": null,
-      "parent_nodes": null
-    },
-    "Виконання завдань з університету": {
-      "total": 60,
-      "current_streak": 54,
-      "best_streak": 54,
-      "win_rate": 98.2,
-      "vector": "Розум",
-      "architecture": "Навчання",
-      "days_to_peak": null,
-      "parent_nodes": null
-    },
-    "Вивчення та запис тем": {
-      "total": 57,
-      "current_streak": 57,
-      "best_streak": 57,
-      "win_rate": 98.3,
-      "vector": "Розум",
-      "architecture": "Звичка",
-      "days_to_peak": null,
-      "parent_nodes": null
-    },
-    "Прибирання": {
-      "total": 70,
-      "current_streak": 64,
-      "best_streak": 64,
-      "win_rate": 97.2,
-      "vector": "Соціалізація",
       "architecture": "Звичка",
       "days_to_peak": null,
       "parent_nodes": null
     },
     "Читання книжки": {
-      "total": 93,
-      "current_streak": 83,
-      "best_streak": 83,
+      "total": 94,
+      "current_streak": 84,
+      "best_streak": 84,
       "win_rate": 98.8,
       "vector": "Розум",
       "architecture": "Звичка",
       "days_to_peak": null,
       "parent_nodes": null
     },
-    "Віджимання": {
-      "total": 185,
-      "current_streak": 89,
-      "best_streak": 89,
-      "win_rate": 98.9,
+    "Прибирання": {
+      "total": 71,
+      "current_streak": 65,
+      "best_streak": 65,
+      "win_rate": 97.3,
+      "vector": "Соціалізація",
+      "architecture": "Звичка",
+      "days_to_peak": null,
+      "parent_nodes": null
+    },
+    "Вивчення та запис тем": {
+      "total": 58,
+      "current_streak": 58,
+      "best_streak": 58,
+      "win_rate": 98.3,
+      "vector": "Розум",
+      "architecture": "Звичка",
+      "days_to_peak": null,
+      "parent_nodes": null
+    },
+    "Виконання завдань з університету": {
+      "total": 61,
+      "current_streak": 55,
+      "best_streak": 55,
+      "win_rate": 98.2,
+      "vector": "Розум",
+      "architecture": "Навчання",
+      "days_to_peak": null,
+      "parent_nodes": null
+    },
+    "Дії в денний час": {
+      "total": 70,
+      "current_streak": 16,
+      "best_streak": 27,
+      "win_rate": 91.1,
+      "vector": "Філософія",
+      "architecture": "Поведінка",
+      "days_to_peak": null,
+      "parent_nodes": null
+    },
+    "Холодний душ": {
+      "total": 40,
+      "current_streak": 40,
+      "best_streak": 40,
+      "win_rate": 97.6,
       "vector": "Тіло",
       "architecture": "Звичка",
+      "days_to_peak": null,
+      "parent_nodes": null
+    },
+    "Вмитися зранку": {
+      "total": 107,
+      "current_streak": 92,
+      "best_streak": 92,
+      "win_rate": 95.5,
+      "vector": "Тіло",
+      "architecture": "Звичка",
+      "days_to_peak": null,
+      "parent_nodes": null
+    },
+    "Запис та повторення англійських слів": {
+      "total": 43,
+      "current_streak": 33,
+      "best_streak": 33,
+      "win_rate": 97.1,
+      "vector": "Розум",
+      "architecture": "Звичка",
+      "days_to_peak": null,
+      "parent_nodes": null
+    },
+    "Сон до 11:00": {
+      "total": 6,
+      "current_streak": 4,
+      "best_streak": 4,
+      "win_rate": 66.7,
+      "vector": "Тіло",
+      "architecture": "Інтеграл",
       "days_to_peak": null,
       "parent_nodes": null
     }
