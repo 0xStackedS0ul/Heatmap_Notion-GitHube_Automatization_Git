@@ -78,6 +78,37 @@ def calculate_streaks(dates_list):
     return current_streak, best_streak
 
 
+def calculate_quarantine_integral(dates_list, first_date_str):
+    """Рахує здоров'я системи за правилами Карантинного Буфера"""
+    if not first_date_str: return 100.0, 0, 0
+
+    success_dates = set(dates_list)
+    start_date = datetime.strptime(first_date_str, "%Y-%m-%d").date()
+    today = get_today_date_obj()
+
+    if start_date > today: return 100.0, 0, 0
+
+    buffer = 0
+    c = 0
+
+    curr_date = start_date
+    while curr_date <= today:
+        curr_str = curr_date.strftime("%Y-%m-%d")
+        if curr_str in success_dates:
+            c += 1
+            # Після 7 днів чистого ходу починаємо списувати борг
+            if c >= 7:
+                buffer = max(0, buffer - 1)
+        else:
+            buffer += 1
+            c = 0  # Скидання лічильника чистого ходу при зриві
+        curr_date += timedelta(days=1)
+
+    # Кожна одиниця боргу в буфері знімає 10% здоров'я
+    health = max(0.0, 100.0 - (buffer * 10.0))
+    return round(health, 1), buffer, c
+
+
 def fetch_all_database_pages():
     results = []
     has_more, start_cursor = True, None
@@ -96,7 +127,7 @@ def process_history_and_update(pages):
     habit_totals = defaultdict(int)
 
     habit_meta = {}
-    habit_earliest_date = {}  # Для розрахунку Інтегралу (Win Rate)
+    habit_earliest_date = {}
     today_str = get_today_str()
 
     print("🔄 Обробка статистики...")
@@ -135,47 +166,64 @@ def process_history_and_update(pages):
                 "parent_nodes": parent_nodes
             }
 
-        # Відслідковуємо найпершу дату для кожної дії
         if not is_template:
             if habit_name not in habit_earliest_date:
                 habit_earliest_date[habit_name] = day
             else:
                 habit_earliest_date[habit_name] = min(habit_earliest_date[habit_name], day)
 
-        if not is_template and intensity > 0:
-            score = (intensity / max_intensity * 100) if max_intensity > 0 else 100.0
-            heatmap_scores[day] += round(score, 1)
-            habit_totals[habit_name] += intensity
-            habit_dates[habit_name].append(day)
+            # 1. ГАРАНТІЯ ІСНУВАННЯ ДНЯ ТА ЗВИЧКИ В БАЗІ (навіть якщо інтенсивність 0)
+            if day not in heatmap_scores:
+                heatmap_scores[day] += 0.0
+            if habit_name not in habit_totals:
+                habit_totals[habit_name] += 0
 
+            # 2. Якщо дія хоча б частково виконана
+            if intensity > 0:
+                score = (intensity / max_intensity * 100) if max_intensity > 0 else 100.0
+                heatmap_scores[day] += round(score, 1)
+                habit_totals[habit_name] += intensity
+                habit_dates[habit_name].append(day)
+
+            # 3. АВТО-ЗАКРИТТЯ ПРОПУСКІВ:
+            # Відмічаємо чекбокс, якщо звичку виконано (intensity > 0)
+            # АБО якщо це вчорашній/минулий день, який залишився пропущеним (щоб прибрати його зі списку "To-Do")
             if not is_enabled:
-                try:
-                    notion.pages.update(page_id=page_id, properties={"Enabled": {"checkbox": True}})
-                except Exception as e:
-                    print(f"❌ Помилка Notion {habit_name}: {e}")
+                if intensity > 0 or day < today_str:
+                    try:
+                        notion.pages.update(page_id=page_id, properties={"Enabled": {"checkbox": True}})
+                        if intensity > 0:
+                            print(f"   ✅ Відмічено: {habit_name} ({day})")
+                        else:
+                            print(f"   ☑️ Авто-закриття пропуску (0): {habit_name} ({day})")
+                    except Exception as e:
+                        print(f"   ❌ Помилка Notion {habit_name}: {e}")
 
     final_stats = {}
     for name, total in habit_totals.items():
         curr_streak, best_streak = calculate_streaks(habit_dates[name])
+        meta = habit_meta.get(name, {})
+        arch = meta.get("architecture")
 
-        # --- РОЗРАХУНОК ІНТЕГРАЛУ (Win Rate %) ---
+        # --- РОЗРАХУНОК ІНТЕГРАЛУ ТА ВАРТОВОГО ---
         win_rate = 0.0
         if name in habit_earliest_date:
-            first_day = datetime.strptime(habit_earliest_date[name], "%Y-%m-%d").date()
-            today_obj = get_today_date_obj()
-            total_days_tracked = (today_obj - first_day).days + 1
-            if total_days_tracked < 1: total_days_tracked = 1
-            successful_days = len(set(habit_dates[name]))
-            win_rate = round((successful_days / total_days_tracked) * 100, 1)
+            if arch in ["Інтеграл", "Вартовий"]:
+                win_rate, _, _ = calculate_quarantine_integral(habit_dates[name], habit_earliest_date[name])
+            else:
+                first_day = datetime.strptime(habit_earliest_date[name], "%Y-%m-%d").date()
+                today_obj = get_today_date_obj()
+                total_days = max(1, (today_obj - first_day).days + 1)
+                success_days = len(set(habit_dates[name]))
+                win_rate = round((success_days / total_days) * 100, 1)
 
-        meta = habit_meta.get(name, {})
         final_stats[name] = {
             "total": total,
             "current_streak": curr_streak,
             "best_streak": best_streak,
             "win_rate": win_rate,
             "vector": meta.get("vector"),
-            "architecture": meta.get("architecture"),
+            "architecture": arch,
             "days_to_peak": meta.get("current_interval"),
             "parent_nodes": meta.get("parent_nodes")
         }
@@ -271,7 +319,7 @@ def main():
 
     with open("data.json", "w", encoding="utf-8") as f:
         json.dump(full_data, f, indent=2, ensure_ascii=False)
-    print("💾 data.json оновлено (+Integral Win Rate)")
+    print("💾 data.json оновлено (+Quarantine Buffer Logic)")
 
     create_daily_habits(pages)
 

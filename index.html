@@ -23,6 +23,7 @@
             --max-width: 1200px;
             --board-bg: #191919;
             --pulse-speed: 2s;
+            --tumor-color: #ef4444; /* Колір зараження */
         }
 
         body {
@@ -117,8 +118,8 @@
         .node-text { fill: #ccc; font-family: 'JetBrains Mono', monospace; font-size: 10px; font-weight: 400; text-anchor: middle; pointer-events: none; }
         .node-badge { font-size: 9px; font-weight: 700; pointer-events: none; text-anchor: middle; fill: #666; }
 
-        .link-base { fill: none; stroke: #222; stroke-width: 1px; }
-        .link-pulse { fill: none; stroke: #fff; stroke-width: 1.5px; stroke-dasharray: 2 12; stroke-linecap: round; }
+        .link-base { fill: none; stroke: #222; stroke-width: 1px; transition: stroke 0.3s;}
+        .link-pulse { fill: none; stroke: #fff; stroke-width: 1.5px; stroke-dasharray: 2 12; stroke-linecap: round; transition: stroke 0.3s;}
 
         @keyframes flow-animation {
             to { stroke-dashoffset: -28; }
@@ -139,25 +140,34 @@
         .stat-card { background: var(--card-bg); border: 1px solid var(--card-border); border-radius: 8px; padding: 18px; display: flex; flex-direction: column; gap: 12px; transition: border-color 0.2s; }
         .stat-card:hover { border-color: #555; }
 
+        .stat-card.infected { border-color: rgba(239, 68, 68, 0.4); background: rgba(69, 10, 10, 0.2); }
+
         .tags-row { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: -5px; }
         .tag { font-size: 9px; font-weight: 600; text-transform: uppercase; letter-spacing: 1px; padding: 4px 8px; border-radius: 20px; background: transparent; border: 1px solid #444; color: #aaa; }
         .tag-arch { border-color: #fff; color: #fff; }
+        .infected .tag-arch { border-color: var(--tumor-color); color: var(--tumor-color); }
 
         .peak-indicator { font-size: 10px; font-weight: 700; padding: 3px 8px; border-radius: 4px; display: flex; align-items: center; gap: 6px; background: transparent; border: 1px solid #555; color: #888; text-transform: uppercase;}
         .peak-ready { background: #fff; color: #000; border-color: #fff; animation: pulse-white 2s infinite; }
+        .infected-warning { background: rgba(239, 68, 68, 0.1); color: var(--tumor-color); border-color: var(--tumor-color); animation: pulse-red 2s infinite; }
+
         @keyframes pulse-white { 0% { box-shadow: 0 0 0 0 rgba(255,255,255, 0.4); } 70% { box-shadow: 0 0 0 6px rgba(255,255,255, 0); } 100% { box-shadow: 0 0 0 0 rgba(255,255,255, 0); } }
+        @keyframes pulse-red { 0% { box-shadow: 0 0 0 0 rgba(239,68,68, 0.4); } 70% { box-shadow: 0 0 0 6px rgba(239,68,68, 0); } 100% { box-shadow: 0 0 0 0 rgba(239,68,68, 0); } }
 
         .stat-header { display: flex; justify-content: space-between; align-items: center; }
         .stat-name { font-size: 14px; font-weight: 500; opacity: 0.9; }
 
         .stat-total-row { display: flex; align-items: baseline; gap: 5px; }
         .stat-value { font-size: 28px; font-weight: 700; color: #fff; line-height: 1; font-family: 'JetBrains Mono', monospace;}
+        .infected .stat-value { color: var(--tumor-color); }
         .stat-label { font-size: 10px; opacity: 0.4; text-transform: uppercase; letter-spacing: 1px;}
 
         .streak-container { display: flex; gap: 8px; margin-top: auto; padding-top: 15px; border-top: 1px dashed #222; }
+        .infected .streak-container { border-top-color: rgba(239,68,68, 0.3); }
         .streak-badge { display: flex; align-items: center; gap: 6px; font-size: 11px; font-weight: 500; background: transparent; border: 1px solid #222; padding: 6px 10px; border-radius: 4px; flex: 1; justify-content: center; color: #777;}
         .streak-active { color: #fff; border-color: #555; }
         .streak-best { color: #aaa; }
+        .infected .streak-badge { border-color: rgba(239,68,68,0.4); color: var(--tumor-color); }
 
         #zoom-wrapper { width: 100%; display: flex; flex-direction: column; align-items: center; transform-origin: top center; }
 
@@ -266,11 +276,12 @@
             return Math.abs(hash);
         }
 
-        function generateBlobPath(radius, streak, id, type, time) {
+        // Форма для звички/інтегралу (Клякса)
+        function generateBlobPath(radius, streak, id, type, time, isInfected) {
             if (type === 'root') streak = 66;
 
             const t = Math.min(Math.max(streak, 0), 66) / 66;
-            const easeT = d3.easeCubicOut(t);
+            const easeT = isInfected ? 0 : d3.easeCubicOut(t); // Заражений завжди хаотичний
 
             const numPoints = 12;
             const points = [];
@@ -278,20 +289,34 @@
 
             for (let i = 0; i < numPoints; i++) {
                 const angle = (i / numPoints) * Math.PI * 2;
+
+                // Якщо пухлина - рухається дуже швидко та хаотично
                 const timeScale = 0.0015;
-                const wobbleSpeed = 1 + (1 - easeT) * 2;
+                const wobbleSpeed = isInfected ? 4 : (1 + (1 - easeT) * 2);
+
                 const phase1 = seed + i * 2.1;
                 const phase2 = seed + i * 5.7;
+
                 const wave1 = Math.sin(time * timeScale * wobbleSpeed + phase1);
                 const wave2 = Math.cos(time * timeScale * wobbleSpeed * 0.73 + phase2);
                 const rand = (wave1 + wave2) * 0.5;
 
-                const distortion = (1 - easeT) * 0.6 * radius;
+                // Пухлина має велике спотворення
+                const distortionMax = isInfected ? 0.8 : 0.6;
+                const distortion = (1 - easeT) * distortionMax * radius;
                 const r = radius + rand * distortion;
 
                 points.push([r * Math.cos(angle), r * Math.sin(angle)]);
             }
             return d3.line().curve(d3.curveCatmullRomClosed.alpha(0.5))(points);
+        }
+
+        // Форма для Вартового (Жорсткий пульсуючий Ромб)
+        function generateSentinelPath(radius, streak, time, isHealthy) {
+            // Здоровий дихає повільно, хворий - б'ється в тривозі
+            const scale = isHealthy ? 1 + Math.sin(time * 0.002) * 0.1 : 1 + Math.sin(time * 0.015) * 0.2;
+            const r = radius * 1.3 * scale;
+            return `M 0 ${-r} L ${r} 0 L 0 ${r} L ${-r} 0 Z`;
         }
 
         function generateWirePath(d, time) {
@@ -309,7 +334,10 @@
 
             const streak = d.target.streak || 0;
             const t = Math.min(Math.max(streak, 0), 66) / 66;
-            const easeT = d3.easeCubicOut(t);
+
+            // Якщо вектор заражений (або ціль), дріт стає дуже кривим
+            const isCorrupted = d.target.isInfected || (d.target.stat && d.target.stat.architecture === 'Вартовий' && d.target.stat.win_rate < 70);
+            const easeT = isCorrupted ? 0 : d3.easeCubicOut(t);
 
             const chaosAmplitude = (1 - easeT) * Math.min(dist * 0.4, 40);
             const seed = simpleHash(d.source.id + "_" + d.target.id);
@@ -320,7 +348,7 @@
                 const by = d.source.y + f * dy;
 
                 const staticOffset = Math.sin(seed + i * 15.3) * chaosAmplitude;
-                const timeOffset = Math.sin(time * 0.001 + i * 2 + seed) * (chaosAmplitude * 0.3);
+                const timeOffset = Math.sin(time * 0.001 + i * 2 + seed) * (chaosAmplitude * (isCorrupted ? 0.8 : 0.3));
                 const totalOffset = staticOffset + timeOffset;
 
                 points.push([bx + nx * totalOffset, by + ny * totalOffset]);
@@ -330,10 +358,8 @@
         }
 
         function getEffectiveStreak(stat) {
-            if (stat.architecture === 'Інтеграл') {
-                // Якщо >= 70%, виглядає ідеально (як стрік 66 днів)
+            if (stat.architecture === 'Інтеграл' || stat.architecture === 'Вартовий') {
                 if (stat.win_rate >= 70) return 66;
-                // Інакше деградує пропорційно
                 return (stat.win_rate / 70) * 66;
             }
             return stat.current_streak || 0;
@@ -350,24 +376,32 @@
             const linksData = [];
             const rootId = "CORE";
 
-            nodesData.push({ id: rootId, name: "Infinity Way", type: "root", radius: 10, streak: 0 });
+            nodesData.push({ id: rootId, name: "Infinity Way", type: "root", radius: 10, streak: 0, isInfected: false });
+
+            // Шукаємо заражені вектори (де Вартовий < 70%)
+            const infectedVectors = new Set();
+            Object.entries(statsSource).forEach(([name, stat]) => {
+                if (stat.architecture === 'Вартовий' && stat.win_rate < 70) {
+                    infectedVectors.add("vec_" + (stat.vector || "None"));
+                }
+            });
 
             Object.entries(statsSource).forEach(([name, stat]) => {
                 const vecId = "vec_" + (stat.vector || "None");
                 const archId = "arch_" + vecId + "_" + (stat.architecture || "None");
+                const isVecInfected = infectedVectors.has(vecId);
 
                 if (!nodesData.find(n => n.id === vecId)) {
-                    nodesData.push({ id: vecId, name: stat.vector || "Інше", type: "vector", radius: 7, streak: 0 });
+                    nodesData.push({ id: vecId, name: stat.vector || "Інше", type: "vector", radius: 7, streak: 0, isInfected: isVecInfected });
                     linksData.push({ source: rootId, target: vecId });
                 }
                 if (!nodesData.find(n => n.id === archId)) {
-                    nodesData.push({ id: archId, name: stat.architecture || "Дія", type: "arch", radius: 5, streak: 0 });
+                    nodesData.push({ id: archId, name: stat.architecture || "Дія", type: "arch", radius: 5, streak: 0, isInfected: isVecInfected });
                     linksData.push({ source: vecId, target: archId });
                 }
 
                 const leafId = "leaf_" + name;
-                // Враховуємо "Ефективний стрік" для Інтегралів
-                nodesData.push({ id: leafId, name: name, type: "leaf", stat: stat, radius: 8, streak: getEffectiveStreak(stat) });
+                nodesData.push({ id: leafId, name: name, type: "leaf", stat: stat, radius: 8, streak: getEffectiveStreak(stat), isInfected: false });
             });
 
             Object.entries(statsSource).forEach(([name, stat]) => {
@@ -437,13 +471,23 @@
                 .data(linksData)
                 .join("g");
 
-            const linkBase = links.append("path").attr("class", "link-base");
+            const linkBase = links.append("path").attr("class", "link-base")
+                .style("stroke", d => {
+                    const targetInfected = d.target.isInfected || (d.target.stat && d.target.stat.architecture === 'Вартовий' && d.target.stat.win_rate < 70);
+                    return targetInfected ? "rgba(239, 68, 68, 0.4)" : "#222";
+                });
 
             const linkPulse = links.append("path")
                 .attr("class", "link-pulse")
-                .style("opacity", d => (d.target.streak > 0) ? 1 : 0)
-                .style("filter", d => (d.target.streak >= 30) ? "url(#glow)" : "none")
+                .style("opacity", d => (d.target.streak > 0 || (d.target.stat && d.target.stat.architecture === 'Вартовий' && d.target.stat.win_rate < 70)) ? 1 : 0)
+                .style("stroke", d => {
+                    const targetInfected = d.target.isInfected || (d.target.stat && d.target.stat.architecture === 'Вартовий' && d.target.stat.win_rate < 70);
+                    return targetInfected ? "#ef4444" : "#fff";
+                })
+                .style("filter", d => (d.target.streak >= 30 || (d.target.stat && d.target.stat.architecture === 'Вартовий' && d.target.stat.win_rate < 70)) ? "url(#glow)" : "none")
                 .style("animation", d => {
+                    const targetInfected = d.target.isInfected || (d.target.stat && d.target.stat.architecture === 'Вартовий' && d.target.stat.win_rate < 70);
+                    if (targetInfected) return `flow-animation 0.8s linear infinite reverse`; // Тривожний зворотній імпульс
                     if (d.target.streak <= 0) return "none";
                     let s = d.target.streak;
                     let duration = Math.max(0.5, 3.0 - (s * 0.04));
@@ -462,11 +506,17 @@
             nodes.append("path")
                 .attr("class", "node-blob")
                 .style("fill", d => {
+                    const isFailingSentinel = d.stat && d.stat.architecture === 'Вартовий' && d.stat.win_rate < 70;
+                    if (isFailingSentinel || d.isInfected) return "#450a0a"; // Темно-червоне тіло
+
                     if (d.type === 'root') return "#fff";
                     if (d.stat && d.stat.days_to_peak <= 0 && d.stat.architecture === "Навчання") return "#fff";
                     return d.streak >= 66 ? "#fff" : "#191919";
                 })
                 .style("stroke", d => {
+                    const isFailingSentinel = d.stat && d.stat.architecture === 'Вартовий' && d.stat.win_rate < 70;
+                    if (isFailingSentinel || d.isInfected) return "#ef4444"; // Яскраво червона обводка
+
                     if (d.type === 'root') return "#fff";
                     if (d.stat && d.stat.days_to_peak <= 0 && d.stat.architecture === "Навчання") return "#fff";
 
@@ -475,10 +525,16 @@
                     return `rgb(${v}, ${v}, ${v})`;
                 })
                 .style("stroke-width", d => {
+                    const isFailingSentinel = d.stat && d.stat.architecture === 'Вартовий' && d.stat.win_rate < 70;
+                    if (isFailingSentinel || d.isInfected) return 2.0;
+
                     const t = Math.min(d.streak, 66) / 66;
                     return 0.8 + (t * 0.7);
                 })
                 .style("filter", d => {
+                    const isFailingSentinel = d.stat && d.stat.architecture === 'Вартовий' && d.stat.win_rate < 70;
+                    if (isFailingSentinel || d.isInfected) return "url(#glow)";
+
                     if (d.type === 'root') return "url(#glow)";
                     if (d.stat && d.stat.days_to_peak <= 0 && d.stat.architecture === "Навчання") return "url(#glow)";
                     return d.streak >= 30 ? "url(#glow)" : "none";
@@ -488,14 +544,17 @@
                 .attr("class", "node-text")
                 .text(d => truncate(d.name, 20))
                 .attr("dy", d => d.radius + 14)
-                .style("fill", d => (d.streak > 0 || d.type === 'root') ? "#fff" : "#666");
+                .style("fill", d => {
+                    const isFailingSentinel = d.stat && d.stat.architecture === 'Вартовий' && d.stat.win_rate < 70;
+                    if (isFailingSentinel || d.isInfected) return "#fca5a5"; // Світло-червоний текст
+                    return (d.streak > 0 || d.type === 'root') ? "#fff" : "#666";
+                });
 
             // Відображення Інтегралу (%) або Стріку (дні)
-            nodes.filter(d => d.type === 'leaf' && (d.streak > 0 || d.stat.architecture === 'Інтеграл')).append("text")
+            nodes.filter(d => d.type === 'leaf' && (d.streak > 0 || d.stat.architecture === 'Інтеграл' || d.stat.architecture === 'Вартовий')).append("text")
                 .text(d => {
-                    if (d.stat.architecture === 'Інтеграл') {
-                        return `∫ ${d.stat.win_rate}%`;
-                    }
+                    if (d.stat.architecture === 'Інтеграл') return `∫ ${d.stat.win_rate}%`;
+                    if (d.stat.architecture === 'Вартовий') return `◈ ${d.stat.win_rate}%`;
                     let info = `✦ ${d.stat.current_streak}`;
                     if (d.stat.architecture === 'Навчання') info += ` | [${d.stat.days_to_peak}]`;
                     return info;
@@ -503,8 +562,8 @@
                 .attr("class", "node-badge")
                 .attr("dy", d => d.radius + 26)
                 .style("fill", d => {
-                    if (d.stat && d.stat.architecture === "Інтеграл") {
-                        return d.stat.win_rate >= 70 ? "#fff" : "#aaa";
+                    if (d.stat && (d.stat.architecture === "Інтеграл" || d.stat.architecture === "Вартовий")) {
+                        return d.stat.win_rate >= 70 ? "#fff" : "#ef4444";
                     }
                     if (d.stat && d.stat.days_to_peak <= 0 && d.stat.architecture === "Навчання") return "#fff";
                     return "#aaa";
@@ -517,7 +576,13 @@
                 linkBase.attr("d", d => generateWirePath(d, elapsed));
                 linkPulse.attr("d", d => generateWirePath(d, elapsed));
                 nodes.attr("transform", d => `translate(${d.x},${d.y})`);
-                nodes.select(".node-blob").attr("d", d => generateBlobPath(d.radius, d.streak, d.id, d.type, elapsed));
+
+                nodes.select(".node-blob").attr("d", d => {
+                    if (d.stat && d.stat.architecture === 'Вартовий') {
+                        return generateSentinelPath(d.radius, d.streak, elapsed, d.stat.win_rate >= 70);
+                    }
+                    return generateBlobPath(d.radius, d.streak, d.id, d.type, elapsed, d.isInfected);
+                });
             });
 
             function dragstarted(event, d) {
@@ -588,15 +653,23 @@
                 } else {
                     entries.forEach(stat => {
                         const card = document.createElement('div');
-                        card.className = 'stat-card';
 
                         const isIntegral = stat.architecture === 'Інтеграл';
-                        const isHealthyIntegral = isIntegral && stat.win_rate >= 70;
+                        const isSentinel = stat.architecture === 'Вартовий';
+                        const usesWinRate = isIntegral || isSentinel;
+                        const isHealthy = usesWinRate ? stat.win_rate >= 70 : true;
+
                         const isPeak = stat.architecture === 'Навчання' && stat.days_to_peak <= 0;
 
-                        const fireIcon = isIntegral ? '∫' : (stat.current_streak > 0 ? '✦' : '✧');
-                        const streakClass = isIntegral ? (isHealthyIntegral ? 'streak-active' : '') : (stat.current_streak > 0 ? 'streak-active' : '');
-                        const displayStreak = isIntegral ? `${stat.win_rate}%` : stat.current_streak;
+                        card.className = 'stat-card' + (!isHealthy ? ' infected' : '');
+
+                        let fireIcon = '✧';
+                        if (isIntegral) fireIcon = '∫';
+                        else if (isSentinel) fireIcon = '◈';
+                        else if (stat.current_streak > 0) fireIcon = '✦';
+
+                        const streakClass = usesWinRate ? (isHealthy ? 'streak-active' : '') : (stat.current_streak > 0 ? 'streak-active' : '');
+                        const displayStreak = usesWinRate ? `${stat.win_rate}%` : stat.current_streak;
 
                         let tagsHTML = `<div class="tags-row">`;
                         if (stat.architecture) {
@@ -604,6 +677,7 @@
                             if (stat.architecture === 'Навчання') icon = '📖';
                             else if (stat.architecture === 'Поведінка') icon = '🌀';
                             else if (isIntegral) icon = '∫';
+                            else if (isSentinel) icon = '◈';
 
                             tagsHTML += `<span class="tag tag-arch">${icon} ${stat.architecture}</span>`;
                         }
@@ -618,9 +692,12 @@
                                 peakHTML = `<div class="peak-indicator">[ T-${stat.days_to_peak} ]</div>`;
                             }
                         }
+                        if (!isHealthy) {
+                            peakHTML = `<div class="peak-indicator infected-warning">[ DAMAGE ]</div>`;
+                        }
 
                         let streakBestHTML = '';
-                        if (isIntegral) {
+                        if (usesWinRate) {
                             streakBestHTML = `
                                 <div class="streak-badge streak-best" title="Ціль">
                                     <span>TARGET</span>
@@ -637,7 +714,7 @@
                         card.innerHTML = `
                             ${tagsHTML}
                             <div class="stat-header">
-                                <span class="stat-name" style="${isPeak || isHealthyIntegral ? 'color: #fff;' : ''}">${stat.name}</span>
+                                <span class="stat-name" style="${isPeak || (usesWinRate && isHealthy) ? 'color: #fff;' : ''}">${stat.name}</span>
                                 ${peakHTML}
                             </div>
                             <div class="stat-total-row">
@@ -655,11 +732,10 @@
                         statsContainer.appendChild(card);
 
                         let tagsText = [stat.architecture, stat.vector].filter(Boolean).join(", ");
-                        let peakStatusText = "";
-                        if (stat.architecture === 'Навчання' && stat.days_to_peak !== undefined && stat.days_to_peak !== null) {
-                            peakStatusText = isPeak ? " [PEAK]" : ` [T-${stat.days_to_peak}]`;
-                        }
-                        dumpText += `${fireIcon} ${displayStreak}${peakStatusText} | ${stat.name} (${tagsText}) -> ${stat.total} циклів (MAX: ${stat.best_streak})\n`;
+                        let alertTag = !isHealthy ? " [SYSTEM DAMAGE]" : "";
+                        if (isPeak) alertTag = " [PEAK DAY]";
+
+                        dumpText += `${fireIcon} ${displayStreak}${alertTag} | ${stat.name} (${tagsText}) -> ${stat.total} циклів (MAX: ${stat.best_streak})\n`;
                     });
                 }
 
