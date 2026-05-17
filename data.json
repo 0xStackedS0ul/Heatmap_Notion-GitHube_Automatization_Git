@@ -1,7 +1,7 @@
 {
   "heatmap": {
-    "2026-05-17": 153.2,
     "2026-05-16": 206.60000000000002,
+    "2026-05-17": 153.2,
     "2026-05-15": 306.6,
     "2026-05-14": 326.6,
     "2026-05-13": 306.6,
@@ -101,12 +101,16 @@
     "2026-02-14": 103.3,
     "2026-02-08": 33.3,
     "2026-02-01": 33.3,
+    "2026-02-09": 0.0,
     "2026-02-10": 33.3,
     "2026-02-05": 33.3,
     "2026-02-04": 33.3,
     "2026-01-25": 33.3,
     "2026-01-26": 33.3,
     "2026-01-27": 33.3,
+    "2026-01-28": 0.0,
+    "2026-01-29": 0.0,
+    "2026-01-30": 0.0,
     "2026-01-31": 33.3,
     "2026-02-11": 33.3,
     "2026-01-24": 33.3,
@@ -114,12 +118,52 @@
     "2026-01-22": 33.3
   },
   "stats": {
+    "Вартовий ТІЛА": {
+      "total": 0,
+      "current_streak": 0,
+      "best_streak": 0,
+      "win_rate": 80.0,
+      "vector": "Тіло",
+      "architecture": "Вартовий",
+      "days_to_peak": 0,
+      "parent_nodes": null
+    },
     "Віджимання": {
       "total": 191,
       "current_streak": 95,
       "best_streak": 95,
       "win_rate": 100.0,
       "vector": "Тіло",
+      "architecture": "Звичка",
+      "days_to_peak": 0,
+      "parent_nodes": null
+    },
+    "Читання книжки": {
+      "total": 98,
+      "current_streak": 88,
+      "best_streak": 88,
+      "win_rate": 98.9,
+      "vector": "Розум",
+      "architecture": "Звичка",
+      "days_to_peak": 0,
+      "parent_nodes": null
+    },
+    "Прибирання": {
+      "total": 75,
+      "current_streak": 69,
+      "best_streak": 69,
+      "win_rate": 97.4,
+      "vector": "Соціалізація",
+      "architecture": "Звичка",
+      "days_to_peak": 0,
+      "parent_nodes": null
+    },
+    "Вивчення та запис тем": {
+      "total": 62,
+      "current_streak": 62,
+      "best_streak": 62,
+      "win_rate": 98.4,
+      "vector": "Розум",
       "architecture": "Звичка",
       "days_to_peak": 0,
       "parent_nodes": null
@@ -174,41 +218,11 @@
       "days_to_peak": 0,
       "parent_nodes": null
     },
-    "Читання книжки": {
-      "total": 98,
-      "current_streak": 88,
-      "best_streak": 88,
-      "win_rate": 98.9,
-      "vector": "Розум",
-      "architecture": "Звичка",
-      "days_to_peak": 0,
-      "parent_nodes": null
-    },
-    "Прибирання": {
-      "total": 75,
-      "current_streak": 69,
-      "best_streak": 69,
-      "win_rate": 97.4,
-      "vector": "Соціалізація",
-      "architecture": "Звичка",
-      "days_to_peak": 0,
-      "parent_nodes": null
-    },
-    "Вивчення та запис тем": {
-      "total": 62,
-      "current_streak": 62,
-      "best_streak": 62,
-      "win_rate": 98.4,
-      "vector": "Розум",
-      "architecture": "Звичка",
-      "days_to_peak": 0,
-      "parent_nodes": null
-    },
     "Сон до 11:00": {
       "total": 9,
       "current_streak": 0,
       "best_streak": 7,
-      "win_rate": 69.2,
+      "win_rate": 70.0,
       "vector": "Тіло",
       "architecture": "Інтеграл",
       "days_to_peak": 0,
