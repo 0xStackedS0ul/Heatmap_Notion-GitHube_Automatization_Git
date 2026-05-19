@@ -5,7 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Hydro Tactics - Neural Wire</title>
 
-    <!-- Тільки D3.js -->
     <script src="https://d3js.org/d3.v7.min.js"></script>
 
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -23,26 +22,17 @@
             --max-width: 1200px;
             --board-bg: #191919;
             --pulse-speed: 2s;
-            --tumor-color: #ef4444; /* Колір зараження */
+            --tumor-color: #ef4444;
         }
 
         body {
             font-family: 'Inter', sans-serif;
-            margin: 0;
-            padding: 20px;
-            color: var(--text-color);
-            background-color: var(--bg-color);
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            overflow-x: hidden;
+            margin: 0; padding: 20px;
+            color: var(--text-color); background-color: var(--bg-color);
+            display: flex; flex-direction: column; align-items: center; overflow-x: hidden;
         }
 
-        /* --- CONTROLS --- */
-        .controls-bar {
-            position: fixed; top: 10px; right: 10px;
-            display: flex; gap: 5px; z-index: 1000;
-        }
+        .controls-bar { position: fixed; top: 10px; right: 10px; display: flex; gap: 5px; z-index: 1000; }
         .zoom-btn {
             background: var(--card-bg); border: 1px solid var(--card-border);
             color: var(--text-color); width: 28px; height: 28px; border-radius: 6px;
@@ -51,7 +41,6 @@
         }
         .zoom-btn:hover { opacity: 1; border-color: var(--accent-color); }
 
-        /* --- TABS NAVIGATION --- */
         .tabs-container {
             display: flex; gap: 20px; border-bottom: 1px solid var(--card-border);
             width: 100%; max-width: var(--max-width); margin-bottom: 20px; padding-left: 5px;
@@ -67,34 +56,22 @@
         .tab-btn:hover { opacity: 1; background-color: var(--active-tab-bg); border-radius: 6px 6px 0 0; }
         .tab-btn.active { opacity: 1; border-bottom: 2px solid var(--accent-color); color: var(--accent-color); }
 
-        /* --- SECTIONS --- */
-        .view-section {
-            width: 100%; max-width: var(--max-width);
-            display: none; animation: fadeIn 0.4s ease;
-        }
+        .view-section { width: 100%; max-width: var(--max-width); display: none; animation: fadeIn 0.4s ease; }
         #view-flow.active { display: flex; flex-direction: column; align-items: center; }
         #view-tanks.active { display: block; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
 
-        /* --- WIRE NETWORK (D3) --- */
         #d3-tree-container {
-            width: 100%;
-            height: 70vh;
-            min-height: 500px;
-            background-color: var(--board-bg);
-            border: 1px solid var(--card-border);
-            border-radius: 12px;
-            position: relative;
-            cursor: grab;
-            overflow: hidden;
+            width: 100%; height: 70vh; min-height: 500px;
+            background-color: var(--board-bg); border: 1px solid var(--card-border);
+            border-radius: 12px; position: relative; cursor: grab; overflow: hidden;
         }
         #d3-tree-container:active { cursor: grabbing; }
 
         .hint-overlay {
-            position: absolute; bottom: 20px; width: 100%;
-            text-align: center; font-family: 'Inter', sans-serif; font-size: 12px;
-            color: #555; pointer-events: none; letter-spacing: 0.5px;
-            font-style: italic;
+            position: absolute; bottom: 20px; width: 100%; text-align: center;
+            font-family: 'Inter', sans-serif; font-size: 12px; color: #555;
+            pointer-events: none; letter-spacing: 0.5px; font-style: italic;
         }
 
         #pulse-status {
@@ -105,33 +82,27 @@
         }
         .ping-dot {
             width: 6px; height: 6px; background-color: #fff; border-radius: 50%; display: inline-block;
-            animation: ping var(--pulse-speed) infinite alternate ease-in-out;
-            box-shadow: 0 0 5px #fff;
+            animation: ping var(--pulse-speed) infinite alternate ease-in-out; box-shadow: 0 0 5px #fff;
         }
         @keyframes ping { 0% { transform: scale(0.8); opacity: 0.3; } 100% { transform: scale(1.5); opacity: 1; } }
 
         .node-group { cursor: grab; }
         .node-group:active { cursor: grabbing; }
-
         .node-blob { stroke-linejoin: round; stroke-linecap: round; }
-
         .node-text { fill: #ccc; font-family: 'JetBrains Mono', monospace; font-size: 10px; font-weight: 400; text-anchor: middle; pointer-events: none; }
         .node-badge { font-size: 9px; font-weight: 700; pointer-events: none; text-anchor: middle; fill: #666; }
 
         .link-base { fill: none; stroke: #222; stroke-width: 1px; transition: stroke 0.3s;}
         .link-pulse { fill: none; stroke: #fff; stroke-width: 1.5px; stroke-dasharray: 2 12; stroke-linecap: round; transition: stroke 0.3s;}
 
-        @keyframes flow-animation {
-            to { stroke-dashoffset: -28; }
-        }
+        @keyframes flow-animation { to { stroke-dashoffset: -28; } }
 
-        /* --- HYDRO TANKS (Stats in B&W) --- */
+        /* --- HYDRO TANKS --- */
         .tanks-header { display: flex; justify-content: flex-end; width: 100%; max-width: var(--max-width); margin: 0 auto 15px auto; }
         .copy-btn {
             background: transparent; border: 1px solid #444; color: #aaa;
             font-family: 'JetBrains Mono', monospace; font-size: 10px; font-weight: 700;
-            padding: 6px 12px; border-radius: 4px; cursor: pointer;
-            transition: all 0.2s; letter-spacing: 1px; text-transform: uppercase;
+            padding: 6px 12px; border-radius: 4px; cursor: pointer; transition: all 0.2s; letter-spacing: 1px; text-transform: uppercase;
         }
         .copy-btn:hover { color: #fff; border-color: #fff; background: rgba(255,255,255,0.05); }
         .copy-btn.copied { background: #fff; color: #000; border-color: #fff; }
@@ -139,7 +110,6 @@
         .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 15px; max-width: var(--max-width); margin: 0 auto; }
         .stat-card { background: var(--card-bg); border: 1px solid var(--card-border); border-radius: 8px; padding: 18px; display: flex; flex-direction: column; gap: 12px; transition: border-color 0.2s; }
         .stat-card:hover { border-color: #555; }
-
         .stat-card.infected { border-color: rgba(239, 68, 68, 0.4); background: rgba(69, 10, 10, 0.2); }
 
         .tags-row { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: -5px; }
@@ -156,7 +126,6 @@
 
         .stat-header { display: flex; justify-content: space-between; align-items: center; }
         .stat-name { font-size: 14px; font-weight: 500; opacity: 0.9; }
-
         .stat-total-row { display: flex; align-items: baseline; gap: 5px; }
         .stat-value { font-size: 28px; font-weight: 700; color: #fff; line-height: 1; font-family: 'JetBrains Mono', monospace;}
         .infected .stat-value { color: var(--tumor-color); }
@@ -170,7 +139,6 @@
         .infected .streak-badge { border-color: rgba(239,68,68,0.4); color: var(--tumor-color); }
 
         #zoom-wrapper { width: 100%; display: flex; flex-direction: column; align-items: center; transform-origin: top center; }
-
     </style>
 </head>
 <body>
@@ -210,9 +178,7 @@
             <div class="tanks-header">
                 <button id="copy-btn" class="copy-btn" onclick="copyMemoryData()">[ COPY TO CLIPBOARD ]</button>
             </div>
-            <div class="stats-grid" id="stats-list">
-                Loading memory...
-            </div>
+            <div class="stats-grid" id="stats-list">Loading memory...</div>
         </div>
     </div>
 
@@ -226,9 +192,7 @@
             zoomWrapper.style.transform = `scale(${currentZoom})`;
             localStorage.setItem('hydro-zoom', currentZoom);
         }
-        function updateZoom(change) {
-            currentZoom += change; currentZoom = Math.round(currentZoom * 10) / 10; applyZoom();
-        }
+        function updateZoom(change) { currentZoom += change; currentZoom = Math.round(currentZoom * 10) / 10; applyZoom(); }
         applyZoom();
 
         function switchTab(tabName) {
@@ -239,49 +203,39 @@
             if (tabName === 'flow') btns[0].classList.add('active'); else btns[1].classList.add('active');
         }
 
-        function truncate(str, n) {
-            return str.length > n ? str.substr(0, n - 1) + '...' : str;
-        }
+        function truncate(str, n) { return str.length > n ? str.substr(0, n - 1) + '...' : str; }
 
         window.memoryDumpText = "";
         function copyMemoryData() {
             if (!window.memoryDumpText) return;
             const textArea = document.createElement("textarea");
             textArea.value = window.memoryDumpText;
-            textArea.style.position = "fixed";
-            textArea.style.left = "-9999px";
-            document.body.appendChild(textArea);
-            textArea.select();
+            textArea.style.position = "fixed"; textArea.style.left = "-9999px";
+            document.body.appendChild(textArea); textArea.select();
             try {
                 document.execCommand('copy');
                 const btn = document.getElementById('copy-btn');
-                btn.innerText = "[ DATA COPIED ]";
-                btn.classList.add('copied');
-                setTimeout(() => {
-                    btn.innerText = "[ COPY TO CLIPBOARD ]";
-                    btn.classList.remove('copied');
-                }, 2000);
-            } catch (err) {
-                console.error('Copy failed', err);
-            }
+                btn.innerText = "[ DATA COPIED ]"; btn.classList.add('copied');
+                setTimeout(() => { btn.innerText = "[ COPY TO CLIPBOARD ]"; btn.classList.remove('copied'); }, 2000);
+            } catch (err) {}
             document.body.removeChild(textArea);
         }
 
         function simpleHash(str) {
             let hash = 0;
-            for (let i = 0; i < str.length; i++) {
-                hash = ((hash << 5) - hash) + str.charCodeAt(i);
-                hash |= 0;
-            }
+            for (let i = 0; i < str.length; i++) { hash = ((hash << 5) - hash) + str.charCodeAt(i); hash |= 0; }
             return Math.abs(hash);
         }
 
-        // Форма для звички/інтегралу (Клякса)
-        function generateBlobPath(radius, streak, id, type, time, isInfected) {
-            if (type === 'root') streak = 66;
+        // Нова логіка форм: підтримує Infection Ratio для Ядра
+        function generateBlobPath(radius, streak, id, type, time, isInfected, infectionRatio = 0) {
+            let t = Math.min(Math.max(streak, 0), 66) / 66;
+            if (type === 'root') t = 1.0;
 
-            const t = Math.min(Math.max(streak, 0), 66) / 66;
-            const easeT = isInfected ? 0 : d3.easeCubicOut(t); // Заражений завжди хаотичний
+            // Якщо заражено, "ідеальність" кола падає
+            let easeT = d3.easeCubicOut(t);
+            const effectiveInfection = type === 'root' ? infectionRatio : (isInfected ? 1 : 0);
+            easeT = Math.max(0, easeT - effectiveInfection);
 
             const numPoints = 12;
             const points = [];
@@ -290,9 +244,9 @@
             for (let i = 0; i < numPoints; i++) {
                 const angle = (i / numPoints) * Math.PI * 2;
 
-                // Якщо пухлина - рухається дуже швидко та хаотично
                 const timeScale = 0.0015;
-                const wobbleSpeed = isInfected ? 4 : (1 + (1 - easeT) * 2);
+                // Чим більше зараження, тим швидше та хаотичніше тремтіння
+                const wobbleSpeed = 1 + (1 - easeT) * 2 + (effectiveInfection * 3);
 
                 const phase1 = seed + i * 2.1;
                 const phase2 = seed + i * 5.7;
@@ -301,8 +255,8 @@
                 const wave2 = Math.cos(time * timeScale * wobbleSpeed * 0.73 + phase2);
                 const rand = (wave1 + wave2) * 0.5;
 
-                // Пухлина має велике спотворення
-                const distortionMax = isInfected ? 0.8 : 0.6;
+                // Радіус спотворення також зростає з інфекцією
+                const distortionMax = 0.6 + (effectiveInfection * 0.2);
                 const distortion = (1 - easeT) * distortionMax * radius;
                 const r = radius + rand * distortion;
 
@@ -311,11 +265,10 @@
             return d3.line().curve(d3.curveCatmullRomClosed.alpha(0.5))(points);
         }
 
-        // Форма для Вартового (Жорсткий пульсуючий Ромб)
-        function generateSentinelPath(radius, streak, time, isHealthy) {
-            // Здоровий дихає повільно, хворий - б'ється в тривозі
-            const scale = isHealthy ? 1 + Math.sin(time * 0.002) * 0.1 : 1 + Math.sin(time * 0.015) * 0.2;
-            const r = radius * 1.3 * scale;
+        function generateSentinelPath(radius, streak, time, isInfected) {
+            // Швидке агресивне серцебиття, якщо хворий
+            const scale = !isInfected ? 1 + Math.sin(time * 0.002) * 0.1 : 1 + Math.sin(time * 0.015) * 0.25;
+            const r = radius * 1.4 * scale;
             return `M 0 ${-r} L ${r} 0 L 0 ${r} L ${-r} 0 Z`;
         }
 
@@ -335,8 +288,8 @@
             const streak = d.target.streak || 0;
             const t = Math.min(Math.max(streak, 0), 66) / 66;
 
-            // Якщо вектор заражений (або ціль), дріт стає дуже кривим
-            const isCorrupted = d.target.isInfected || (d.target.stat && d.target.stat.architecture === 'Вартовий' && d.target.stat.win_rate < 70);
+            // Якщо цільовий вузол заражений, дріт стає дуже кривим
+            const isCorrupted = d.target.isInfected || (d.target.type === 'root' && d.target.infectionRatio > 0);
             const easeT = isCorrupted ? 0 : d3.easeCubicOut(t);
 
             const chaosAmplitude = (1 - easeT) * Math.min(dist * 0.4, 40);
@@ -376,20 +329,35 @@
             const linksData = [];
             const rootId = "CORE";
 
-            nodesData.push({ id: rootId, name: "Infinity Way", type: "root", radius: 10, streak: 0, isInfected: false });
-
-            // Шукаємо заражені вектори (де Вартовий < 70%)
+            // 1. ВИРАХОВУЄМО ІНФЕКЦІЮ
+            const totalVectorsList = [...new Set(Object.values(statsSource).map(s => "vec_" + (s.vector || "None")))];
             const infectedVectors = new Set();
+
             Object.entries(statsSource).forEach(([name, stat]) => {
                 if (stat.architecture === 'Вартовий' && stat.win_rate < 70) {
                     infectedVectors.add("vec_" + (stat.vector || "None"));
                 }
             });
 
+            // Наскільки сильно вразливе Ядро (від 0.0 до 1.0)
+            const coreInfectionRatio = totalVectorsList.length > 0 ? (infectedVectors.size / totalVectorsList.length) : 0;
+
+            // Центральне Ядро
+            nodesData.push({
+                id: rootId, name: "Infinity Way", type: "root",
+                radius: 12, streak: 0,
+                isInfected: coreInfectionRatio > 0, infectionRatio: coreInfectionRatio
+            });
+
             Object.entries(statsSource).forEach(([name, stat]) => {
                 const vecId = "vec_" + (stat.vector || "None");
                 const archId = "arch_" + vecId + "_" + (stat.architecture || "None");
                 const isVecInfected = infectedVectors.has(vecId);
+
+                // Якщо це не Вартовий, але Інтеграл з просадкою - він заражає сам себе
+                const isFailingSelf = (stat.architecture === 'Інтеграл' || stat.architecture === 'Вартовий') && stat.win_rate < 70;
+                // Звичка (листочок) заражається, якщо її Вектор хворий, або вона сама є хворим Інтегралом
+                const isLeafInfected = isVecInfected || isFailingSelf;
 
                 if (!nodesData.find(n => n.id === vecId)) {
                     nodesData.push({ id: vecId, name: stat.vector || "Інше", type: "vector", radius: 7, streak: 0, isInfected: isVecInfected });
@@ -401,7 +369,7 @@
                 }
 
                 const leafId = "leaf_" + name;
-                nodesData.push({ id: leafId, name: name, type: "leaf", stat: stat, radius: 8, streak: getEffectiveStreak(stat), isInfected: false });
+                nodesData.push({ id: leafId, name: name, type: "leaf", stat: stat, radius: 8, streak: getEffectiveStreak(stat), isInfected: isLeafInfected });
             });
 
             Object.entries(statsSource).forEach(([name, stat]) => {
@@ -472,22 +440,16 @@
                 .join("g");
 
             const linkBase = links.append("path").attr("class", "link-base")
-                .style("stroke", d => {
-                    const targetInfected = d.target.isInfected || (d.target.stat && d.target.stat.architecture === 'Вартовий' && d.target.stat.win_rate < 70);
-                    return targetInfected ? "rgba(239, 68, 68, 0.4)" : "#222";
-                });
+                .style("stroke", d => d.target.isInfected ? "rgba(239, 68, 68, 0.4)" : "#222");
 
             const linkPulse = links.append("path")
                 .attr("class", "link-pulse")
-                .style("opacity", d => (d.target.streak > 0 || (d.target.stat && d.target.stat.architecture === 'Вартовий' && d.target.stat.win_rate < 70)) ? 1 : 0)
-                .style("stroke", d => {
-                    const targetInfected = d.target.isInfected || (d.target.stat && d.target.stat.architecture === 'Вартовий' && d.target.stat.win_rate < 70);
-                    return targetInfected ? "#ef4444" : "#fff";
-                })
-                .style("filter", d => (d.target.streak >= 30 || (d.target.stat && d.target.stat.architecture === 'Вартовий' && d.target.stat.win_rate < 70)) ? "url(#glow)" : "none")
+                .style("opacity", d => (d.target.streak > 0 || d.target.isInfected) ? 1 : 0)
+                .style("stroke", d => d.target.isInfected ? "#ef4444" : "#fff")
+                .style("filter", d => (d.target.streak >= 30 || d.target.isInfected) ? "url(#glow)" : "none")
                 .style("animation", d => {
-                    const targetInfected = d.target.isInfected || (d.target.stat && d.target.stat.architecture === 'Вартовий' && d.target.stat.win_rate < 70);
-                    if (targetInfected) return `flow-animation 0.8s linear infinite reverse`; // Тривожний зворотній імпульс
+                    // Якщо вузол заражений, імпульс летить агресивно у зворотньому напрямку (до ядра)
+                    if (d.target.isInfected) return `flow-animation 0.8s linear infinite reverse`;
                     if (d.target.streak <= 0) return "none";
                     let s = d.target.streak;
                     let duration = Math.max(0.5, 3.0 - (s * 0.04));
@@ -506,18 +468,20 @@
             nodes.append("path")
                 .attr("class", "node-blob")
                 .style("fill", d => {
-                    const isFailingSentinel = d.stat && d.stat.architecture === 'Вартовий' && d.stat.win_rate < 70;
-                    if (isFailingSentinel || d.isInfected) return "#450a0a"; // Темно-червоне тіло
-
-                    if (d.type === 'root') return "#fff";
+                    if (d.type === 'root') {
+                        if (d.infectionRatio > 0) return d3.interpolateRgb("#ffffff", "#450a0a")(d.infectionRatio);
+                        return "#fff";
+                    }
+                    if (d.isInfected) return "#450a0a";
                     if (d.stat && d.stat.days_to_peak <= 0 && d.stat.architecture === "Навчання") return "#fff";
                     return d.streak >= 66 ? "#fff" : "#191919";
                 })
                 .style("stroke", d => {
-                    const isFailingSentinel = d.stat && d.stat.architecture === 'Вартовий' && d.stat.win_rate < 70;
-                    if (isFailingSentinel || d.isInfected) return "#ef4444"; // Яскраво червона обводка
-
-                    if (d.type === 'root') return "#fff";
+                    if (d.type === 'root') {
+                        if (d.infectionRatio > 0) return d3.interpolateRgb("#ffffff", "#ef4444")(d.infectionRatio);
+                        return "#fff";
+                    }
+                    if (d.isInfected) return "#ef4444";
                     if (d.stat && d.stat.days_to_peak <= 0 && d.stat.architecture === "Навчання") return "#fff";
 
                     const t = Math.min(d.streak, 66) / 66;
@@ -525,16 +489,12 @@
                     return `rgb(${v}, ${v}, ${v})`;
                 })
                 .style("stroke-width", d => {
-                    const isFailingSentinel = d.stat && d.stat.architecture === 'Вартовий' && d.stat.win_rate < 70;
-                    if (isFailingSentinel || d.isInfected) return 2.0;
-
+                    if (d.isInfected || (d.type === 'root' && d.infectionRatio > 0)) return 2.0; // Хворі вузли мають товсту лінію
                     const t = Math.min(d.streak, 66) / 66;
                     return 0.8 + (t * 0.7);
                 })
                 .style("filter", d => {
-                    const isFailingSentinel = d.stat && d.stat.architecture === 'Вартовий' && d.stat.win_rate < 70;
-                    if (isFailingSentinel || d.isInfected) return "url(#glow)";
-
+                    if (d.isInfected || (d.type === 'root' && d.infectionRatio > 0)) return "url(#glow)";
                     if (d.type === 'root') return "url(#glow)";
                     if (d.stat && d.stat.days_to_peak <= 0 && d.stat.architecture === "Навчання") return "url(#glow)";
                     return d.streak >= 30 ? "url(#glow)" : "none";
@@ -545,12 +505,11 @@
                 .text(d => truncate(d.name, 20))
                 .attr("dy", d => d.radius + 14)
                 .style("fill", d => {
-                    const isFailingSentinel = d.stat && d.stat.architecture === 'Вартовий' && d.stat.win_rate < 70;
-                    if (isFailingSentinel || d.isInfected) return "#fca5a5"; // Світло-червоний текст
-                    return (d.streak > 0 || d.type === 'root') ? "#fff" : "#666";
+                    if (d.type === 'root') return d.infectionRatio > 0 ? "#fca5a5" : "#fff";
+                    if (d.isInfected) return "#fca5a5";
+                    return (d.streak > 0) ? "#fff" : "#666";
                 });
 
-            // Відображення Інтегралу (%) або Стріку (дні)
             nodes.filter(d => d.type === 'leaf' && (d.streak > 0 || d.stat.architecture === 'Інтеграл' || d.stat.architecture === 'Вартовий')).append("text")
                 .text(d => {
                     if (d.stat.architecture === 'Інтеграл') return `∫ ${d.stat.win_rate}%`;
@@ -563,8 +522,9 @@
                 .attr("dy", d => d.radius + 26)
                 .style("fill", d => {
                     if (d.stat && (d.stat.architecture === "Інтеграл" || d.stat.architecture === "Вартовий")) {
-                        return d.stat.win_rate >= 70 ? "#fff" : "#ef4444";
+                        return d.stat.win_rate >= 70 && !d.isInfected ? "#fff" : "#ef4444";
                     }
+                    if (d.isInfected) return "#ef4444";
                     if (d.stat && d.stat.days_to_peak <= 0 && d.stat.architecture === "Навчання") return "#fff";
                     return "#aaa";
                 });
@@ -579,9 +539,9 @@
 
                 nodes.select(".node-blob").attr("d", d => {
                     if (d.stat && d.stat.architecture === 'Вартовий') {
-                        return generateSentinelPath(d.radius, d.streak, elapsed, d.stat.win_rate >= 70);
+                        return generateSentinelPath(d.radius, d.streak, elapsed, !d.isInfected);
                     }
-                    return generateBlobPath(d.radius, d.streak, d.id, d.type, elapsed, d.isInfected);
+                    return generateBlobPath(d.radius, d.streak, d.id, d.type, elapsed, d.isInfected, d.infectionRatio);
                 });
             });
 
@@ -658,7 +618,6 @@
                         const isSentinel = stat.architecture === 'Вартовий';
                         const usesWinRate = isIntegral || isSentinel;
                         const isHealthy = usesWinRate ? stat.win_rate >= 70 : true;
-
                         const isPeak = stat.architecture === 'Навчання' && stat.days_to_peak <= 0;
 
                         card.className = 'stat-card' + (!isHealthy ? ' infected' : '');
@@ -686,11 +645,8 @@
 
                         let peakHTML = '';
                         if (stat.architecture === 'Навчання' && stat.days_to_peak !== undefined && stat.days_to_peak !== null) {
-                            if (isPeak) {
-                                peakHTML = `<div class="peak-indicator peak-ready">[ PEAK ]</div>`;
-                            } else {
-                                peakHTML = `<div class="peak-indicator">[ T-${stat.days_to_peak} ]</div>`;
-                            }
+                            if (isPeak) peakHTML = `<div class="peak-indicator peak-ready">[ PEAK ]</div>`;
+                            else peakHTML = `<div class="peak-indicator">[ T-${stat.days_to_peak} ]</div>`;
                         }
                         if (!isHealthy) {
                             peakHTML = `<div class="peak-indicator infected-warning">[ DAMAGE ]</div>`;
@@ -698,17 +654,9 @@
 
                         let streakBestHTML = '';
                         if (usesWinRate) {
-                            streakBestHTML = `
-                                <div class="streak-badge streak-best" title="Ціль">
-                                    <span>TARGET</span>
-                                    <span>>70%</span>
-                                </div>`;
+                            streakBestHTML = `<div class="streak-badge streak-best" title="Ціль"><span>TARGET</span><span>>70%</span></div>`;
                         } else {
-                            streakBestHTML = `
-                                <div class="streak-badge streak-best" title="Рекорд">
-                                    <span>MAX</span>
-                                    <span>${stat.best_streak}</span>
-                                </div>`;
+                            streakBestHTML = `<div class="streak-badge streak-best" title="Рекорд"><span>MAX</span><span>${stat.best_streak}</span></div>`;
                         }
 
                         card.innerHTML = `
@@ -738,9 +686,7 @@
                         dumpText += `${fireIcon} ${displayStreak}${alertTag} | ${stat.name} (${tagsText}) -> ${stat.total} циклів (MAX: ${stat.best_streak})\n`;
                     });
                 }
-
                 window.memoryDumpText = dumpText;
-
             } catch (error) {
                 console.error("Error:", error);
                 document.body.innerHTML = `<p style="color:white; text-align:center; font-family: monospace;">[ FATAL ] ${error.message}</p>`;
