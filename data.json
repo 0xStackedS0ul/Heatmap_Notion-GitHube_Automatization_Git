@@ -1,5 +1,6 @@
 {
   "heatmap": {
+    "2026-05-29": 626.6,
     "2026-05-28": 219.89999999999998,
     "2026-05-27": 226.60000000000002,
     "2026-05-26": 226.60000000000002,
@@ -130,9 +131,9 @@
   },
   "stats": {
     "Віджимання": {
-      "total": 202,
-      "current_streak": 106,
-      "best_streak": 106,
+      "total": 203,
+      "current_streak": 107,
+      "best_streak": 107,
       "win_rate": 99.1,
       "vector": "Тіло",
       "architecture": "Звичка",
@@ -140,9 +141,9 @@
       "parent_nodes": null
     },
     "Читання книжки": {
-      "total": 110,
-      "current_streak": 100,
-      "best_streak": 100,
+      "total": 111,
+      "current_streak": 101,
+      "best_streak": 101,
       "win_rate": 99.0,
       "vector": "Розум",
       "architecture": "Звичка",
@@ -150,9 +151,9 @@
       "parent_nodes": null
     },
     "Прибирання": {
-      "total": 87,
-      "current_streak": 81,
-      "best_streak": 81,
+      "total": 88,
+      "current_streak": 82,
+      "best_streak": 82,
       "win_rate": 97.8,
       "vector": "Соціалізація",
       "architecture": "Звичка",
@@ -160,9 +161,9 @@
       "parent_nodes": null
     },
     "Вивчення та запис тем": {
-      "total": 74,
-      "current_streak": 74,
-      "best_streak": 74,
+      "total": 75,
+      "current_streak": 75,
+      "best_streak": 75,
       "win_rate": 98.7,
       "vector": "Розум",
       "architecture": "Звичка",
@@ -170,9 +171,9 @@
       "parent_nodes": null
     },
     "Виконання завдань з університету": {
-      "total": 77,
-      "current_streak": 71,
-      "best_streak": 71,
+      "total": 78,
+      "current_streak": 72,
+      "best_streak": 72,
       "win_rate": 98.6,
       "vector": "Розум",
       "architecture": "Навчання",
@@ -180,29 +181,29 @@
       "parent_nodes": null
     },
     "Дії в денний час": {
-      "total": 83,
-      "current_streak": 0,
+      "total": 84,
+      "current_streak": 1,
       "best_streak": 27,
-      "win_rate": 86.1,
+      "win_rate": 86.3,
       "vector": "Філософія",
       "architecture": "Поведінка",
       "days_to_peak": null,
       "parent_nodes": null
     },
     "Холодний душ": {
-      "total": 56,
-      "current_streak": 56,
-      "best_streak": 56,
-      "win_rate": 98.2,
+      "total": 57,
+      "current_streak": 57,
+      "best_streak": 57,
+      "win_rate": 98.3,
       "vector": "Тіло",
       "architecture": "Звичка",
       "days_to_peak": null,
       "parent_nodes": null
     },
     "Вмитися зранку": {
-      "total": 123,
-      "current_streak": 108,
-      "best_streak": 108,
+      "total": 124,
+      "current_streak": 109,
+      "best_streak": 109,
       "win_rate": 96.1,
       "vector": "Тіло",
       "architecture": "Звичка",
@@ -210,9 +211,9 @@
       "parent_nodes": null
     },
     "Запис та повторення англійських слів": {
-      "total": 60,
-      "current_streak": 49,
-      "best_streak": 49,
+      "total": 61,
+      "current_streak": 50,
+      "best_streak": 50,
       "win_rate": 98.0,
       "vector": "Розум",
       "architecture": "Звичка",
@@ -230,8 +231,8 @@
       "parent_nodes": null
     },
     "Вартовий ТІЛА": {
-      "total": 1,
-      "current_streak": 0,
+      "total": 2,
+      "current_streak": 1,
       "best_streak": 1,
       "win_rate": 0.0,
       "vector": "Тіло",
@@ -240,9 +241,9 @@
       "parent_nodes": null
     },
     "Вартовий Розуму": {
-      "total": 0,
-      "current_streak": 0,
-      "best_streak": 0,
+      "total": 1,
+      "current_streak": 1,
+      "best_streak": 1,
       "win_rate": 0.0,
       "vector": "Розум",
       "architecture": "Вартовий",
@@ -250,8 +251,8 @@
       "parent_nodes": null
     },
     "Вартовий Філософії": {
-      "total": 1,
-      "current_streak": 0,
+      "total": 2,
+      "current_streak": 1,
       "best_streak": 1,
       "win_rate": 0.0,
       "vector": "Філософія",
@@ -260,9 +261,9 @@
       "parent_nodes": null
     },
     "Вартовий Соціалізації": {
-      "total": 0,
-      "current_streak": 0,
-      "best_streak": 0,
+      "total": 1,
+      "current_streak": 1,
+      "best_streak": 1,
       "win_rate": 0.0,
       "vector": "Соціалізація",
       "architecture": "Вартовий",
@@ -270,10 +271,10 @@
       "parent_nodes": null
     },
     "Запис в щоденик": {
-      "total": 10,
-      "current_streak": 10,
-      "best_streak": 10,
-      "win_rate": 90.9,
+      "total": 11,
+      "current_streak": 11,
+      "best_streak": 11,
+      "win_rate": 91.7,
       "vector": "Філософія",
       "architecture": "Звичка",
       "days_to_peak": null,
