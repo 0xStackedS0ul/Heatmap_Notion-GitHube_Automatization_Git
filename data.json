@@ -1,5 +1,6 @@
 {
   "heatmap": {
+    "2026-06-03": 33.3,
     "2026-06-02": 646.6,
     "2026-06-01": 653.2,
     "2026-05-31": 606.6,
@@ -141,7 +142,7 @@
       "win_rate": 99.1,
       "vector": "Тіло",
       "architecture": "Звичка",
-      "days_to_peak": null,
+      "days_to_peak": 0,
       "parent_nodes": null
     },
     "Читання книжки": {
@@ -151,7 +152,7 @@
       "win_rate": 99.1,
       "vector": "Розум",
       "architecture": "Звичка",
-      "days_to_peak": null,
+      "days_to_peak": 0,
       "parent_nodes": null
     },
     "Прибирання": {
@@ -161,7 +162,7 @@
       "win_rate": 97.9,
       "vector": "Соціалізація",
       "architecture": "Звичка",
-      "days_to_peak": null,
+      "days_to_peak": 0,
       "parent_nodes": null
     },
     "Вивчення та запис тем": {
@@ -171,7 +172,7 @@
       "win_rate": 98.8,
       "vector": "Розум",
       "architecture": "Звичка",
-      "days_to_peak": null,
+      "days_to_peak": 0,
       "parent_nodes": null
     },
     "Виконання завдань з університету": {
@@ -181,7 +182,7 @@
       "win_rate": 98.7,
       "vector": "Розум",
       "architecture": "Навчання",
-      "days_to_peak": null,
+      "days_to_peak": 0,
       "parent_nodes": null
     },
     "Дії в денний час": {
@@ -191,7 +192,7 @@
       "win_rate": 87.0,
       "vector": "Філософія",
       "architecture": "Поведінка",
-      "days_to_peak": null,
+      "days_to_peak": 0,
       "parent_nodes": null
     },
     "Холодний душ": {
@@ -201,17 +202,17 @@
       "win_rate": 98.4,
       "vector": "Тіло",
       "architecture": "Звичка",
-      "days_to_peak": null,
+      "days_to_peak": 0,
       "parent_nodes": null
     },
     "Вмитися зранку": {
-      "total": 128,
-      "current_streak": 113,
-      "best_streak": 113,
-      "win_rate": 96.2,
+      "total": 129,
+      "current_streak": 114,
+      "best_streak": 114,
+      "win_rate": 97.0,
       "vector": "Тіло",
       "architecture": "Звичка",
-      "days_to_peak": null,
+      "days_to_peak": 0,
       "parent_nodes": null
     },
     "Запис та повторення англійських слів": {
@@ -221,7 +222,7 @@
       "win_rate": 98.2,
       "vector": "Розум",
       "architecture": "Звичка",
-      "days_to_peak": null,
+      "days_to_peak": 0,
       "parent_nodes": null
     },
     "Сон до 11:00": {
@@ -231,7 +232,7 @@
       "win_rate": 0.0,
       "vector": "Тіло",
       "architecture": "Інтеграл",
-      "days_to_peak": null,
+      "days_to_peak": 0,
       "parent_nodes": null
     },
     "Вартовий ТІЛА": {
@@ -241,7 +242,7 @@
       "win_rate": 0.0,
       "vector": "Тіло",
       "architecture": "Вартовий",
-      "days_to_peak": null,
+      "days_to_peak": 0,
       "parent_nodes": null
     },
     "Вартовий Розуму": {
@@ -251,7 +252,7 @@
       "win_rate": 0.0,
       "vector": "Розум",
       "architecture": "Вартовий",
-      "days_to_peak": null,
+      "days_to_peak": 0,
       "parent_nodes": null
     },
     "Вартовий Філософії": {
@@ -261,7 +262,7 @@
       "win_rate": 0.0,
       "vector": "Філософія",
       "architecture": "Вартовий",
-      "days_to_peak": null,
+      "days_to_peak": 0,
       "parent_nodes": null
     },
     "Вартовий Соціалізації": {
@@ -271,7 +272,7 @@
       "win_rate": 0.0,
       "vector": "Соціалізація",
       "architecture": "Вартовий",
-      "days_to_peak": null,
+      "days_to_peak": 0,
       "parent_nodes": null
     },
     "Запис в щоденик": {
@@ -281,7 +282,7 @@
       "win_rate": 87.5,
       "vector": "Філософія",
       "architecture": "Звичка",
-      "days_to_peak": null,
+      "days_to_peak": 0,
       "parent_nodes": null
     }
   }
