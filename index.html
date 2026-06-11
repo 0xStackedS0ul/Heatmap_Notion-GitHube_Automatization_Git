@@ -59,7 +59,7 @@
         .view-section { width: 100%; max-width: var(--max-width); display: none; animation: fadeIn 0.4s ease; }
         #view-flow.active { display: flex; flex-direction: column; align-items: center; }
         #view-tanks.active { display: block; }
-        #view-telemetry.active { display: flex; flex-direction: column; align-items: center; width: 100%; }
+        #view-challenges.active { display: flex; flex-direction: column; align-items: center; width: 100%; }
 
         @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
 
@@ -111,6 +111,7 @@
 
         /* --- HYDRO TANKS --- */
         .tanks-header { display: flex; justify-content: flex-end; width: 100%; max-width: var(--max-width); margin: 0 auto 15px auto; }
+
         .copy-btn {
             background: transparent; border: 1px solid #444; color: #aaa;
             font-family: 'JetBrains Mono', monospace; font-size: 10px; font-weight: 700;
@@ -152,42 +153,49 @@
 
         #zoom-wrapper { width: 100%; display: flex; flex-direction: column; align-items: center; transform-origin: top center; }
 
-        /* --- TELEMETRY STYLES --- */
-        .telemetry-header {
-            display: flex; justify-content: space-between; align-items: center; width: 100%; max-width: var(--max-width); margin-bottom: 20px;
+        /* --- CHALLENGES STYLES --- */
+        .challenges-header {
+            display: flex; flex-direction: column; align-items: center; width: 100%; max-width: var(--max-width); margin-bottom: 20px; gap: 15px;
         }
-        .filter-select {
+        .challenges-header .filter-select {
+            width: 100%; max-width: 400px; text-align: center;
             background: var(--card-bg); border: 1px solid var(--card-border); color: #fff;
             padding: 8px 12px; border-radius: 6px; font-family: 'JetBrains Mono', monospace; font-size: 12px;
             outline: none; cursor: pointer; transition: border-color 0.2s;
         }
-        .filter-select:hover { border-color: #555; }
-        .filter-select optgroup { color: #888; font-style: normal; }
-        .filter-select option { color: #fff; }
+        .challenges-header .filter-select:hover { border-color: #555; }
+        .challenges-header .filter-select option { background: var(--card-bg); color: #fff; }
 
-        #telemetry-chart-container {
-            width: 100%; height: 400px; background-color: var(--board-bg);
-            border: 1px solid var(--card-border); border-radius: 12px; padding: 20px;
-            position: relative;
+        .spin-btn {
+            background: var(--accent-color); color: #000; border: none; padding: 10px 30px;
+            font-family: 'JetBrains Mono', monospace; font-size: 16px; font-weight: 700;
+            border-radius: 6px; cursor: pointer; transition: all 0.2s; text-transform: uppercase;
+            letter-spacing: 2px; box-shadow: 0 0 15px rgba(255,255,255,0.2);
+        }
+        .spin-btn:hover { background: #ddd; transform: translateY(-2px); box-shadow: 0 4px 20px rgba(255,255,255,0.4); }
+        .spin-btn:active { transform: translateY(0); }
+        .spin-btn:disabled { background: #333; color: #555; cursor: not-allowed; transform: none; box-shadow: none; }
+
+        #challenge-result-container {
+            width: 100%; max-width: 800px; background-color: transparent;
+            display: flex; flex-direction: column; align-items: center; justify-content: flex-start;
+            min-height: 500px; text-align: center; padding-top: 20px;
         }
 
-        .axis-text { font-family: 'JetBrains Mono', monospace; font-size: 10px; fill: #555; }
-        .axis-line { stroke: #2d2d2d; }
-        .grid-line { stroke: #222; stroke-dasharray: 2 4; }
-
-        .line-path { fill: none; stroke: url(#line-gradient); stroke-width: 1.5px; filter: url(#glow); }
-        .area-path { fill: url(#area-gradient); opacity: 0.15; }
-
-        .tooltip-line { stroke: #444; stroke-width: 1px; stroke-dasharray: 4 4; }
-        .chart-tooltip {
-            position: absolute; background: #0a0a0a; border: 1px solid #333;
-            color: #fff; padding: 10px 14px; border-radius: 6px; font-family: 'JetBrains Mono', monospace;
-            font-size: 11px; pointer-events: none; opacity: 0; transition: opacity 0.2s;
-            box-shadow: 0 8px 20px rgba(0,0,0,0.8); transform: translate(-50%, -120%);
-            white-space: nowrap;
+        #wheel-container {
+            width: 320px; height: 320px; position: relative; margin-bottom: 30px;
         }
-        .tooltip-val { font-size: 14px; font-weight: 700; margin-top: 4px; display: block; }
-        .tooltip-val.danger { color: var(--tumor-color); }
+
+        #challenge-text-output {
+            min-height: 80px; display: flex; flex-direction: column; align-items: center; justify-content: center;
+            opacity: 0; transform: translateY(10px); transition: all 0.5s ease;
+        }
+        #challenge-text-output.visible { opacity: 1; transform: translateY(0); }
+
+        .challenge-title { font-family: 'JetBrains Mono', monospace; font-size: 12px; color: #888; margin-bottom: 15px; text-transform: uppercase; letter-spacing: 2px; }
+        .challenge-text { font-family: 'Inter', sans-serif; font-size: 24px; font-weight: 600; color: #fff; line-height: 1.4; max-width: 600px;}
+        .challenge-placeholder { font-family: 'JetBrains Mono', monospace; font-size: 14px; color: #555; font-style: italic; margin-top: 100px; }
+
     </style>
 </head>
 <body>
@@ -211,8 +219,8 @@
             <button class="tab-btn" onclick="switchTab('tanks')">
                 <span style="font-size: 14px;">■</span> Memory Tanks
             </button>
-            <button class="tab-btn" onclick="switchTab('telemetry')">
-                <span style="font-size: 16px;">⎔</span> Telemetry
+            <button class="tab-btn" onclick="switchTab('challenges')">
+                <span style="font-size: 16px;">⎔</span> Challenges
             </button>
         </div>
 
@@ -236,14 +244,21 @@
             <div class="stats-grid" id="stats-list">Loading memory...</div>
         </div>
 
-        <div id="view-telemetry" class="view-section">
-            <div class="telemetry-header">
-                <select id="telemetry-filter" class="filter-select" onchange="updateTelemetryChart()">
-                    <option value="ALL">GLOBAL SYSTEM [ALL]</option>
+        <!-- NEW CHALLENGES SECTION -->
+        <div id="view-challenges" class="view-section">
+            <div class="challenges-header">
+                <select id="challenge-habit-select" class="filter-select" onchange="drawWheelForSelected()">
+                    <option value="" disabled selected>Оберіть звичку для челенджу...</option>
                 </select>
+                <button id="spin-btn" class="spin-btn" onclick="spinWheel()" disabled>INITIATE SPIN</button>
             </div>
-            <div id="telemetry-chart-container">
-                <!-- D3 appends SVG here -->
+            <div id="challenge-result-container">
+                <div id="wheel-container"></div>
+                <div id="challenge-text-output">
+                    <div class="challenge-title">МІКРО-ЧЕЛЕНДЖ:</div>
+                    <div class="challenge-text" id="challenge-text-val"></div>
+                </div>
+                <span id="challenge-placeholder" class="challenge-placeholder">Оберіть звичку, щоб завантажити колесо ймовірностей.</span>
             </div>
         </div>
     </div>
@@ -270,8 +285,8 @@
             else if (tabName === 'tanks') btns[1].classList.add('active');
             else btns[2].classList.add('active');
 
-            if (tabName === 'telemetry' && window.globalStatsSource) {
-                updateTelemetryChart();
+            if (tabName === 'challenges') {
+                loadChallenges();
             }
         }
 
@@ -307,6 +322,7 @@
             return Math.abs(hash);
         }
 
+        // --- D3.js NODE GENERATION FUNCTIONS ---
         function generateBlobPath(radius, streak, id, type, time, isInfected, infectionRatio = 0) {
             let t = Math.min(Math.max(streak, 0), 66) / 66;
             if (type === 'root') t = 1.0;
@@ -545,7 +561,7 @@
                 .style("fill", d => {
                     if (d.type === 'root') {
                         if (d.infectionRatio > 0) return d3.interpolateRgb("#191919", "#450a0a")(d.infectionRatio);
-                        return "#191919"; // Empty look
+                        return "#191919";
                     }
                     if (d.isInfected) return "#450a0a";
                     if (d.stat && d.stat.days_to_peak <= 0 && d.stat.architecture === "Навчання") return "#fff";
@@ -631,349 +647,215 @@
             }
         }
 
-        // --- SMART TELEMETRY LOGIC ---
-        function populateTelemetryFilters(statsSource) {
-            const select = document.getElementById("telemetry-filter");
-            while (select.options.length > 1) select.remove(1);
+        // --- CHALLENGES LOGIC (WHEEL) ---
+        let challengesData = {};
+        let currentWheelRotation = 0;
 
-            const vectors = new Set();
-            const architectures = new Set();
-            const nodes = [];
+        async function loadChallenges() {
+            const select = document.getElementById("challenge-habit-select");
+            const spinBtn = document.getElementById("spin-btn");
 
-            Object.entries(statsSource).forEach(([name, stat]) => {
-                if (stat.vector) vectors.add(stat.vector);
-                if (stat.architecture) architectures.add(stat.architecture);
-                nodes.push(name);
-            });
-
-            if (vectors.size > 0) {
-                const grp = document.createElement("optgroup");
-                grp.label = "--- VECTORS ---";
-                vectors.forEach(v => { const opt = document.createElement("option"); opt.value = "VEC|" + v; opt.text = "[V] " + v; grp.appendChild(opt); });
-                select.appendChild(grp);
-            }
-
-            if (architectures.size > 0) {
-                const grp = document.createElement("optgroup");
-                grp.label = "--- ARCHITECTURES ---";
-                architectures.forEach(a => { const opt = document.createElement("option"); opt.value = "ARC|" + a; opt.text = "[A] " + a; grp.appendChild(opt); });
-                select.appendChild(grp);
-            }
-
-            if (nodes.length > 0) {
-                const grp = document.createElement("optgroup");
-                grp.label = "--- NODES ---";
-                nodes.sort().forEach(n => { const opt = document.createElement("option"); opt.value = "NOD|" + n; opt.text = "✦ " + n; grp.appendChild(opt); });
-                select.appendChild(grp);
+            try {
+                const timestamp = new Date().getTime();
+                const response = await fetch(`./challenges.json?t=${timestamp}`);
+                if (!response.ok) throw new Error("Challenges file not found");
+                challengesData = await response.json();
+                populateChallengeHabits();
+            } catch (error) {
+                console.error("Error loading challenges:", error);
+                document.getElementById("challenge-placeholder").innerHTML = `<span style="color: var(--tumor-color);">Помилка завантаження: ${error.message}</span>`;
+                select.disabled = true;
+                spinBtn.disabled = true;
             }
         }
 
-        function updateTelemetryChart() {
-            if (!window.globalStatsSource) return;
-            const filterVal = document.getElementById("telemetry-filter").value;
-            const statsSource = window.globalStatsSource;
+        function populateChallengeHabits() {
+            const select = document.getElementById("challenge-habit-select");
+            const spinBtn = document.getElementById("spin-btn");
 
-            let targets = [];
-            if (filterVal === "ALL") {
-                targets = Object.keys(statsSource);
-            } else {
-                const [type, val] = filterVal.split('|');
-                if (type === "VEC") targets = Object.keys(statsSource).filter(k => statsSource[k].vector === val);
-                else if (type === "ARC") targets = Object.keys(statsSource).filter(k => statsSource[k].architecture === val);
-                else if (type === "NOD") targets = [val];
-            }
+            while (select.options.length > 1) select.remove(1);
 
-            if (targets.length === 0) return;
-
-            // 1. Симуляція повної історичної правди день за днем
-            const targetScores = {};
-            let globalEarliest = new Date();
-            let hasIntegrals = false;
-            let hasStreaks = false;
-
-            targets.forEach(t => {
-                const stat = statsSource[t];
-
-                const isIntegral = stat.architecture === 'Інтеграл' || stat.architecture === 'Вартовий';
-                if (isIntegral) hasIntegrals = true;
-                else hasStreaks = true;
-
-                if (!stat.history || stat.history.length === 0) return;
-
-                const firstDateStr = stat.history[0];
-                const firstDate = new Date(firstDateStr);
-                if (firstDate < globalEarliest) globalEarliest = firstDate;
-
-                targetScores[t] = {};
-
-                let buffer = 0;
-                let cleanDays = 0;
-                let streak = 0;
-
-                const today = new Date();
-                today.setHours(23, 59, 59, 999);
-
-                let curr = new Date(firstDate);
-
-                while (curr <= today) {
-                    const dStr = curr.toISOString().split('T')[0];
-                    const isSuccess = stat.history.includes(dStr);
-
-                    if (isIntegral) {
-                        // Точно як в бекенді: карантинний буфер
-                        if (isSuccess) {
-                            cleanDays++;
-                            if (cleanDays >= 7) buffer = Math.max(0, buffer - 1);
-                        } else {
-                            buffer++;
-                            cleanDays = 0;
-                        }
-                        targetScores[t][dStr] = Math.max(0, 100 - (buffer * 10));
-                    } else {
-                        // Історичний стрік: падає в нуль при пропуску
-                        if (isSuccess) streak++;
-                        else streak = 0;
-                        targetScores[t][dStr] = streak;
-                    }
-                    curr.setDate(curr.getDate() + 1);
-                }
-            });
-
-            if (Object.keys(targetScores).length === 0) {
-                document.getElementById("telemetry-chart-container").innerHTML = '<p style="color:#555; text-align:center; padding-top: 150px; font-family: monospace;">[ NO VALID TELEMETRY DATA ]<br/>Execute actions to initiate feed.</p>';
+            const habits = Object.keys(challengesData).filter(k => challengesData[k].length > 0);
+            if (habits.length === 0) {
+                select.options[0].text = "Немає доступних челенджів";
+                select.disabled = true;
+                spinBtn.disabled = true;
                 return;
             }
 
-            const daysCount = 90;
-            const dateLabels = [];
-
-            let chartStart = new Date();
-            chartStart.setDate(chartStart.getDate() - daysCount);
-            if (globalEarliest > chartStart) chartStart = new Date(globalEarliest);
-
-            const today = new Date();
-            today.setHours(23, 59, 59, 999);
-
-            for (let d = new Date(chartStart); d <= today; d.setDate(d.getDate() + 1)) {
-                dateLabels.push(d.toISOString().split('T')[0]);
-            }
-
-            if (dateLabels.length === 1) {
-                let prevDay = new Date(chartStart);
-                prevDay.setDate(prevDay.getDate() - 1);
-                dateLabels.unshift(prevDay.toISOString().split('T')[0]);
-            }
-
-            const chartData = [];
-            dateLabels.forEach(dayStr => {
-                let sum = 0;
-                let count = 0;
-                targets.forEach(t => {
-                    if (targetScores[t] && targetScores[t][dayStr] !== undefined) {
-                        sum += targetScores[t][dayStr];
-                        count++;
-                    }
-                });
-                if (count > 0) {
-                    chartData.push({
-                        date: d3.timeParse("%Y-%m-%d")(dayStr),
-                        value: sum / count
-                    });
-                } else {
-                    chartData.push({
-                        date: d3.timeParse("%Y-%m-%d")(dayStr),
-                        value: 0
-                    });
-                }
+            habits.sort().forEach(habitName => {
+                const opt = document.createElement("option");
+                opt.value = habitName;
+                opt.text = "✦ " + habitName;
+                select.appendChild(opt);
             });
 
-            if (chartData.length === 0) return;
-
-            document.getElementById("telemetry-chart-container").innerHTML = '<div id="chart-tooltip" class="chart-tooltip"></div>';
-            renderD3Chart(chartData, hasIntegrals, hasStreaks);
+            select.disabled = false;
         }
 
-        function renderD3Chart(data, hasIntegrals, hasStreaks) {
-            const container = document.getElementById("telemetry-chart-container");
-            const width = container.clientWidth;
-            const height = container.clientHeight;
-            const margin = {top: 20, right: 30, bottom: 30, left: 40};
+        function drawWheelForSelected() {
+            const select = document.getElementById("challenge-habit-select");
+            const habit = select.value;
+            const spinBtn = document.getElementById("spin-btn");
+            const container = document.getElementById("wheel-container");
+            const placeholder = document.getElementById("challenge-placeholder");
+            const textOutput = document.getElementById("challenge-text-output");
 
-            d3.select("#telemetry-chart-container svg").remove();
+            textOutput.classList.remove("visible");
+            currentWheelRotation = 0;
 
-            const svg = d3.select("#telemetry-chart-container")
+            if (!habit || !challengesData[habit] || challengesData[habit].length === 0) {
+                container.innerHTML = "";
+                placeholder.style.display = "block";
+                spinBtn.disabled = true;
+                return;
+            }
+
+            placeholder.style.display = "none";
+            spinBtn.disabled = false;
+
+            const options = challengesData[habit];
+            const N = options.length;
+
+            d3.select("#wheel-container svg").remove();
+            const width = 320, height = 320, radius = Math.min(width, height) / 2;
+
+            const svg = d3.select("#wheel-container")
                 .append("svg")
                 .attr("width", width)
-                .attr("height", height);
+                .attr("height", height)
+                .append("g")
+                .attr("transform", `translate(${width/2},${height/2})`);
 
-            const x = d3.scaleTime()
-                .domain(d3.extent(data, d => d.date))
-                .range([margin.left, width - margin.right]);
-
-            const maxY = d3.max(data, d => d.value) || 10;
-            // Якщо тільки Інтеграли - фіксуємо 100%. Якщо стріки - динамічно.
-            const yDomainMax = (!hasStreaks && hasIntegrals) ? 100 : Math.max(10, maxY * 1.1);
-
-            const y = d3.scaleLinear()
-                .domain([0, yDomainMax])
-                .range([height - margin.bottom, margin.top]);
-
+            // Glow filter
             const defs = svg.append("defs");
-            const filter = defs.append("filter").attr("id", "glow").attr("x", "-20%").attr("y", "-20%").attr("width", "140%").attr("height", "140%");
-            filter.append("feGaussianBlur").attr("stdDeviation", "2").attr("result", "coloredBlur");
+            const filter = defs.append("filter").attr("id", "wheel-glow").attr("x", "-50%").attr("y", "-50%").attr("width", "200%").attr("height", "200%");
+            filter.append("feGaussianBlur").attr("stdDeviation", "3").attr("result", "coloredBlur");
             const feMerge = filter.append("feMerge");
             feMerge.append("feMergeNode").attr("in", "coloredBlur");
             feMerge.append("feMergeNode").attr("in", "SourceGraphic");
 
-            // Використовуємо поріг "червоної зони" тільки якщо це чисті Інтеграли/Вартові
-            let thresholdOffset = 0;
-            if (!hasStreaks && hasIntegrals) {
-                thresholdOffset = Math.max(0, Math.min(100, (y(0) - y(70)) / (y(0) - y(100)) * 100));
-            }
+            // Background dark circle
+            svg.append("circle").attr("r", radius - 10).attr("fill", "#0a0a0a").attr("stroke", "#222").attr("stroke-width", "1px");
 
-            defs.append("linearGradient")
-                .attr("id", "line-gradient")
-                .attr("gradientUnits", "userSpaceOnUse")
-                .attr("x1", 0).attr("y1", y(yDomainMax))
-                .attr("x2", 0).attr("y2", y(0))
-                .selectAll("stop")
-                .data([
-                    {offset: "0%", color: "#ffffff"},
-                    {offset: (100 - thresholdOffset) + "%", color: "#ffffff"},
-                    {offset: (100 - thresholdOffset + 0.1) + "%", color: thresholdOffset > 0 ? "#ef4444" : "#ffffff"},
-                    {offset: "100%", color: thresholdOffset > 0 ? "#ef4444" : "#ffffff"}
-                ])
-                .join("stop")
-                .attr("offset", d => d.offset)
-                .attr("stop-color", d => d.color);
+            const wheelGroup = svg.append("g").attr("id", "wheel-g");
 
-            defs.append("linearGradient")
-                .attr("id", "area-gradient")
-                .attr("gradientUnits", "userSpaceOnUse")
-                .attr("x1", 0).attr("y1", y(yDomainMax))
-                .attr("x2", 0).attr("y2", y(0))
-                .selectAll("stop")
-                .data([
-                    {offset: "0%", color: "rgba(255,255,255,0.15)"},
-                    {offset: (100 - thresholdOffset) + "%", color: "rgba(255,255,255,0)"},
-                    {offset: (100 - thresholdOffset + 0.1) + "%", color: thresholdOffset > 0 ? "rgba(239, 68, 68,0)" : "rgba(255,255,255,0)"},
-                    {offset: "100%", color: thresholdOffset > 0 ? "rgba(239, 68, 68,0.3)" : "rgba(255,255,255,0)"}
-                ])
-                .join("stop")
-                .attr("offset", d => d.offset)
-                .attr("stop-color", d => d.color);
+            const pie = d3.pie().value(1).sort(null);
+            const arc = d3.arc().innerRadius(radius - 80).outerRadius(radius - 15);
 
-            const line = d3.line()
-                .x(d => x(d.date))
-                .y(d => y(d.value))
-                .curve(d3.curveMonotoneX);
+            const arcs = wheelGroup.selectAll(".arc")
+                .data(pie(new Array(N).fill(1)))
+                .enter().append("g").attr("class", "arc");
 
-            const area = d3.area()
-                .x(d => x(d.date))
-                .y0(y(0))
-                .y1(d => y(d.value))
-                .curve(d3.curveMonotoneX);
+            arcs.append("path")
+                .attr("id", (d, i) => "slice-" + i)
+                .attr("d", arc)
+                .attr("fill", "#191919")
+                .attr("stroke", "#333")
+                .attr("stroke-width", "1.5px")
+                .style("transition", "fill 0.3s, stroke 0.3s");
 
-            svg.append("g")
-                .attr("transform", `translate(0,${height - margin.bottom})`)
-                .call(d3.axisBottom(x).ticks(6).tickFormat(d3.timeFormat("%d %b")))
-                .attr("class", "axis-text")
-                .call(g => g.select(".domain").attr("class", "axis-line"))
-                .call(g => g.selectAll(".tick line").attr("class", "axis-line"));
+            arcs.append("text")
+                .attr("transform", d => {
+                    const c = arc.centroid(d);
+                    // Розвертаємо текст, щоб він читався від центру назовні
+                    const angle = (d.startAngle + d.endAngle) / 2 * 180 / Math.PI - 90;
+                    return `translate(${c}) rotate(${angle})`;
+                })
+                .attr("text-anchor", "middle")
+                .attr("dy", "0.35em")
+                .style("fill", "#666")
+                .style("font-family", "JetBrains Mono")
+                .style("font-size", "12px")
+                .style("font-weight", "700")
+                .text((d, i) => `[${(i + 1).toString().padStart(2, '0')}]`);
 
-            svg.append("g")
-                .attr("transform", `translate(${margin.left},0)`)
-                .call(d3.axisLeft(y).ticks(5).tickFormat(d => {
-                    if (!hasStreaks && hasIntegrals) return d + "%";
-                    return d;
-                }))
-                .attr("class", "axis-text")
-                .call(g => g.select(".domain").attr("class", "axis-line"))
-                .call(g => g.selectAll(".tick line").attr("class", "axis-line"));
+            // Inner styling
+            svg.append("circle").attr("r", radius - 80).attr("fill", "#111").attr("stroke", "#444").attr("stroke-width", "2px");
+            svg.append("circle").attr("r", radius - 85).attr("fill", "none").attr("stroke", "#222").attr("stroke-width", "1px").attr("stroke-dasharray", "4 4");
 
-            let tickValues = y.ticks(5);
-            if (!hasStreaks && hasIntegrals) tickValues = [0, 50, 70, 100];
+            svg.append("text")
+                .attr("text-anchor", "middle")
+                .attr("dy", "0.1em")
+                .style("fill", "#444")
+                .style("font-family", "JetBrains Mono")
+                .style("font-size", "24px")
+                .style("font-weight", "700")
+                .text("⎔");
 
-            svg.append("g")
-                .attr("class", "grid")
-                .attr("transform", `translate(${margin.left},0)`)
-                .call(d3.axisLeft(y).tickValues(tickValues).tickSize(-width + margin.left + margin.right).tickFormat(""))
-                .call(g => g.select(".domain").remove())
-                .call(g => g.selectAll(".tick line").attr("class", "grid-line"));
-
-            svg.append("path")
-                .datum(data)
-                .attr("class", "area-path")
-                .attr("d", area);
-
-            const path = svg.append("path")
-                .datum(data)
-                .attr("class", "line-path")
-                .attr("d", line);
-
-            const totalLength = path.node().getTotalLength();
-            path.attr("stroke-dasharray", totalLength + " " + totalLength)
-                .attr("stroke-dashoffset", totalLength)
-                .transition()
-                .duration(1500)
-                .ease(d3.easeCubicOut)
-                .attr("stroke-dashoffset", 0);
-
-            const tooltip = d3.select("#chart-tooltip");
-            const focusLine = svg.append("line").attr("class", "tooltip-line").style("opacity", 0);
-
-            const overlay = svg.append("rect")
-                .attr("width", width - margin.left - margin.right)
-                .attr("height", height - margin.top - margin.bottom)
-                .attr("x", margin.left)
-                .attr("y", margin.top)
-                .attr("fill", "none")
-                .attr("pointer-events", "all");
-
-            overlay.on("mousemove", (event) => {
-                const [mouseX] = d3.pointer(event);
-                const x0 = x.invert(mouseX);
-
-                const bisect = d3.bisector(d => d.date).left;
-                const i = bisect(data, x0, 1);
-                const d0 = data[i - 1];
-                const d1 = data[i];
-                let d = d0;
-                if (d1 && d0) d = x0 - d0.date > d1.date - x0 ? d1 : d0;
-
-                const cx = x(d.date);
-                const cy = y(d.value);
-
-                focusLine.style("opacity", 1)
-                    .attr("x1", cx).attr("y1", margin.top)
-                    .attr("x2", cx).attr("y2", height - margin.bottom);
-
-                const isDanger = (!hasStreaks && hasIntegrals) ? d.value < 70 : false;
-                const valClass = isDanger ? "danger" : "";
-
-                const labelStr = (!hasStreaks && hasIntegrals) ? `INT: ${d.value.toFixed(1)}%` : `VAL: ${d.value.toFixed(1)}`;
-
-                tooltip.style("opacity", 1)
-                    .style("left", cx + "px")
-                    .style("top", (cy - 10) + "px")
-                    .html(`
-                        <span style="color:#888;">[ ${d3.timeFormat("%d %b")(d.date)} ]</span>
-                        <span class="tooltip-val ${valClass}">${labelStr}</span>
-                    `);
-            });
-
-            overlay.on("mouseout", () => {
-                focusLine.style("opacity", 0);
-                tooltip.style("opacity", 0);
-            });
+            // Pointer (Top)
+            const pointerG = svg.append("g").attr("transform", `translate(0, -${radius - 5})`);
+            pointerG.append("polygon")
+                .attr("points", "-12,-10 12,-10 0,15")
+                .attr("fill", "#fff")
+                .style("filter", "url(#wheel-glow)");
         }
 
-        window.addEventListener('resize', () => {
-            if (document.getElementById('view-telemetry').classList.contains('active')) {
-                updateTelemetryChart();
-            }
-        });
+        function spinWheel() {
+            const select = document.getElementById("challenge-habit-select");
+            const selectedHabit = select.value;
+            const spinBtn = document.getElementById("spin-btn");
+            const textOutput = document.getElementById("challenge-text-output");
+            const textVal = document.getElementById("challenge-text-val");
 
+            if (!selectedHabit || !challengesData[selectedHabit]) return;
+
+            const options = challengesData[selectedHabit];
+            const N = options.length;
+
+            spinBtn.disabled = true;
+            textOutput.classList.remove("visible");
+
+            // Reset all slices
+            d3.selectAll(".arc path").attr("fill", "#191919").attr("stroke", "#333").style("filter", "none");
+
+            // Deterministic PRNG
+            const todayStr = new Date().toISOString().split('T')[0];
+            const seedStr = todayStr + "_" + selectedHabit;
+            const seed = simpleHash(seedStr);
+
+            const a = 1664525;
+            const c = 1013904223;
+            const m = Math.pow(2, 32);
+            const rand = (a * seed + c) % m;
+            const targetIndex = Math.floor((rand / m) * N);
+
+            const challengeText = options[targetIndex];
+
+            const sliceAngle = 360 / N;
+            const extraSpins = 5 * 360;
+            const targetAngleOffset = 360 - (targetIndex * sliceAngle + sliceAngle / 2);
+
+            const baseRotation = Math.floor(currentWheelRotation / 360) * 360;
+            const finalRotation = baseRotation + extraSpins + targetAngleOffset;
+
+            currentWheelRotation = finalRotation;
+
+            const wheelG = d3.select("#wheel-g");
+
+            wheelG.transition()
+                .duration(4000)
+                .ease(d3.easeCubicOut)
+                .attrTween("transform", function() {
+                    const i = d3.interpolateString(this.getAttribute("transform") || "rotate(0)", `rotate(${finalRotation})`);
+                    return function(t) { return i(t); };
+                })
+                .on("end", () => {
+                    // Підсвічуємо переможний сектор
+                    d3.select(`#slice-${targetIndex}`)
+                        .attr("fill", "#fff")
+                        .attr("stroke", "#fff")
+                        .style("filter", "url(#wheel-glow)");
+
+                    // Показуємо текст
+                    textVal.innerText = challengeText;
+                    textOutput.classList.add("visible");
+
+                    spinBtn.disabled = false;
+                });
+        }
+
+        // --- MAIN DASHBOARD RENDER ---
         async function renderDashboard() {
             try {
                 const timestamp = new Date().getTime();
@@ -1013,8 +895,6 @@
 
                 if (Object.keys(statsSource).length > 0) {
                     renderSystemTree(statsSource);
-                    populateTelemetryFilters(statsSource);
-                    updateTelemetryChart();
                 } else {
                     document.getElementById("d3-tree-container").innerHTML = '<p style="color:#555; text-align:center; padding-top: 50px; font-family: monospace;">[ SIGNAL LOST ] Start to initiate link.</p>';
                 }
