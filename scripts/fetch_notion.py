@@ -79,7 +79,6 @@ def calculate_streaks(dates_list):
 
 
 def calculate_quarantine_integral(dates_list, first_date_str):
-    """Рахує здоров'я системи за правилами Карантинного Буфера"""
     if not first_date_str: return 100.0, 0, 0
 
     success_dates = set(dates_list)
@@ -96,15 +95,13 @@ def calculate_quarantine_integral(dates_list, first_date_str):
         curr_str = curr_date.strftime("%Y-%m-%d")
         if curr_str in success_dates:
             c += 1
-            # Після 7 днів чистого ходу починаємо списувати борг
             if c >= 7:
                 buffer = max(0, buffer - 1)
         else:
             buffer += 1
-            c = 0  # Скидання лічильника чистого ходу при зриві
+            c = 0
         curr_date += timedelta(days=1)
 
-    # Кожна одиниця боргу в буфері знімає 10% здоров'я
     health = max(0.0, 100.0 - (buffer * 10.0))
     return round(health, 1), buffer, c
 
@@ -172,22 +169,17 @@ def process_history_and_update(pages):
             else:
                 habit_earliest_date[habit_name] = min(habit_earliest_date[habit_name], day)
 
-            # 1. ГАРАНТІЯ ІСНУВАННЯ ДНЯ ТА ЗВИЧКИ В БАЗІ (навіть якщо інтенсивність 0)
             if day not in heatmap_scores:
                 heatmap_scores[day] += 0.0
             if habit_name not in habit_totals:
                 habit_totals[habit_name] += 0
 
-            # 2. Якщо дія хоча б частково виконана
             if intensity > 0:
                 score = (intensity / max_intensity * 100) if max_intensity > 0 else 100.0
                 heatmap_scores[day] += round(score, 1)
                 habit_totals[habit_name] += intensity
                 habit_dates[habit_name].append(day)
 
-            # 3. АВТО-ЗАКРИТТЯ ПРОПУСКІВ:
-            # Відмічаємо чекбокс, якщо звичку виконано (intensity > 0)
-            # АБО якщо це вчорашній/минулий день, який залишився пропущеним (щоб прибрати його зі списку "To-Do")
             if not is_enabled:
                 if intensity > 0 or day < today_str:
                     try:
@@ -205,7 +197,6 @@ def process_history_and_update(pages):
         meta = habit_meta.get(name, {})
         arch = meta.get("architecture")
 
-        # --- РОЗРАХУНОК ІНТЕГРАЛУ ТА ВАРТОВОГО ---
         win_rate = 0.0
         if name in habit_earliest_date:
             if arch in ["Інтеграл", "Вартовий"]:
@@ -225,7 +216,8 @@ def process_history_and_update(pages):
             "vector": meta.get("vector"),
             "architecture": arch,
             "days_to_peak": meta.get("current_interval"),
-            "parent_nodes": meta.get("parent_nodes")
+            "parent_nodes": meta.get("parent_nodes"),
+            "history": sorted(list(set(habit_dates[name])))  # ДОДАНО: Історія днів виконання
         }
 
     return {"heatmap": dict(heatmap_scores), "stats": final_stats}
@@ -319,7 +311,7 @@ def main():
 
     with open("data.json", "w", encoding="utf-8") as f:
         json.dump(full_data, f, indent=2, ensure_ascii=False)
-    print("💾 data.json оновлено (+Quarantine Buffer Logic)")
+    print("💾 data.json оновлено (+History Array)")
 
     create_daily_habits(pages)
 

@@ -44,7 +44,7 @@
         .tabs-container {
             display: flex; gap: 20px; border-bottom: 1px solid var(--card-border);
             width: 100%; max-width: var(--max-width); margin-bottom: 20px; padding-left: 5px;
-            margin-left: auto; margin-right: auto;
+            margin-left: auto; margin-right: auto; flex-wrap: wrap;
         }
         .tab-btn {
             background: none; border: none; padding: 10px 12px;
@@ -59,8 +59,11 @@
         .view-section { width: 100%; max-width: var(--max-width); display: none; animation: fadeIn 0.4s ease; }
         #view-flow.active { display: flex; flex-direction: column; align-items: center; }
         #view-tanks.active { display: block; }
+        #view-telemetry.active { display: flex; flex-direction: column; align-items: center; width: 100%; }
+
         @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
 
+        /* --- WIRE NETWORK (D3) --- */
         #d3-tree-container {
             width: 100%; height: 70vh; min-height: 500px;
             background-color: var(--board-bg); border: 1px solid var(--card-border);
@@ -139,6 +142,38 @@
         .infected .streak-badge { border-color: rgba(239,68,68,0.4); color: var(--tumor-color); }
 
         #zoom-wrapper { width: 100%; display: flex; flex-direction: column; align-items: center; transform-origin: top center; }
+
+        /* --- TELEMETRY STYLES --- */
+        .telemetry-header {
+            display: flex; justify-content: space-between; align-items: center; width: 100%; max-width: var(--max-width); margin-bottom: 20px;
+        }
+        .filter-select {
+            background: var(--card-bg); border: 1px solid var(--card-border); color: #fff;
+            padding: 8px 12px; border-radius: 6px; font-family: 'JetBrains Mono', monospace; font-size: 12px;
+            outline: none; cursor: pointer; transition: border-color 0.2s;
+        }
+        .filter-select:hover { border-color: #555; }
+        .filter-select optgroup { color: #888; font-style: normal; }
+        .filter-select option { color: #fff; }
+
+        #telemetry-chart-container {
+            width: 100%; height: 400px; background-color: var(--board-bg);
+            border: 1px solid var(--card-border); border-radius: 12px; padding: 20px;
+            position: relative;
+        }
+
+        .axis-text { font-family: 'JetBrains Mono', monospace; font-size: 10px; fill: #666; }
+        .axis-line { stroke: #333; }
+        .grid-line { stroke: #222; stroke-dasharray: 4 4; }
+        .line-path { fill: none; stroke: #fff; stroke-width: 2px; filter: url(#glow); }
+        .area-path { fill: url(#area-gradient); opacity: 0.3; }
+        .tooltip-line { stroke: #666; stroke-width: 1px; stroke-dasharray: 4 4; }
+        .chart-tooltip {
+            position: absolute; background: rgba(10, 10, 10, 0.9); border: 1px solid #444;
+            color: #fff; padding: 8px 12px; border-radius: 6px; font-family: 'JetBrains Mono', monospace;
+            font-size: 11px; pointer-events: none; opacity: 0; transition: opacity 0.2s;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.5); transform: translate(-50%, -120%);
+        }
     </style>
 </head>
 <body>
@@ -162,13 +197,15 @@
             <button class="tab-btn" onclick="switchTab('tanks')">
                 <span style="font-size: 14px;">■</span> Memory Tanks
             </button>
+            <button class="tab-btn" onclick="switchTab('telemetry')">
+                <span style="font-size: 14px;">📈</span> Telemetry
+            </button>
         </div>
 
         <div id="view-flow" class="view-section active">
             <div id="pulse-status">
                 <span class="ping-dot"></span> FREQUENCY: <span id="delay-val">0.0Hz</span> | GLOBAL CHAIN: <span id="streak-val">0</span>
             </div>
-
             <div id="d3-tree-container">
                 <div class="hint-overlay">Just start, you'll figure out along the way. [ 0 &rarr; 66 DAYS / >70% INT ]</div>
             </div>
@@ -179,6 +216,19 @@
                 <button id="copy-btn" class="copy-btn" onclick="copyMemoryData()">[ COPY TO CLIPBOARD ]</button>
             </div>
             <div class="stats-grid" id="stats-list">Loading memory...</div>
+        </div>
+
+        <!-- NEW TELEMETRY SECTION -->
+        <div id="view-telemetry" class="view-section">
+            <div class="telemetry-header">
+                <select id="telemetry-filter" class="filter-select" onchange="updateTelemetryChart()">
+                    <option value="ALL">GLOBAL SYSTEM [ALL]</option>
+                    <!-- Options populated by JS -->
+                </select>
+            </div>
+            <div id="telemetry-chart-container">
+                <div id="chart-tooltip" class="chart-tooltip"></div>
+            </div>
         </div>
     </div>
 
@@ -200,7 +250,14 @@
             document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
             document.getElementById(`view-${tabName}`).classList.add('active');
             const btns = document.querySelectorAll('.tab-btn');
-            if (tabName === 'flow') btns[0].classList.add('active'); else btns[1].classList.add('active');
+            if (tabName === 'flow') btns[0].classList.add('active');
+            else if (tabName === 'tanks') btns[1].classList.add('active');
+            else btns[2].classList.add('active');
+
+            // Trigger chart redraw to fix dimensions if hidden
+            if (tabName === 'telemetry' && window.globalStatsSource) {
+                updateTelemetryChart();
+            }
         }
 
         function truncate(str, n) { return str.length > n ? str.substr(0, n - 1) + '...' : str; }
@@ -227,12 +284,10 @@
             return Math.abs(hash);
         }
 
-        // Нова логіка форм: підтримує Infection Ratio для Ядра
         function generateBlobPath(radius, streak, id, type, time, isInfected, infectionRatio = 0) {
             let t = Math.min(Math.max(streak, 0), 66) / 66;
             if (type === 'root') t = 1.0;
 
-            // Якщо заражено, "ідеальність" кола падає
             let easeT = d3.easeCubicOut(t);
             const effectiveInfection = type === 'root' ? infectionRatio : (isInfected ? 1 : 0);
             easeT = Math.max(0, easeT - effectiveInfection);
@@ -244,8 +299,7 @@
             for (let i = 0; i < numPoints; i++) {
                 const angle = (i / numPoints) * Math.PI * 2;
 
-                const timeScale = 0.0015;
-                // Чим більше зараження, тим швидше та хаотичніше тремтіння
+                const timeScale = 0.001;
                 const wobbleSpeed = 1 + (1 - easeT) * 2 + (effectiveInfection * 3);
 
                 const phase1 = seed + i * 2.1;
@@ -255,7 +309,6 @@
                 const wave2 = Math.cos(time * timeScale * wobbleSpeed * 0.73 + phase2);
                 const rand = (wave1 + wave2) * 0.5;
 
-                // Радіус спотворення також зростає з інфекцією
                 const distortionMax = 0.6 + (effectiveInfection * 0.2);
                 const distortion = (1 - easeT) * distortionMax * radius;
                 const r = radius + rand * distortion;
@@ -266,7 +319,6 @@
         }
 
         function generateSentinelPath(radius, streak, time, isInfected) {
-            // Швидке агресивне серцебиття, якщо хворий
             const scale = !isInfected ? 1 + Math.sin(time * 0.002) * 0.1 : 1 + Math.sin(time * 0.015) * 0.25;
             const r = radius * 1.4 * scale;
             return `M 0 ${-r} L ${r} 0 L 0 ${r} L ${-r} 0 Z`;
@@ -288,7 +340,6 @@
             const streak = d.target.streak || 0;
             const t = Math.min(Math.max(streak, 0), 66) / 66;
 
-            // Якщо цільовий вузол заражений, дріт стає дуже кривим
             const isCorrupted = d.target.isInfected || (d.target.type === 'root' && d.target.infectionRatio > 0);
             const easeT = isCorrupted ? 0 : d3.easeCubicOut(t);
 
@@ -329,7 +380,6 @@
             const linksData = [];
             const rootId = "CORE";
 
-            // 1. ВИРАХОВУЄМО ІНФЕКЦІЮ
             const totalVectorsList = [...new Set(Object.values(statsSource).map(s => "vec_" + (s.vector || "None")))];
             const infectedVectors = new Set();
 
@@ -339,10 +389,8 @@
                 }
             });
 
-            // Наскільки сильно вразливе Ядро (від 0.0 до 1.0)
             const coreInfectionRatio = totalVectorsList.length > 0 ? (infectedVectors.size / totalVectorsList.length) : 0;
 
-            // Центральне Ядро
             nodesData.push({
                 id: rootId, name: "Infinity Way", type: "root",
                 radius: 12, streak: 0,
@@ -354,9 +402,7 @@
                 const archId = "arch_" + vecId + "_" + (stat.architecture || "None");
                 const isVecInfected = infectedVectors.has(vecId);
 
-                // Якщо це не Вартовий, але Інтеграл з просадкою - він заражає сам себе
                 const isFailingSelf = (stat.architecture === 'Інтеграл' || stat.architecture === 'Вартовий') && stat.win_rate < 70;
-                // Звичка (листочок) заражається, якщо її Вектор хворий, або вона сама є хворим Інтегралом
                 const isLeafInfected = isVecInfected || isFailingSelf;
 
                 if (!nodesData.find(n => n.id === vecId)) {
@@ -420,20 +466,25 @@
 
             const g = svg.append("g");
 
-            const zoom = d3.zoom().scaleExtent([0.2, 3]).on("zoom", (e) => g.attr("transform", e.transform));
+            const zoom = d3.zoom().scaleExtent([0.1, 3]).on("zoom", (e) => g.attr("transform", e.transform));
             svg.call(zoom);
-            svg.call(zoom.transform, d3.zoomIdentity.translate(width / 2, height / 2).scale(0.9));
+            svg.call(zoom.transform, d3.zoomIdentity.translate(width / 2, height / 2).scale(0.5));
 
             const simulation = d3.forceSimulation(nodesData)
                 .force("link", d3.forceLink(linksData).id(d => d.id).distance(d => {
                     if (d.source.type === "root") return 150;
-                    if (d.source.type === "vector") return 100;
-                    if (d.source.type === "leaf" && d.target.type === "leaf") return 45;
-                    return 70;
+                    if (d.source.type === "vector") return 150;
+                    if (d.source.type === "leaf" && d.target.type === "leaf") return 60;
+                    return 100;
                 }))
-                .force("charge", d3.forceManyBody().strength(-400))
-                .force("center", d3.forceCenter(0, 0))
-                .force("collide", d3.forceCollide().radius(d => d.type === 'leaf' ? 40 : d.radius + 20).iterations(2));
+                .force("charge", d3.forceManyBody().strength(-800).distanceMax(800))
+                .force("collide", d3.forceCollide().radius(d => d.type === 'leaf' ? 50 : d.radius + 30).iterations(3))
+                .force("radial", d3.forceRadial(d => {
+                    if (d.type === 'root') return 0;
+                    if (d.type === 'vector') return 250;
+                    if (d.type === 'arch') return 450;
+                    return null;
+                }, 0, 0).strength(d => (d.type === 'vector' || d.type === 'arch') ? 1.0 : 0.0));
 
             const links = g.append("g").selectAll("g")
                 .data(linksData)
@@ -448,7 +499,6 @@
                 .style("stroke", d => d.target.isInfected ? "#ef4444" : "#fff")
                 .style("filter", d => (d.target.streak >= 30 || d.target.isInfected) ? "url(#glow)" : "none")
                 .style("animation", d => {
-                    // Якщо вузол заражений, імпульс летить агресивно у зворотньому напрямку (до ядра)
                     if (d.target.isInfected) return `flow-animation 0.8s linear infinite reverse`;
                     if (d.target.streak <= 0) return "none";
                     let s = d.target.streak;
@@ -489,7 +539,7 @@
                     return `rgb(${v}, ${v}, ${v})`;
                 })
                 .style("stroke-width", d => {
-                    if (d.isInfected || (d.type === 'root' && d.infectionRatio > 0)) return 2.0; // Хворі вузли мають товсту лінію
+                    if (d.isInfected || (d.type === 'root' && d.infectionRatio > 0)) return 2.0;
                     const t = Math.min(d.streak, 66) / 66;
                     return 0.8 + (t * 0.7);
                 })
@@ -556,6 +606,241 @@
             }
         }
 
+        // --- TELEMETRY LOGIC ---
+        function populateTelemetryFilters(statsSource) {
+            const select = document.getElementById("telemetry-filter");
+            // Clear existing except ALL
+            while (select.options.length > 1) select.remove(1);
+
+            const vectors = new Set();
+            const architectures = new Set();
+            const nodes = [];
+
+            Object.entries(statsSource).forEach(([name, stat]) => {
+                if (stat.vector) vectors.add(stat.vector);
+                if (stat.architecture) architectures.add(stat.architecture);
+                nodes.push(name);
+            });
+
+            if (vectors.size > 0) {
+                const grp = document.createElement("optgroup");
+                grp.label = "--- VECTORS ---";
+                vectors.forEach(v => { const opt = document.createElement("option"); opt.value = "VEC|" + v; opt.text = "[V] " + v; grp.appendChild(opt); });
+                select.appendChild(grp);
+            }
+
+            if (architectures.size > 0) {
+                const grp = document.createElement("optgroup");
+                grp.label = "--- ARCHITECTURES ---";
+                architectures.forEach(a => { const opt = document.createElement("option"); opt.value = "ARC|" + a; opt.text = "[A] " + a; grp.appendChild(opt); });
+                select.appendChild(grp);
+            }
+
+            if (nodes.length > 0) {
+                const grp = document.createElement("optgroup");
+                grp.label = "--- NODES ---";
+                nodes.sort().forEach(n => { const opt = document.createElement("option"); opt.value = "NOD|" + n; opt.text = "✦ " + n; grp.appendChild(opt); });
+                select.appendChild(grp);
+            }
+        }
+
+        function updateTelemetryChart() {
+            if (!window.globalStatsSource) return;
+            const filterVal = document.getElementById("telemetry-filter").value;
+            const statsSource = window.globalStatsSource;
+
+            // Generate past 60 days
+            const daysCount = 60;
+            const dateLabels = [];
+            const today = new Date();
+            for (let i = daysCount - 1; i >= 0; i--) {
+                const d = new Date(today);
+                d.setDate(d.getDate() - i);
+                dateLabels.push(d.toISOString().split('T')[0]);
+            }
+
+            // Filter targets
+            let targets = [];
+            if (filterVal === "ALL") {
+                targets = Object.keys(statsSource);
+            } else {
+                const [type, val] = filterVal.split('|');
+                if (type === "VEC") targets = Object.keys(statsSource).filter(k => statsSource[k].vector === val);
+                else if (type === "ARC") targets = Object.keys(statsSource).filter(k => statsSource[k].architecture === val);
+                else if (type === "NOD") targets = [val];
+            }
+
+            if (targets.length === 0) return;
+
+            // Calculate daily score (Rolling 7-day average of completion percentage)
+            const dailyRaw = dateLabels.map(dayStr => {
+                let completions = 0;
+                targets.forEach(t => {
+                    if (statsSource[t].history && statsSource[t].history.includes(dayStr)) completions++;
+                });
+                return (completions / targets.length) * 100;
+            });
+
+            // Apply 7-day rolling average for smoothness
+            const windowSize = 7;
+            const smoothedData = dailyRaw.map((val, i, arr) => {
+                let sum = 0;
+                let count = 0;
+                for (let j = Math.max(0, i - windowSize + 1); j <= i; j++) {
+                    sum += arr[j];
+                    count++;
+                }
+                return sum / count;
+            });
+
+            const chartData = dateLabels.map((date, i) => ({
+                date: d3.timeParse("%Y-%m-%d")(date),
+                value: smoothedData[i]
+            }));
+
+            renderD3Chart(chartData);
+        }
+
+        function renderD3Chart(data) {
+            const container = document.getElementById("telemetry-chart-container");
+            const width = container.clientWidth;
+            const height = container.clientHeight;
+            const margin = {top: 20, right: 30, bottom: 30, left: 40};
+
+            d3.select("#telemetry-chart-container svg").remove();
+
+            const svg = d3.select("#telemetry-chart-container")
+                .append("svg")
+                .attr("width", width)
+                .attr("height", height);
+
+            // Definitions (Glow & Gradient)
+            const defs = svg.append("defs");
+            const filter = defs.append("filter").attr("id", "glow").attr("x", "-20%").attr("y", "-20%").attr("width", "140%").attr("height", "140%");
+            filter.append("feGaussianBlur").attr("stdDeviation", "3").attr("result", "coloredBlur");
+            const feMerge = filter.append("feMerge");
+            feMerge.append("feMergeNode").attr("in", "coloredBlur");
+            feMerge.append("feMergeNode").attr("in", "SourceGraphic");
+
+            const gradient = defs.append("linearGradient")
+                .attr("id", "area-gradient")
+                .attr("x1", "0%").attr("y1", "0%")
+                .attr("x2", "0%").attr("y2", "100%");
+            gradient.append("stop").attr("offset", "0%").attr("stop-color", "#ffffff").attr("stop-opacity", 0.3);
+            gradient.append("stop").attr("offset", "100%").attr("stop-color", "#000000").attr("stop-opacity", 0.0);
+
+            const x = d3.scaleTime()
+                .domain(d3.extent(data, d => d.date))
+                .range([margin.left, width - margin.right]);
+
+            const y = d3.scaleLinear()
+                .domain([0, 100])
+                .range([height - margin.bottom, margin.top]);
+
+            const line = d3.line()
+                .x(d => x(d.date))
+                .y(d => y(d.value))
+                .curve(d3.curveMonotoneX);
+
+            const area = d3.area()
+                .x(d => x(d.date))
+                .y0(y(0))
+                .y1(d => y(d.value))
+                .curve(d3.curveMonotoneX);
+
+            // Axes
+            svg.append("g")
+                .attr("transform", `translate(0,${height - margin.bottom})`)
+                .call(d3.axisBottom(x).ticks(6).tickFormat(d3.timeFormat("%d %b")))
+                .attr("class", "axis-text")
+                .call(g => g.select(".domain").attr("class", "axis-line"))
+                .call(g => g.selectAll(".tick line").attr("class", "axis-line"));
+
+            svg.append("g")
+                .attr("transform", `translate(${margin.left},0)`)
+                .call(d3.axisLeft(y).ticks(5).tickFormat(d => d + "%"))
+                .attr("class", "axis-text")
+                .call(g => g.select(".domain").attr("class", "axis-line"))
+                .call(g => g.selectAll(".tick line").attr("class", "axis-line"));
+
+            // Grid Lines (Horizontal)
+            svg.append("g")
+                .attr("class", "grid")
+                .attr("transform", `translate(${margin.left},0)`)
+                .call(d3.axisLeft(y).ticks(5).tickSize(-width + margin.left + margin.right).tickFormat(""))
+                .call(g => g.select(".domain").remove())
+                .call(g => g.selectAll(".tick line").attr("class", "grid-line"));
+
+            // Draw Area
+            svg.append("path")
+                .datum(data)
+                .attr("class", "area-path")
+                .attr("d", area);
+
+            // Draw Line
+            const path = svg.append("path")
+                .datum(data)
+                .attr("class", "line-path")
+                .attr("d", line);
+
+            // Line Animation (Draw in)
+            const totalLength = path.node().getTotalLength();
+            path.attr("stroke-dasharray", totalLength + " " + totalLength)
+                .attr("stroke-dashoffset", totalLength)
+                .transition()
+                .duration(1500)
+                .ease(d3.easeCubicOut)
+                .attr("stroke-dashoffset", 0);
+
+            // Tooltip Logic
+            const tooltip = d3.select("#chart-tooltip");
+            const focusLine = svg.append("line").attr("class", "tooltip-line").style("opacity", 0);
+
+            const overlay = svg.append("rect")
+                .attr("width", width - margin.left - margin.right)
+                .attr("height", height - margin.top - margin.bottom)
+                .attr("x", margin.left)
+                .attr("y", margin.top)
+                .attr("fill", "none")
+                .attr("pointer-events", "all");
+
+            overlay.on("mousemove", (event) => {
+                const [mouseX] = d3.pointer(event);
+                const x0 = x.invert(mouseX);
+
+                // Find closest data point
+                const bisect = d3.bisector(d => d.date).left;
+                const i = bisect(data, x0, 1);
+                const d0 = data[i - 1];
+                const d1 = data[i];
+                let d = d0;
+                if (d1 && d0) d = x0 - d0.date > d1.date - x0 ? d1 : d0;
+
+                const cx = x(d.date);
+                const cy = y(d.value);
+
+                focusLine.style("opacity", 1)
+                    .attr("x1", cx).attr("y1", margin.top)
+                    .attr("x2", cx).attr("y2", height - margin.bottom);
+
+                tooltip.style("opacity", 1)
+                    .style("left", cx + "px")
+                    .style("top", (cy - 10) + "px")
+                    .html(`[ ${d3.timeFormat("%d %b")(d.date)} ]<br/>PWR: ${d.value.toFixed(1)}%`);
+            });
+
+            overlay.on("mouseout", () => {
+                focusLine.style("opacity", 0);
+                tooltip.style("opacity", 0);
+            });
+        }
+
+        window.addEventListener('resize', () => {
+            if (document.getElementById('view-telemetry').classList.contains('active')) {
+                updateTelemetryChart();
+            }
+        });
+
         async function renderDashboard() {
             try {
                 const timestamp = new Date().getTime();
@@ -565,6 +850,8 @@
                 const fullData = await response.json();
                 let heatmapSource = fullData.heatmap || fullData;
                 let statsSource = fullData.stats || {};
+
+                window.globalStatsSource = statsSource; // Store globally for Telemetry
 
                 let globalStreak = 0;
                 let checkDate = new Date();
@@ -593,6 +880,8 @@
 
                 if (Object.keys(statsSource).length > 0) {
                     renderSystemTree(statsSource);
+                    populateTelemetryFilters(statsSource);
+                    updateTelemetryChart();
                 } else {
                     document.getElementById("d3-tree-container").innerHTML = '<p style="color:#555; text-align:center; padding-top: 50px; font-family: monospace;">[ SIGNAL LOST ] Start to initiate link.</p>';
                 }
