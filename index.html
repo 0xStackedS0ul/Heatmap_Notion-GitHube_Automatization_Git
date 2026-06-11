@@ -89,6 +89,15 @@
         }
         @keyframes ping { 0% { transform: scale(0.8); opacity: 0.3; } 100% { transform: scale(1.5); opacity: 1; } }
 
+        #repulsion-control {
+            position: absolute; top: 15px; left: 15px;
+            background: rgba(20, 20, 20, 0.8); border: 1px solid var(--card-border);
+            padding: 8px 12px; border-radius: 6px; font-family: 'JetBrains Mono', monospace;
+            font-size: 10px; color: #aaa; display: flex; flex-direction: column; gap: 6px;
+            z-index: 10; backdrop-filter: blur(4px);
+        }
+        #repulsion-control input[type=range] { width: 120px; accent-color: var(--accent-color); cursor: pointer; }
+
         .node-group { cursor: grab; }
         .node-group:active { cursor: grabbing; }
         .node-blob { stroke-linejoin: round; stroke-linecap: round; }
@@ -162,18 +171,23 @@
             position: relative;
         }
 
-        .axis-text { font-family: 'JetBrains Mono', monospace; font-size: 10px; fill: #666; }
-        .axis-line { stroke: #333; }
-        .grid-line { stroke: #222; stroke-dasharray: 4 4; }
-        .line-path { fill: none; stroke: #fff; stroke-width: 2px; filter: url(#glow); }
-        .area-path { fill: url(#area-gradient); opacity: 0.3; }
-        .tooltip-line { stroke: #666; stroke-width: 1px; stroke-dasharray: 4 4; }
+        .axis-text { font-family: 'JetBrains Mono', monospace; font-size: 10px; fill: #555; }
+        .axis-line { stroke: #2d2d2d; }
+        .grid-line { stroke: #222; stroke-dasharray: 2 4; }
+
+        .line-path { fill: none; stroke: url(#line-gradient); stroke-width: 1.5px; filter: url(#glow); }
+        .area-path { fill: url(#area-gradient); opacity: 0.15; }
+
+        .tooltip-line { stroke: #444; stroke-width: 1px; stroke-dasharray: 4 4; }
         .chart-tooltip {
-            position: absolute; background: rgba(10, 10, 10, 0.9); border: 1px solid #444;
-            color: #fff; padding: 8px 12px; border-radius: 6px; font-family: 'JetBrains Mono', monospace;
+            position: absolute; background: #0a0a0a; border: 1px solid #333;
+            color: #fff; padding: 10px 14px; border-radius: 6px; font-family: 'JetBrains Mono', monospace;
             font-size: 11px; pointer-events: none; opacity: 0; transition: opacity 0.2s;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.5); transform: translate(-50%, -120%);
+            box-shadow: 0 8px 20px rgba(0,0,0,0.8); transform: translate(-50%, -120%);
+            white-space: nowrap;
         }
+        .tooltip-val { font-size: 14px; font-weight: 700; margin-top: 4px; display: block; }
+        .tooltip-val.danger { color: var(--tumor-color); }
     </style>
 </head>
 <body>
@@ -198,7 +212,7 @@
                 <span style="font-size: 14px;">■</span> Memory Tanks
             </button>
             <button class="tab-btn" onclick="switchTab('telemetry')">
-                <span style="font-size: 14px;">📈</span> Telemetry
+                <span style="font-size: 16px;">⎔</span> Telemetry
             </button>
         </div>
 
@@ -207,6 +221,10 @@
                 <span class="ping-dot"></span> FREQUENCY: <span id="delay-val">0.0Hz</span> | GLOBAL CHAIN: <span id="streak-val">0</span>
             </div>
             <div id="d3-tree-container">
+                <div id="repulsion-control">
+                    <label for="repulsion-slider">ВІДШТОВХУВАННЯ: <span id="repulsion-val">800</span></label>
+                    <input type="range" id="repulsion-slider" min="100" max="2500" value="800" step="50" oninput="updateRepulsion(this.value)">
+                </div>
                 <div class="hint-overlay">Just start, you'll figure out along the way. [ 0 &rarr; 66 DAYS / >70% INT ]</div>
             </div>
         </div>
@@ -218,16 +236,14 @@
             <div class="stats-grid" id="stats-list">Loading memory...</div>
         </div>
 
-        <!-- NEW TELEMETRY SECTION -->
         <div id="view-telemetry" class="view-section">
             <div class="telemetry-header">
                 <select id="telemetry-filter" class="filter-select" onchange="updateTelemetryChart()">
                     <option value="ALL">GLOBAL SYSTEM [ALL]</option>
-                    <!-- Options populated by JS -->
                 </select>
             </div>
             <div id="telemetry-chart-container">
-                <div id="chart-tooltip" class="chart-tooltip"></div>
+                <!-- D3 appends SVG here -->
             </div>
         </div>
     </div>
@@ -254,9 +270,16 @@
             else if (tabName === 'tanks') btns[1].classList.add('active');
             else btns[2].classList.add('active');
 
-            // Trigger chart redraw to fix dimensions if hidden
             if (tabName === 'telemetry' && window.globalStatsSource) {
                 updateTelemetryChart();
+            }
+        }
+
+        function updateRepulsion(val) {
+            document.getElementById('repulsion-val').innerText = val;
+            if (window.sysSimulation) {
+                window.sysSimulation.force("charge").strength(-val);
+                window.sysSimulation.alpha(0.3).restart();
             }
         }
 
@@ -298,10 +321,8 @@
 
             for (let i = 0; i < numPoints; i++) {
                 const angle = (i / numPoints) * Math.PI * 2;
-
                 const timeScale = 0.001;
                 const wobbleSpeed = 1 + (1 - easeT) * 2 + (effectiveInfection * 3);
-
                 const phase1 = seed + i * 2.1;
                 const phase2 = seed + i * 5.7;
 
@@ -470,6 +491,8 @@
             svg.call(zoom);
             svg.call(zoom.transform, d3.zoomIdentity.translate(width / 2, height / 2).scale(0.5));
 
+            const initRepulsion = parseInt(document.getElementById("repulsion-slider").value) || 800;
+
             const simulation = d3.forceSimulation(nodesData)
                 .force("link", d3.forceLink(linksData).id(d => d.id).distance(d => {
                     if (d.source.type === "root") return 150;
@@ -477,7 +500,7 @@
                     if (d.source.type === "leaf" && d.target.type === "leaf") return 60;
                     return 100;
                 }))
-                .force("charge", d3.forceManyBody().strength(-800).distanceMax(800))
+                .force("charge", d3.forceManyBody().strength(-initRepulsion).distanceMax(800))
                 .force("collide", d3.forceCollide().radius(d => d.type === 'leaf' ? 50 : d.radius + 30).iterations(3))
                 .force("radial", d3.forceRadial(d => {
                     if (d.type === 'root') return 0;
@@ -485,6 +508,8 @@
                     if (d.type === 'arch') return 450;
                     return null;
                 }, 0, 0).strength(d => (d.type === 'vector' || d.type === 'arch') ? 1.0 : 0.0));
+
+            window.sysSimulation = simulation;
 
             const links = g.append("g").selectAll("g")
                 .data(linksData)
@@ -519,8 +544,8 @@
                 .attr("class", "node-blob")
                 .style("fill", d => {
                     if (d.type === 'root') {
-                        if (d.infectionRatio > 0) return d3.interpolateRgb("#ffffff", "#450a0a")(d.infectionRatio);
-                        return "#fff";
+                        if (d.infectionRatio > 0) return d3.interpolateRgb("#191919", "#450a0a")(d.infectionRatio);
+                        return "#191919"; // Empty look
                     }
                     if (d.isInfected) return "#450a0a";
                     if (d.stat && d.stat.days_to_peak <= 0 && d.stat.architecture === "Навчання") return "#fff";
@@ -606,10 +631,9 @@
             }
         }
 
-        // --- TELEMETRY LOGIC ---
+        // --- SMART TELEMETRY LOGIC ---
         function populateTelemetryFilters(statsSource) {
             const select = document.getElementById("telemetry-filter");
-            // Clear existing except ALL
             while (select.options.length > 1) select.remove(1);
 
             const vectors = new Set();
@@ -649,17 +673,6 @@
             const filterVal = document.getElementById("telemetry-filter").value;
             const statsSource = window.globalStatsSource;
 
-            // Generate past 60 days
-            const daysCount = 60;
-            const dateLabels = [];
-            const today = new Date();
-            for (let i = daysCount - 1; i >= 0; i--) {
-                const d = new Date(today);
-                d.setDate(d.getDate() - i);
-                dateLabels.push(d.toISOString().split('T')[0]);
-            }
-
-            // Filter targets
             let targets = [];
             if (filterVal === "ALL") {
                 targets = Object.keys(statsSource);
@@ -672,36 +685,115 @@
 
             if (targets.length === 0) return;
 
-            // Calculate daily score (Rolling 7-day average of completion percentage)
-            const dailyRaw = dateLabels.map(dayStr => {
-                let completions = 0;
-                targets.forEach(t => {
-                    if (statsSource[t].history && statsSource[t].history.includes(dayStr)) completions++;
-                });
-                return (completions / targets.length) * 100;
+            // 1. Симуляція повної історичної правди день за днем
+            const targetScores = {};
+            let globalEarliest = new Date();
+            let hasIntegrals = false;
+            let hasStreaks = false;
+
+            targets.forEach(t => {
+                const stat = statsSource[t];
+
+                const isIntegral = stat.architecture === 'Інтеграл' || stat.architecture === 'Вартовий';
+                if (isIntegral) hasIntegrals = true;
+                else hasStreaks = true;
+
+                if (!stat.history || stat.history.length === 0) return;
+
+                const firstDateStr = stat.history[0];
+                const firstDate = new Date(firstDateStr);
+                if (firstDate < globalEarliest) globalEarliest = firstDate;
+
+                targetScores[t] = {};
+
+                let buffer = 0;
+                let cleanDays = 0;
+                let streak = 0;
+
+                const today = new Date();
+                today.setHours(23, 59, 59, 999);
+
+                let curr = new Date(firstDate);
+
+                while (curr <= today) {
+                    const dStr = curr.toISOString().split('T')[0];
+                    const isSuccess = stat.history.includes(dStr);
+
+                    if (isIntegral) {
+                        // Точно як в бекенді: карантинний буфер
+                        if (isSuccess) {
+                            cleanDays++;
+                            if (cleanDays >= 7) buffer = Math.max(0, buffer - 1);
+                        } else {
+                            buffer++;
+                            cleanDays = 0;
+                        }
+                        targetScores[t][dStr] = Math.max(0, 100 - (buffer * 10));
+                    } else {
+                        // Історичний стрік: падає в нуль при пропуску
+                        if (isSuccess) streak++;
+                        else streak = 0;
+                        targetScores[t][dStr] = streak;
+                    }
+                    curr.setDate(curr.getDate() + 1);
+                }
             });
 
-            // Apply 7-day rolling average for smoothness
-            const windowSize = 7;
-            const smoothedData = dailyRaw.map((val, i, arr) => {
+            if (Object.keys(targetScores).length === 0) {
+                document.getElementById("telemetry-chart-container").innerHTML = '<p style="color:#555; text-align:center; padding-top: 150px; font-family: monospace;">[ NO VALID TELEMETRY DATA ]<br/>Execute actions to initiate feed.</p>';
+                return;
+            }
+
+            const daysCount = 90;
+            const dateLabels = [];
+
+            let chartStart = new Date();
+            chartStart.setDate(chartStart.getDate() - daysCount);
+            if (globalEarliest > chartStart) chartStart = new Date(globalEarliest);
+
+            const today = new Date();
+            today.setHours(23, 59, 59, 999);
+
+            for (let d = new Date(chartStart); d <= today; d.setDate(d.getDate() + 1)) {
+                dateLabels.push(d.toISOString().split('T')[0]);
+            }
+
+            if (dateLabels.length === 1) {
+                let prevDay = new Date(chartStart);
+                prevDay.setDate(prevDay.getDate() - 1);
+                dateLabels.unshift(prevDay.toISOString().split('T')[0]);
+            }
+
+            const chartData = [];
+            dateLabels.forEach(dayStr => {
                 let sum = 0;
                 let count = 0;
-                for (let j = Math.max(0, i - windowSize + 1); j <= i; j++) {
-                    sum += arr[j];
-                    count++;
+                targets.forEach(t => {
+                    if (targetScores[t] && targetScores[t][dayStr] !== undefined) {
+                        sum += targetScores[t][dayStr];
+                        count++;
+                    }
+                });
+                if (count > 0) {
+                    chartData.push({
+                        date: d3.timeParse("%Y-%m-%d")(dayStr),
+                        value: sum / count
+                    });
+                } else {
+                    chartData.push({
+                        date: d3.timeParse("%Y-%m-%d")(dayStr),
+                        value: 0
+                    });
                 }
-                return sum / count;
             });
 
-            const chartData = dateLabels.map((date, i) => ({
-                date: d3.timeParse("%Y-%m-%d")(date),
-                value: smoothedData[i]
-            }));
+            if (chartData.length === 0) return;
 
-            renderD3Chart(chartData);
+            document.getElementById("telemetry-chart-container").innerHTML = '<div id="chart-tooltip" class="chart-tooltip"></div>';
+            renderD3Chart(chartData, hasIntegrals, hasStreaks);
         }
 
-        function renderD3Chart(data) {
+        function renderD3Chart(data, hasIntegrals, hasStreaks) {
             const container = document.getElementById("telemetry-chart-container");
             const width = container.clientWidth;
             const height = container.clientHeight;
@@ -714,28 +806,62 @@
                 .attr("width", width)
                 .attr("height", height);
 
-            // Definitions (Glow & Gradient)
-            const defs = svg.append("defs");
-            const filter = defs.append("filter").attr("id", "glow").attr("x", "-20%").attr("y", "-20%").attr("width", "140%").attr("height", "140%");
-            filter.append("feGaussianBlur").attr("stdDeviation", "3").attr("result", "coloredBlur");
-            const feMerge = filter.append("feMerge");
-            feMerge.append("feMergeNode").attr("in", "coloredBlur");
-            feMerge.append("feMergeNode").attr("in", "SourceGraphic");
-
-            const gradient = defs.append("linearGradient")
-                .attr("id", "area-gradient")
-                .attr("x1", "0%").attr("y1", "0%")
-                .attr("x2", "0%").attr("y2", "100%");
-            gradient.append("stop").attr("offset", "0%").attr("stop-color", "#ffffff").attr("stop-opacity", 0.3);
-            gradient.append("stop").attr("offset", "100%").attr("stop-color", "#000000").attr("stop-opacity", 0.0);
-
             const x = d3.scaleTime()
                 .domain(d3.extent(data, d => d.date))
                 .range([margin.left, width - margin.right]);
 
+            const maxY = d3.max(data, d => d.value) || 10;
+            // Якщо тільки Інтеграли - фіксуємо 100%. Якщо стріки - динамічно.
+            const yDomainMax = (!hasStreaks && hasIntegrals) ? 100 : Math.max(10, maxY * 1.1);
+
             const y = d3.scaleLinear()
-                .domain([0, 100])
+                .domain([0, yDomainMax])
                 .range([height - margin.bottom, margin.top]);
+
+            const defs = svg.append("defs");
+            const filter = defs.append("filter").attr("id", "glow").attr("x", "-20%").attr("y", "-20%").attr("width", "140%").attr("height", "140%");
+            filter.append("feGaussianBlur").attr("stdDeviation", "2").attr("result", "coloredBlur");
+            const feMerge = filter.append("feMerge");
+            feMerge.append("feMergeNode").attr("in", "coloredBlur");
+            feMerge.append("feMergeNode").attr("in", "SourceGraphic");
+
+            // Використовуємо поріг "червоної зони" тільки якщо це чисті Інтеграли/Вартові
+            let thresholdOffset = 0;
+            if (!hasStreaks && hasIntegrals) {
+                thresholdOffset = Math.max(0, Math.min(100, (y(0) - y(70)) / (y(0) - y(100)) * 100));
+            }
+
+            defs.append("linearGradient")
+                .attr("id", "line-gradient")
+                .attr("gradientUnits", "userSpaceOnUse")
+                .attr("x1", 0).attr("y1", y(yDomainMax))
+                .attr("x2", 0).attr("y2", y(0))
+                .selectAll("stop")
+                .data([
+                    {offset: "0%", color: "#ffffff"},
+                    {offset: (100 - thresholdOffset) + "%", color: "#ffffff"},
+                    {offset: (100 - thresholdOffset + 0.1) + "%", color: thresholdOffset > 0 ? "#ef4444" : "#ffffff"},
+                    {offset: "100%", color: thresholdOffset > 0 ? "#ef4444" : "#ffffff"}
+                ])
+                .join("stop")
+                .attr("offset", d => d.offset)
+                .attr("stop-color", d => d.color);
+
+            defs.append("linearGradient")
+                .attr("id", "area-gradient")
+                .attr("gradientUnits", "userSpaceOnUse")
+                .attr("x1", 0).attr("y1", y(yDomainMax))
+                .attr("x2", 0).attr("y2", y(0))
+                .selectAll("stop")
+                .data([
+                    {offset: "0%", color: "rgba(255,255,255,0.15)"},
+                    {offset: (100 - thresholdOffset) + "%", color: "rgba(255,255,255,0)"},
+                    {offset: (100 - thresholdOffset + 0.1) + "%", color: thresholdOffset > 0 ? "rgba(239, 68, 68,0)" : "rgba(255,255,255,0)"},
+                    {offset: "100%", color: thresholdOffset > 0 ? "rgba(239, 68, 68,0.3)" : "rgba(255,255,255,0)"}
+                ])
+                .join("stop")
+                .attr("offset", d => d.offset)
+                .attr("stop-color", d => d.color);
 
             const line = d3.line()
                 .x(d => x(d.date))
@@ -748,7 +874,6 @@
                 .y1(d => y(d.value))
                 .curve(d3.curveMonotoneX);
 
-            // Axes
             svg.append("g")
                 .attr("transform", `translate(0,${height - margin.bottom})`)
                 .call(d3.axisBottom(x).ticks(6).tickFormat(d3.timeFormat("%d %b")))
@@ -758,32 +883,34 @@
 
             svg.append("g")
                 .attr("transform", `translate(${margin.left},0)`)
-                .call(d3.axisLeft(y).ticks(5).tickFormat(d => d + "%"))
+                .call(d3.axisLeft(y).ticks(5).tickFormat(d => {
+                    if (!hasStreaks && hasIntegrals) return d + "%";
+                    return d;
+                }))
                 .attr("class", "axis-text")
                 .call(g => g.select(".domain").attr("class", "axis-line"))
                 .call(g => g.selectAll(".tick line").attr("class", "axis-line"));
 
-            // Grid Lines (Horizontal)
+            let tickValues = y.ticks(5);
+            if (!hasStreaks && hasIntegrals) tickValues = [0, 50, 70, 100];
+
             svg.append("g")
                 .attr("class", "grid")
                 .attr("transform", `translate(${margin.left},0)`)
-                .call(d3.axisLeft(y).ticks(5).tickSize(-width + margin.left + margin.right).tickFormat(""))
+                .call(d3.axisLeft(y).tickValues(tickValues).tickSize(-width + margin.left + margin.right).tickFormat(""))
                 .call(g => g.select(".domain").remove())
                 .call(g => g.selectAll(".tick line").attr("class", "grid-line"));
 
-            // Draw Area
             svg.append("path")
                 .datum(data)
                 .attr("class", "area-path")
                 .attr("d", area);
 
-            // Draw Line
             const path = svg.append("path")
                 .datum(data)
                 .attr("class", "line-path")
                 .attr("d", line);
 
-            // Line Animation (Draw in)
             const totalLength = path.node().getTotalLength();
             path.attr("stroke-dasharray", totalLength + " " + totalLength)
                 .attr("stroke-dashoffset", totalLength)
@@ -792,7 +919,6 @@
                 .ease(d3.easeCubicOut)
                 .attr("stroke-dashoffset", 0);
 
-            // Tooltip Logic
             const tooltip = d3.select("#chart-tooltip");
             const focusLine = svg.append("line").attr("class", "tooltip-line").style("opacity", 0);
 
@@ -808,7 +934,6 @@
                 const [mouseX] = d3.pointer(event);
                 const x0 = x.invert(mouseX);
 
-                // Find closest data point
                 const bisect = d3.bisector(d => d.date).left;
                 const i = bisect(data, x0, 1);
                 const d0 = data[i - 1];
@@ -823,10 +948,18 @@
                     .attr("x1", cx).attr("y1", margin.top)
                     .attr("x2", cx).attr("y2", height - margin.bottom);
 
+                const isDanger = (!hasStreaks && hasIntegrals) ? d.value < 70 : false;
+                const valClass = isDanger ? "danger" : "";
+
+                const labelStr = (!hasStreaks && hasIntegrals) ? `INT: ${d.value.toFixed(1)}%` : `VAL: ${d.value.toFixed(1)}`;
+
                 tooltip.style("opacity", 1)
                     .style("left", cx + "px")
                     .style("top", (cy - 10) + "px")
-                    .html(`[ ${d3.timeFormat("%d %b")(d.date)} ]<br/>PWR: ${d.value.toFixed(1)}%`);
+                    .html(`
+                        <span style="color:#888;">[ ${d3.timeFormat("%d %b")(d.date)} ]</span>
+                        <span class="tooltip-val ${valClass}">${labelStr}</span>
+                    `);
             });
 
             overlay.on("mouseout", () => {
@@ -851,7 +984,7 @@
                 let heatmapSource = fullData.heatmap || fullData;
                 let statsSource = fullData.stats || {};
 
-                window.globalStatsSource = statsSource; // Store globally for Telemetry
+                window.globalStatsSource = statsSource;
 
                 let globalStreak = 0;
                 let checkDate = new Date();
