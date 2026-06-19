@@ -1,5 +1,6 @@
 {
   "heatmap": {
+    "2026-06-19": 86.6,
     "2026-06-18": 566.6,
     "2026-06-17": 533.2,
     "2026-06-16": 586.6,
@@ -151,13 +152,13 @@
   },
   "stats": {
     "Віджимання": {
-      "total": 251,
-      "current_streak": 128,
-      "best_streak": 128,
-      "win_rate": 99.2,
+      "total": 252,
+      "current_streak": 129,
+      "best_streak": 129,
+      "win_rate": 100.0,
       "vector": "Тіло",
       "architecture": "Звичка",
-      "days_to_peak": null,
+      "days_to_peak": 0,
       "parent_nodes": null,
       "history": [
         "2026-02-11",
@@ -287,7 +288,8 @@
         "2026-06-15",
         "2026-06-16",
         "2026-06-17",
-        "2026-06-18"
+        "2026-06-18",
+        "2026-06-19"
       ]
     },
     "Читання книжки": {
@@ -297,7 +299,7 @@
       "win_rate": 99.2,
       "vector": "Розум",
       "architecture": "Звичка",
-      "days_to_peak": null,
+      "days_to_peak": 0,
       "parent_nodes": null,
       "history": [
         "2026-02-18",
@@ -430,7 +432,7 @@
       "win_rate": 98.2,
       "vector": "Соціалізація",
       "architecture": "Звичка",
-      "days_to_peak": null,
+      "days_to_peak": 0,
       "parent_nodes": null,
       "history": [
         "2026-03-02",
@@ -550,7 +552,7 @@
       "win_rate": 99.0,
       "vector": "Розум",
       "architecture": "Звичка",
-      "days_to_peak": null,
+      "days_to_peak": 0,
       "parent_nodes": null,
       "history": [
         "2026-03-16",
@@ -657,7 +659,7 @@
       "win_rate": 98.9,
       "vector": "Розум",
       "architecture": "Навчання",
-      "days_to_peak": null,
+      "days_to_peak": 0,
       "parent_nodes": null,
       "history": [
         "2026-03-19",
@@ -761,7 +763,7 @@
       "win_rate": 88.2,
       "vector": "Філософія",
       "architecture": "Поведінка",
-      "days_to_peak": null,
+      "days_to_peak": 0,
       "parent_nodes": null,
       "history": [
         "2026-03-19",
@@ -849,13 +851,13 @@
       ]
     },
     "Холодний душ": {
-      "total": 77,
-      "current_streak": 77,
-      "best_streak": 77,
-      "win_rate": 98.7,
+      "total": 78,
+      "current_streak": 78,
+      "best_streak": 78,
+      "win_rate": 100.0,
       "vector": "Тіло",
       "architecture": "Звичка",
-      "days_to_peak": null,
+      "days_to_peak": 0,
       "parent_nodes": null,
       "history": [
         "2026-04-03",
@@ -934,17 +936,18 @@
         "2026-06-15",
         "2026-06-16",
         "2026-06-17",
-        "2026-06-18"
+        "2026-06-18",
+        "2026-06-19"
       ]
     },
     "Вмитися зранку": {
-      "total": 144,
-      "current_streak": 129,
-      "best_streak": 129,
-      "win_rate": 96.6,
+      "total": 145,
+      "current_streak": 130,
+      "best_streak": 130,
+      "win_rate": 97.3,
       "vector": "Тіло",
       "architecture": "Звичка",
-      "days_to_peak": null,
+      "days_to_peak": 0,
       "parent_nodes": null,
       "history": [
         "2026-01-22",
@@ -1090,7 +1093,8 @@
         "2026-06-15",
         "2026-06-16",
         "2026-06-17",
-        "2026-06-18"
+        "2026-06-18",
+        "2026-06-19"
       ]
     },
     "Запис та повторення англійських слів": {
@@ -1100,7 +1104,7 @@
       "win_rate": 98.6,
       "vector": "Розум",
       "architecture": "Звичка",
-      "days_to_peak": null,
+      "days_to_peak": 0,
       "parent_nodes": null,
       "history": [
         "2026-04-10",
@@ -1182,7 +1186,7 @@
       "win_rate": 0.0,
       "vector": "Тіло",
       "architecture": "Інтеграл",
-      "days_to_peak": null,
+      "days_to_peak": 0,
       "parent_nodes": null,
       "history": [
         "2026-05-05",
@@ -1205,7 +1209,7 @@
       "win_rate": 0.0,
       "vector": "Тіло",
       "architecture": "Вартовий",
-      "days_to_peak": null,
+      "days_to_peak": 0,
       "parent_nodes": null,
       "history": [
         "2026-05-22",
@@ -1223,7 +1227,7 @@
       "win_rate": 10.0,
       "vector": "Розум",
       "architecture": "Вартовий",
-      "days_to_peak": null,
+      "days_to_peak": 0,
       "parent_nodes": null,
       "history": [
         "2026-05-29",
@@ -1253,7 +1257,7 @@
       "win_rate": 50.0,
       "vector": "Філософія",
       "architecture": "Вартовий",
-      "days_to_peak": null,
+      "days_to_peak": 0,
       "parent_nodes": null,
       "history": [
         "2026-05-21",
@@ -1286,7 +1290,7 @@
       "win_rate": 0.0,
       "vector": "Соціалізація",
       "architecture": "Вартовий",
-      "days_to_peak": null,
+      "days_to_peak": 0,
       "parent_nodes": null,
       "history": [
         "2026-05-29",
@@ -1317,7 +1321,7 @@
       "win_rate": 93.8,
       "vector": "Філософія",
       "architecture": "Звичка",
-      "days_to_peak": null,
+      "days_to_peak": 0,
       "parent_nodes": null,
       "history": [
         "2026-05-19",
