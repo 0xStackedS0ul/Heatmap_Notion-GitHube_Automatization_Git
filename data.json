@@ -1,5 +1,6 @@
 {
   "heatmap": {
+    "2026-07-01": 33.3,
     "2026-06-30": 646.6,
     "2026-06-29": 626.6,
     "2026-06-28": 626.6,
@@ -169,7 +170,7 @@
       "win_rate": 99.3,
       "vector": "Тіло",
       "architecture": "Звичка",
-      "days_to_peak": null,
+      "days_to_peak": 0,
       "parent_nodes": null,
       "history": [
         "2026-02-11",
@@ -321,7 +322,7 @@
       "win_rate": 99.3,
       "vector": "Розум",
       "architecture": "Звичка",
-      "days_to_peak": null,
+      "days_to_peak": 0,
       "parent_nodes": null,
       "history": [
         "2026-02-18",
@@ -466,7 +467,7 @@
       "win_rate": 98.4,
       "vector": "Соціалізація",
       "architecture": "Звичка",
-      "days_to_peak": null,
+      "days_to_peak": 0,
       "parent_nodes": null,
       "history": [
         "2026-03-02",
@@ -598,7 +599,7 @@
       "win_rate": 99.1,
       "vector": "Розум",
       "architecture": "Звичка",
-      "days_to_peak": null,
+      "days_to_peak": 0,
       "parent_nodes": null,
       "history": [
         "2026-03-16",
@@ -717,7 +718,7 @@
       "win_rate": 99.0,
       "vector": "Розум",
       "architecture": "Навчання",
-      "days_to_peak": null,
+      "days_to_peak": 0,
       "parent_nodes": null,
       "history": [
         "2026-03-19",
@@ -833,7 +834,7 @@
       "win_rate": 88.6,
       "vector": "Філософія",
       "architecture": "Поведінка",
-      "days_to_peak": null,
+      "days_to_peak": 0,
       "parent_nodes": null,
       "history": [
         "2026-03-19",
@@ -938,7 +939,7 @@
       "win_rate": 98.9,
       "vector": "Тіло",
       "architecture": "Звичка",
-      "days_to_peak": null,
+      "days_to_peak": 0,
       "parent_nodes": null,
       "history": [
         "2026-04-03",
@@ -1033,13 +1034,13 @@
       ]
     },
     "Вмитися зранку": {
-      "total": 156,
-      "current_streak": 141,
-      "best_streak": 141,
-      "win_rate": 96.9,
+      "total": 157,
+      "current_streak": 142,
+      "best_streak": 142,
+      "win_rate": 97.5,
       "vector": "Тіло",
       "architecture": "Звичка",
-      "days_to_peak": null,
+      "days_to_peak": 0,
       "parent_nodes": null,
       "history": [
         "2026-01-22",
@@ -1197,7 +1198,8 @@
         "2026-06-27",
         "2026-06-28",
         "2026-06-29",
-        "2026-06-30"
+        "2026-06-30",
+        "2026-07-01"
       ]
     },
     "Запис та повторення англійських слів": {
@@ -1207,7 +1209,7 @@
       "win_rate": 98.8,
       "vector": "Розум",
       "architecture": "Звичка",
-      "days_to_peak": null,
+      "days_to_peak": 0,
       "parent_nodes": null,
       "history": [
         "2026-04-10",
@@ -1301,7 +1303,7 @@
       "win_rate": 0.0,
       "vector": "Тіло",
       "architecture": "Інтеграл",
-      "days_to_peak": null,
+      "days_to_peak": 0,
       "parent_nodes": null,
       "history": [
         "2026-05-05",
@@ -1324,7 +1326,7 @@
       "win_rate": 0.0,
       "vector": "Тіло",
       "architecture": "Вартовий",
-      "days_to_peak": null,
+      "days_to_peak": 0,
       "parent_nodes": null,
       "history": [
         "2026-05-22",
@@ -1352,7 +1354,7 @@
       "win_rate": 90.0,
       "vector": "Розум",
       "architecture": "Вартовий",
-      "days_to_peak": null,
+      "days_to_peak": 0,
       "parent_nodes": null,
       "history": [
         "2026-05-29",
@@ -1394,7 +1396,7 @@
       "win_rate": 90.0,
       "vector": "Філософія",
       "architecture": "Вартовий",
-      "days_to_peak": null,
+      "days_to_peak": 0,
       "parent_nodes": null,
       "history": [
         "2026-05-21",
@@ -1439,7 +1441,7 @@
       "win_rate": 90.0,
       "vector": "Соціалізація",
       "architecture": "Вартовий",
-      "days_to_peak": null,
+      "days_to_peak": 0,
       "parent_nodes": null,
       "history": [
         "2026-05-29",
@@ -1482,7 +1484,7 @@
       "win_rate": 95.5,
       "vector": "Філософія",
       "architecture": "Звичка",
-      "days_to_peak": null,
+      "days_to_peak": 0,
       "parent_nodes": null,
       "history": [
         "2026-05-19",
