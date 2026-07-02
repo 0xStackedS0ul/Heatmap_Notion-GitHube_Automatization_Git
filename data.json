@@ -1,6 +1,6 @@
 {
   "heatmap": {
-    "2026-07-01": 33.3,
+    "2026-07-01": 626.6,
     "2026-06-30": 646.6,
     "2026-06-29": 626.6,
     "2026-06-28": 626.6,
@@ -164,13 +164,13 @@
   },
   "stats": {
     "Віджимання": {
-      "total": 270,
-      "current_streak": 140,
-      "best_streak": 140,
+      "total": 271,
+      "current_streak": 141,
+      "best_streak": 141,
       "win_rate": 99.3,
       "vector": "Тіло",
       "architecture": "Звичка",
-      "days_to_peak": 0,
+      "days_to_peak": null,
       "parent_nodes": null,
       "history": [
         "2026-02-11",
@@ -312,17 +312,18 @@
         "2026-06-27",
         "2026-06-28",
         "2026-06-29",
-        "2026-06-30"
+        "2026-06-30",
+        "2026-07-01"
       ]
     },
     "Читання книжки": {
-      "total": 148,
-      "current_streak": 133,
-      "best_streak": 133,
+      "total": 149,
+      "current_streak": 134,
+      "best_streak": 134,
       "win_rate": 99.3,
       "vector": "Розум",
       "architecture": "Звичка",
-      "days_to_peak": 0,
+      "days_to_peak": null,
       "parent_nodes": null,
       "history": [
         "2026-02-18",
@@ -457,17 +458,18 @@
         "2026-06-27",
         "2026-06-28",
         "2026-06-29",
-        "2026-06-30"
+        "2026-06-30",
+        "2026-07-01"
       ]
     },
     "Прибирання": {
-      "total": 120,
-      "current_streak": 114,
-      "best_streak": 114,
+      "total": 121,
+      "current_streak": 115,
+      "best_streak": 115,
       "win_rate": 98.4,
       "vector": "Соціалізація",
       "architecture": "Звичка",
-      "days_to_peak": 0,
+      "days_to_peak": null,
       "parent_nodes": null,
       "history": [
         "2026-03-02",
@@ -589,17 +591,18 @@
         "2026-06-27",
         "2026-06-28",
         "2026-06-29",
-        "2026-06-30"
+        "2026-06-30",
+        "2026-07-01"
       ]
     },
     "Вивчення та запис тем": {
-      "total": 109,
-      "current_streak": 107,
-      "best_streak": 107,
+      "total": 110,
+      "current_streak": 108,
+      "best_streak": 108,
       "win_rate": 99.1,
       "vector": "Розум",
       "architecture": "Звичка",
-      "days_to_peak": 0,
+      "days_to_peak": null,
       "parent_nodes": null,
       "history": [
         "2026-03-16",
@@ -708,17 +711,18 @@
         "2026-06-27",
         "2026-06-28",
         "2026-06-29",
-        "2026-06-30"
+        "2026-06-30",
+        "2026-07-01"
       ]
     },
     "Виконання завдань": {
-      "total": 111,
-      "current_streak": 104,
-      "best_streak": 104,
-      "win_rate": 99.0,
+      "total": 112,
+      "current_streak": 105,
+      "best_streak": 105,
+      "win_rate": 99.1,
       "vector": "Розум",
       "architecture": "Навчання",
-      "days_to_peak": 0,
+      "days_to_peak": null,
       "parent_nodes": null,
       "history": [
         "2026-03-19",
@@ -824,17 +828,18 @@
         "2026-06-27",
         "2026-06-28",
         "2026-06-29",
-        "2026-06-30"
+        "2026-06-30",
+        "2026-07-01"
       ]
     },
     "Дії в денний час": {
-      "total": 121,
-      "current_streak": 7,
+      "total": 122,
+      "current_streak": 8,
       "best_streak": 27,
-      "win_rate": 88.6,
+      "win_rate": 88.7,
       "vector": "Філософія",
       "architecture": "Поведінка",
-      "days_to_peak": 0,
+      "days_to_peak": null,
       "parent_nodes": null,
       "history": [
         "2026-03-19",
@@ -929,17 +934,18 @@
         "2026-06-27",
         "2026-06-28",
         "2026-06-29",
-        "2026-06-30"
+        "2026-06-30",
+        "2026-07-01"
       ]
     },
     "Холодний душ": {
-      "total": 89,
-      "current_streak": 89,
-      "best_streak": 89,
+      "total": 90,
+      "current_streak": 90,
+      "best_streak": 90,
       "win_rate": 98.9,
       "vector": "Тіло",
       "architecture": "Звичка",
-      "days_to_peak": 0,
+      "days_to_peak": null,
       "parent_nodes": null,
       "history": [
         "2026-04-03",
@@ -1030,17 +1036,18 @@
         "2026-06-27",
         "2026-06-28",
         "2026-06-29",
-        "2026-06-30"
+        "2026-06-30",
+        "2026-07-01"
       ]
     },
     "Вмитися зранку": {
       "total": 157,
       "current_streak": 142,
       "best_streak": 142,
-      "win_rate": 97.5,
+      "win_rate": 96.9,
       "vector": "Тіло",
       "architecture": "Звичка",
-      "days_to_peak": 0,
+      "days_to_peak": null,
       "parent_nodes": null,
       "history": [
         "2026-01-22",
@@ -1203,13 +1210,13 @@
       ]
     },
     "Запис та повторення англійських слів": {
-      "total": 103,
-      "current_streak": 82,
-      "best_streak": 82,
+      "total": 104,
+      "current_streak": 83,
+      "best_streak": 83,
       "win_rate": 98.8,
       "vector": "Розум",
       "architecture": "Звичка",
-      "days_to_peak": 0,
+      "days_to_peak": null,
       "parent_nodes": null,
       "history": [
         "2026-04-10",
@@ -1293,7 +1300,8 @@
         "2026-06-27",
         "2026-06-28",
         "2026-06-29",
-        "2026-06-30"
+        "2026-06-30",
+        "2026-07-01"
       ]
     },
     "Сон до 11:00": {
@@ -1303,7 +1311,7 @@
       "win_rate": 0.0,
       "vector": "Тіло",
       "architecture": "Інтеграл",
-      "days_to_peak": 0,
+      "days_to_peak": null,
       "parent_nodes": null,
       "history": [
         "2026-05-05",
@@ -1320,13 +1328,13 @@
       ]
     },
     "Вартовий ТІЛА": {
-      "total": 16,
-      "current_streak": 10,
-      "best_streak": 10,
+      "total": 17,
+      "current_streak": 11,
+      "best_streak": 11,
       "win_rate": 0.0,
       "vector": "Тіло",
       "architecture": "Вартовий",
-      "days_to_peak": 0,
+      "days_to_peak": null,
       "parent_nodes": null,
       "history": [
         "2026-05-22",
@@ -1344,17 +1352,18 @@
         "2026-06-27",
         "2026-06-28",
         "2026-06-29",
-        "2026-06-30"
+        "2026-06-30",
+        "2026-07-01"
       ]
     },
     "Вартовий Розуму": {
-      "total": 30,
-      "current_streak": 17,
-      "best_streak": 17,
+      "total": 31,
+      "current_streak": 18,
+      "best_streak": 18,
       "win_rate": 90.0,
       "vector": "Розум",
       "architecture": "Вартовий",
-      "days_to_peak": 0,
+      "days_to_peak": null,
       "parent_nodes": null,
       "history": [
         "2026-05-29",
@@ -1386,17 +1395,18 @@
         "2026-06-27",
         "2026-06-28",
         "2026-06-29",
-        "2026-06-30"
+        "2026-06-30",
+        "2026-07-01"
       ]
     },
     "Вартовий Філософії": {
-      "total": 33,
-      "current_streak": 18,
-      "best_streak": 18,
+      "total": 34,
+      "current_streak": 19,
+      "best_streak": 19,
       "win_rate": 90.0,
       "vector": "Філософія",
       "architecture": "Вартовий",
-      "days_to_peak": 0,
+      "days_to_peak": null,
       "parent_nodes": null,
       "history": [
         "2026-05-21",
@@ -1431,17 +1441,18 @@
         "2026-06-27",
         "2026-06-28",
         "2026-06-29",
-        "2026-06-30"
+        "2026-06-30",
+        "2026-07-01"
       ]
     },
     "Вартовий Соціалізації": {
-      "total": 31,
-      "current_streak": 18,
-      "best_streak": 18,
+      "total": 32,
+      "current_streak": 19,
+      "best_streak": 19,
       "win_rate": 90.0,
       "vector": "Соціалізація",
       "architecture": "Вартовий",
-      "days_to_peak": 0,
+      "days_to_peak": null,
       "parent_nodes": null,
       "history": [
         "2026-05-29",
@@ -1474,17 +1485,18 @@
         "2026-06-27",
         "2026-06-28",
         "2026-06-29",
-        "2026-06-30"
+        "2026-06-30",
+        "2026-07-01"
       ]
     },
     "Запис в щоденик": {
-      "total": 43,
-      "current_streak": 18,
+      "total": 44,
+      "current_streak": 19,
       "best_streak": 24,
-      "win_rate": 95.5,
+      "win_rate": 95.6,
       "vector": "Філософія",
       "architecture": "Звичка",
-      "days_to_peak": 0,
+      "days_to_peak": null,
       "parent_nodes": null,
       "history": [
         "2026-05-19",
@@ -1528,7 +1540,8 @@
         "2026-06-27",
         "2026-06-28",
         "2026-06-29",
-        "2026-06-30"
+        "2026-06-30",
+        "2026-07-01"
       ]
     }
   }
