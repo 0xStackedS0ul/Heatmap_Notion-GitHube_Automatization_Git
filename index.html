@@ -979,6 +979,10 @@
                                     <span>${displayStreak}</span>
                                 </div>
                                 ${streakBestHTML}
+                                <div class="streak-badge" title="Вік звички в днях" style="color: #666; border-color: #333;">
+                                    <span>AGE</span>
+                                    <span>${stat.total_age_days || 1}</span>
+                                </div>
                             </div>
                         `;
                         statsContainer.appendChild(card);
