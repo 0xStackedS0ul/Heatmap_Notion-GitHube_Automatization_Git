@@ -961,6 +961,8 @@
                             streakBestHTML = `<div class="streak-badge streak-best" title="Рекорд"><span>MAX</span><span>${stat.best_streak}</span></div>`;
                         }
 
+                        const metricName = stat.metrics ? stat.metrics : "циклів";
+
                         card.innerHTML = `
                             ${tagsHTML}
                             <div class="stat-header">
@@ -969,7 +971,7 @@
                             </div>
                             <div class="stat-total-row">
                                 <span class="stat-value">${stat.total}</span>
-                                <span class="stat-label">циклів</span>
+                                <span class="stat-label">${metricName}</span>
                             </div>
                             <div class="streak-container">
                                 <div class="streak-badge ${streakClass}" title="Поточна серія">
@@ -985,7 +987,7 @@
                         let alertTag = !isHealthy ? " [SYSTEM DAMAGE]" : "";
                         if (isPeak) alertTag = " [PEAK DAY]";
 
-                        dumpText += `${fireIcon} ${displayStreak}${alertTag} | ${stat.name} (${tagsText}) -> ${stat.total} циклів (MAX: ${stat.best_streak})\n`;
+                        dumpText += `${fireIcon} ${displayStreak}${alertTag} | ${stat.name} (${tagsText}) -> ${stat.total} ${metricName} (MAX: ${stat.best_streak} | Вік: ${stat.total_age_days} дн.)\n`;
                     });
                 }
                 window.memoryDumpText = dumpText;

@@ -153,6 +153,7 @@ def process_history_and_update(pages):
 
         interval = get_prop(props, "Maximum interval", "number")
         parent_nodes = get_text(props, "Parent_Nodes")
+        metrics_txt = get_text(props, "Metrics")
 
         if habit_name not in habit_meta or day == today_str or is_template:
             habit_meta[habit_name] = {
@@ -160,7 +161,8 @@ def process_history_and_update(pages):
                 "architecture": architecture,
                 "current_interval": interval if day == today_str else habit_meta.get(habit_name, {}).get(
                     "current_interval"),
-                "parent_nodes": parent_nodes
+                "parent_nodes": parent_nodes,
+                "metrics": metrics_txt
             }
 
         if not is_template:
@@ -198,15 +200,17 @@ def process_history_and_update(pages):
         arch = meta.get("architecture")
 
         win_rate = 0.0
+        total_age_days = 1
         if name in habit_earliest_date:
+            first_day = datetime.strptime(habit_earliest_date[name], "%Y-%m-%d").date()
+            today_obj = get_today_date_obj()
+            total_age_days = max(1, (today_obj - first_day).days + 1)
+
             if arch in ["Інтеграл", "Вартовий"]:
                 win_rate, _, _ = calculate_quarantine_integral(habit_dates[name], habit_earliest_date[name])
             else:
-                first_day = datetime.strptime(habit_earliest_date[name], "%Y-%m-%d").date()
-                today_obj = get_today_date_obj()
-                total_days = max(1, (today_obj - first_day).days + 1)
                 success_days = len(set(habit_dates[name]))
-                win_rate = round((success_days / total_days) * 100, 1)
+                win_rate = round((success_days / total_age_days) * 100, 1)
 
         final_stats[name] = {
             "total": total,
@@ -217,7 +221,9 @@ def process_history_and_update(pages):
             "architecture": arch,
             "days_to_peak": meta.get("current_interval"),
             "parent_nodes": meta.get("parent_nodes"),
-            "history": sorted(list(set(habit_dates[name])))  # ДОДАНО: Історія днів виконання
+            "metrics": meta.get("metrics"),
+            "total_age_days": total_age_days,
+            "history": sorted(list(set(habit_dates[name])))
         }
 
     return {"heatmap": dict(heatmap_scores), "stats": final_stats}
@@ -259,6 +265,7 @@ def create_daily_habits(all_pages):
         auto_complete = get_prop(t_props, "Auto_Complete", "checkbox")
         auto_value = get_prop(t_props, "Auto_Value", "number")
         parent_nodes_txt = get_text(t_props, "Parent_Nodes")
+        metrics_txt = get_text(t_props, "Metrics")
 
         new_interval = base_interval
 
@@ -297,6 +304,7 @@ def create_daily_habits(all_pages):
         if arch: new_props["Action Architecture"] = {"select": {"name": arch}}
         if vector: new_props["Vector category"] = {"select": {"name": vector}}
         if parent_nodes_txt: new_props["Parent_Nodes"] = {"rich_text": [{"text": {"content": parent_nodes_txt}}]}
+        if metrics_txt: new_props["Metrics"] = {"rich_text": [{"text": {"content": metrics_txt}}]}
 
         try:
             notion.pages.create(parent={"database_id": DATABASE_ID}, properties=new_props)
