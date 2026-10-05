@@ -1,5 +1,6 @@
 {
   "heatmap": {
+    "2026-10-04": 270.8,
     "2026-10-03": 235.8,
     "2026-10-02": 316.40000000000003,
     "2026-10-01": 215.8,
@@ -258,16 +259,16 @@
   },
   "stats": {
     "Віджимання": {
-      "total": 453,
-      "current_streak": 235,
-      "best_streak": 235,
+      "total": 457,
+      "current_streak": 236,
+      "best_streak": 236,
       "win_rate": 99.6,
       "vector": "Тіло",
       "architecture": "Звичка",
       "days_to_peak": null,
       "parent_nodes": null,
       "metrics": null,
-      "total_age_days": 236,
+      "total_age_days": 237,
       "history": [
         "2026-02-11",
         "2026-02-12",
@@ -503,20 +504,21 @@
         "2026-09-30",
         "2026-10-01",
         "2026-10-02",
-        "2026-10-03"
+        "2026-10-03",
+        "2026-10-04"
       ]
     },
     "Читання книжки": {
-      "total": 264,
-      "current_streak": 228,
-      "best_streak": 228,
+      "total": 265,
+      "current_streak": 229,
+      "best_streak": 229,
       "win_rate": 99.6,
       "vector": "Розум",
       "architecture": "Звичка",
       "days_to_peak": null,
       "parent_nodes": null,
       "metrics": null,
-      "total_age_days": 229,
+      "total_age_days": 230,
       "history": [
         "2026-02-18",
         "2026-02-19",
@@ -745,20 +747,21 @@
         "2026-09-30",
         "2026-10-01",
         "2026-10-02",
-        "2026-10-03"
+        "2026-10-03",
+        "2026-10-04"
       ]
     },
     "Прибирання": {
-      "total": 216,
-      "current_streak": 209,
-      "best_streak": 209,
+      "total": 217,
+      "current_streak": 210,
+      "best_streak": 210,
       "win_rate": 99.1,
       "vector": "Соціалізація",
       "architecture": "Звичка",
       "days_to_peak": null,
       "parent_nodes": null,
       "metrics": null,
-      "total_age_days": 217,
+      "total_age_days": 218,
       "history": [
         "2026-03-02",
         "2026-03-03",
@@ -974,20 +977,21 @@
         "2026-09-30",
         "2026-10-01",
         "2026-10-02",
-        "2026-10-03"
+        "2026-10-03",
+        "2026-10-04"
       ]
     },
     "Вивчення та запис тем": {
-      "total": 207,
-      "current_streak": 202,
-      "best_streak": 202,
+      "total": 208,
+      "current_streak": 203,
+      "best_streak": 203,
       "win_rate": 99.5,
       "vector": "Розум",
       "architecture": "Звичка",
       "days_to_peak": null,
       "parent_nodes": null,
       "metrics": null,
-      "total_age_days": 203,
+      "total_age_days": 204,
       "history": [
         "2026-03-16",
         "2026-03-17",
@@ -1190,20 +1194,21 @@
         "2026-09-30",
         "2026-10-01",
         "2026-10-02",
-        "2026-10-03"
+        "2026-10-03",
+        "2026-10-04"
       ]
     },
     "Виконання завдань": {
-      "total": 209,
-      "current_streak": 199,
-      "best_streak": 199,
+      "total": 210,
+      "current_streak": 200,
+      "best_streak": 200,
       "win_rate": 99.5,
       "vector": "Розум",
       "architecture": "Навчання",
       "days_to_peak": null,
       "parent_nodes": null,
       "metrics": null,
-      "total_age_days": 200,
+      "total_age_days": 201,
       "history": [
         "2026-03-19",
         "2026-03-20",
@@ -1403,20 +1408,21 @@
         "2026-09-30",
         "2026-10-01",
         "2026-10-02",
-        "2026-10-03"
+        "2026-10-03",
+        "2026-10-04"
       ]
     },
     "Дії в денний час": {
-      "total": 282,
-      "current_streak": 102,
-      "best_streak": 102,
+      "total": 283,
+      "current_streak": 103,
+      "best_streak": 103,
       "win_rate": 94.0,
       "vector": "Філософія",
       "architecture": "Поведінка",
       "days_to_peak": null,
       "parent_nodes": null,
       "metrics": null,
-      "total_age_days": 200,
+      "total_age_days": 201,
       "history": [
         "2026-03-19",
         "2026-03-20",
@@ -1605,20 +1611,21 @@
         "2026-09-30",
         "2026-10-01",
         "2026-10-02",
-        "2026-10-03"
+        "2026-10-03",
+        "2026-10-04"
       ]
     },
     "Холодний душ": {
-      "total": 186,
-      "current_streak": 184,
-      "best_streak": 184,
+      "total": 187,
+      "current_streak": 185,
+      "best_streak": 185,
       "win_rate": 99.5,
       "vector": "Тіло",
       "architecture": "Звичка",
       "days_to_peak": null,
       "parent_nodes": null,
       "metrics": null,
-      "total_age_days": 185,
+      "total_age_days": 186,
       "history": [
         "2026-04-03",
         "2026-04-04",
@@ -1803,20 +1810,21 @@
         "2026-09-30",
         "2026-10-01",
         "2026-10-02",
-        "2026-10-03"
+        "2026-10-03",
+        "2026-10-04"
       ]
     },
     "Вмитися зранку": {
-      "total": 251,
-      "current_streak": 236,
-      "best_streak": 236,
-      "win_rate": 98.0,
+      "total": 252,
+      "current_streak": 237,
+      "best_streak": 237,
+      "win_rate": 98.1,
       "vector": "Тіло",
       "architecture": "Звичка",
       "days_to_peak": null,
       "parent_nodes": null,
       "metrics": null,
-      "total_age_days": 256,
+      "total_age_days": 257,
       "history": [
         "2026-01-22",
         "2026-01-23",
@@ -2068,20 +2076,21 @@
         "2026-09-30",
         "2026-10-01",
         "2026-10-02",
-        "2026-10-03"
+        "2026-10-03",
+        "2026-10-04"
       ]
     },
     "Запис та повторення англійських слів": {
-      "total": 395,
-      "current_streak": 177,
-      "best_streak": 177,
+      "total": 402,
+      "current_streak": 178,
+      "best_streak": 178,
       "win_rate": 99.4,
       "vector": "Розум",
       "architecture": "Звичка",
       "days_to_peak": null,
       "parent_nodes": null,
       "metrics": null,
-      "total_age_days": 178,
+      "total_age_days": 179,
       "history": [
         "2026-04-10",
         "2026-04-11",
@@ -2259,7 +2268,8 @@
         "2026-09-30",
         "2026-10-01",
         "2026-10-02",
-        "2026-10-03"
+        "2026-10-03",
+        "2026-10-04"
       ]
     },
     "Сон до 11:00": {
@@ -2272,7 +2282,7 @@
       "days_to_peak": null,
       "parent_nodes": null,
       "metrics": null,
-      "total_age_days": 153,
+      "total_age_days": 154,
       "history": [
         "2026-05-05",
         "2026-05-06",
@@ -2321,8 +2331,8 @@
       ]
     },
     "Запис в щоденик": {
-      "total": 136,
-      "current_streak": 27,
+      "total": 137,
+      "current_streak": 28,
       "best_streak": 57,
       "win_rate": 96.4,
       "vector": "Філософія",
@@ -2330,7 +2340,7 @@
       "days_to_peak": null,
       "parent_nodes": null,
       "metrics": null,
-      "total_age_days": 139,
+      "total_age_days": 140,
       "history": [
         "2026-05-19",
         "2026-05-20",
@@ -2465,20 +2475,21 @@
         "2026-09-30",
         "2026-10-01",
         "2026-10-02",
-        "2026-10-03"
+        "2026-10-03",
+        "2026-10-04"
       ]
     },
     "Пробіжка": {
-      "total": 78.773,
-      "current_streak": 92,
-      "best_streak": 92,
+      "total": 78.774,
+      "current_streak": 93,
+      "best_streak": 93,
       "win_rate": 98.9,
       "vector": "Тіло",
       "architecture": "Звичка",
       "days_to_peak": null,
       "parent_nodes": null,
       "metrics": null,
-      "total_age_days": 93,
+      "total_age_days": 94,
       "history": [
         "2026-07-04",
         "2026-07-05",
@@ -2571,20 +2582,21 @@
         "2026-09-30",
         "2026-10-01",
         "2026-10-02",
-        "2026-10-03"
+        "2026-10-03",
+        "2026-10-04"
       ]
     },
     "Комплекс вправ для ніг": {
-      "total": 85,
-      "current_streak": 85,
-      "best_streak": 85,
-      "win_rate": 98.8,
+      "total": 86,
+      "current_streak": 86,
+      "best_streak": 86,
+      "win_rate": 98.9,
       "vector": "Тіло",
       "architecture": "Звичка",
       "days_to_peak": null,
       "parent_nodes": null,
       "metrics": "1 виконання комплексу це: \n20 присідань\n10 випадів на кожну ногу\n20 підйомів на носки\n30–60 секунд стояти на одній нозі (на кожній)\n30 секунд розтягнути литки",
-      "total_age_days": 86,
+      "total_age_days": 87,
       "history": [
         "2026-07-11",
         "2026-07-12",
@@ -2670,20 +2682,21 @@
         "2026-09-30",
         "2026-10-01",
         "2026-10-02",
-        "2026-10-03"
+        "2026-10-03",
+        "2026-10-04"
       ]
     },
     "Шаблон дій": {
       "total": 29,
       "current_streak": 0,
       "best_streak": 11,
-      "win_rate": 46.8,
+      "win_rate": 46.0,
       "vector": "Філософія",
       "architecture": "Шаблон",
       "days_to_peak": null,
       "parent_nodes": null,
       "metrics": "1 виконання це 60 хв дії",
-      "total_age_days": 62,
+      "total_age_days": 63,
       "history": [
         "2026-08-11",
         "2026-08-12",
@@ -2717,16 +2730,16 @@
       ]
     },
     "Чистка зубів зранку та перед сном": {
-      "total": 58,
-      "current_streak": 1,
+      "total": 59,
+      "current_streak": 2,
       "best_streak": 32,
-      "win_rate": 88.2,
+      "win_rate": 88.5,
       "vector": "Тіло",
       "architecture": "Звичка",
       "days_to_peak": null,
       "parent_nodes": null,
       "metrics": "1 виконання це чистка зубів ввечері чи зранку",
-      "total_age_days": 51,
+      "total_age_days": 52,
       "history": [
         "2026-08-15",
         "2026-08-17",
@@ -2772,20 +2785,21 @@
         "2026-09-28",
         "2026-09-29",
         "2026-09-30",
-        "2026-10-03"
+        "2026-10-03",
+        "2026-10-04"
       ]
     },
     "Вартовий ТІЛА": {
       "total": 106,
       "current_streak": 0,
       "best_streak": 81,
-      "win_rate": 60.0,
+      "win_rate": 50.0,
       "vector": "Тіло",
       "architecture": "Вартовий",
       "days_to_peak": null,
       "parent_nodes": null,
       "metrics": null,
-      "total_age_days": 142,
+      "total_age_days": 143,
       "history": [
         "2026-05-22",
         "2026-05-29",
@@ -2899,13 +2913,13 @@
       "total": 122,
       "current_streak": 0,
       "best_streak": 109,
-      "win_rate": 60.0,
+      "win_rate": 50.0,
       "vector": "Розум",
       "architecture": "Вартовий",
       "days_to_peak": null,
       "parent_nodes": null,
       "metrics": null,
-      "total_age_days": 141,
+      "total_age_days": 142,
       "history": [
         "2026-05-29",
         "2026-05-30",
@@ -3035,13 +3049,13 @@
       "total": 125,
       "current_streak": 0,
       "best_streak": 110,
-      "win_rate": 60.0,
+      "win_rate": 50.0,
       "vector": "Філософія",
       "architecture": "Вартовий",
       "days_to_peak": null,
       "parent_nodes": null,
       "metrics": null,
-      "total_age_days": 141,
+      "total_age_days": 142,
       "history": [
         "2026-05-21",
         "2026-05-29",
@@ -3174,13 +3188,13 @@
       "total": 123,
       "current_streak": 0,
       "best_streak": 110,
-      "win_rate": 60.0,
+      "win_rate": 50.0,
       "vector": "Соціалізація",
       "architecture": "Вартовий",
       "days_to_peak": null,
       "parent_nodes": null,
       "metrics": null,
-      "total_age_days": 140,
+      "total_age_days": 141,
       "history": [
         "2026-05-29",
         "2026-05-30",
